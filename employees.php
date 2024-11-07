@@ -7,7 +7,6 @@ if (!isset($_SESSION['role_name']) || !isset($_SESSION['employee_id'])) {
 }
 require_once "database.php";
 
-// Variables for pagination
 $results_per_page = 5;
 $page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int)$_GET['page'] : 1;
 $offset = ($page - 1) * $results_per_page;
@@ -526,7 +525,7 @@ include './layout/header.php';
                     <?php if ($can_manage_roles): ?>
                         <div class="col-3">
                             <label for="role_name">Role</label>
-                            <select name="role_name" id="edit_role_name_select" class="form-control" required>
+                            <select name="edit_role_name_select" id="edit_role_name_select" class="form-control" required>
                                 <option value="">Select Role</option>
                                 <option value="1" 
                                     <?php if (isset($employeeData) && $employeeData['role_name'] == 'super admin') echo 'selected'; ?>>
