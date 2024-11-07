@@ -25,16 +25,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit();
 }
 
-$imagePath = ''; // Initialize an empty path
+$imagePath = '';
 
 if (isset($_FILES['file']) && $_FILES['file']['error'] === UPLOAD_ERR_OK) {
     $uploadDir = 'uploads/';
     $fileName = basename($_FILES['file']['name']);
     $targetFilePath = $uploadDir . $fileName;
 
-    // Move uploaded file to the desired directory
     if (move_uploaded_file($_FILES['file']['tmp_name'], $targetFilePath)) {
-        $imagePath = $targetFilePath;  // Set image path to display it on the form
+        $imagePath = $targetFilePath; 
         echo "Image uploaded successfully!";
     } else {
         echo "Failed to upload the image.";
@@ -63,7 +62,7 @@ $stmt->execute();
 $result = $stmt->get_result();
 $employee = $result->fetch_assoc();
 
-$imagePath = $employee['image_path'] ? $employee['image_path'] : 'assets/images/account.png'; // Fallback to default image
+$imagePath = $employee['image_path'] ? $employee['image_path'] : 'assets/images/account.png';
 
 $hire_date = date("m/d/Y", strtotime($employee['hire_date']));
 $birthdate = date("F d, Y", strtotime($employee['birthdate']));
@@ -80,7 +79,7 @@ $age = date_diff(date_create($employee['birthdate']), date_create('today'))->y;
                             <div class="card-body d-flex align-items-center">
                                 <div>
                                   <?php
-                                    $imagePath = isset($_GET['image']) ? $_GET['image'] : 'default.jpg';  // Fallback to a default image if none is uploaded
+                                    $imagePath = isset($_GET['image']) ? $_GET['image'] : 'default.jpg';
                                     ?>
                                     
                                     <form action="submit_employee_image.php" enctype="multipart/form-data" id="form" method="POST">
