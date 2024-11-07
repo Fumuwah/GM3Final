@@ -169,7 +169,7 @@
         </div>
         <ul class="navbar-nav flex-row flex-column flex-lg-row">
             <li class="nav-item active mx-3 d-flex align-items-center">
-                <img src="assets/images/home.png" class="header-icons mr-2" href="indexs.php"> <a class="nav-link" href="homev2.php">Home<span class="sr-only">(current)</span></a>
+                <img src="assets/images/home.png" class="header-icons mr-2" href="index.php"> <a class="nav-link" href="homev2.php">Home<span class="sr-only">(current)</span></a>
             </li>
             <li class="nav-item mx-3 d-flex align-items-center">
             <img src="assets/images/about.png" class="header-icons mr-1"> <a class="nav-link" href="about.php">About</a>
