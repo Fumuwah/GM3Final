@@ -49,7 +49,6 @@ background: linear-gradient(90deg, rgba(52,219,206,0.5690651260504201) 0%, rgba(
     </style>
 </head>
 <body class="d-flex flex-wrap">
-    <!-- Just an image -->
     <div class="login-bg h-100 col-12 col-md-6 position-relative" style="background: url(assets/images/login-bg-low.jpg) no-repeat center center; background-size: cover;">
         <div class="overlay"></div>
     </div>
@@ -65,7 +64,6 @@ background: linear-gradient(90deg, rgba(52,219,206,0.5690651260504201) 0%, rgba(
                 <div class="form-group">
                     <label for="exampleInputEmail1">Employee Number</label>
                     <input type="email" class="form-control" name="email" placeholder="Enter Employee Number">
-                    <!-- <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small> -->
                   </div>
                   <div class="form-btn">
                   <button type="submit" value="Login" name="login" id="login-btn" class="btn btn-primary mt-3">Submit</button>
