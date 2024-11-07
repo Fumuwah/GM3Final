@@ -21,7 +21,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     SELECT dtr.*, employees.lastname, employees.firstname 
     FROM dtr
     JOIN employees ON dtr.employee_number = employees.employee_number
-    WHERE dtr.project_id = ?"; // Or any other condition
+    WHERE dtr.project_id = ?";
 
     $stmt->execute();
     $result = $stmt->get_result();
