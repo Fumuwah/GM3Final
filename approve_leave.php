@@ -111,6 +111,7 @@ echo "Leave request approved and leave balance updated successfully.";
 }
 
 $stmt->close();
+$balance_stmt->close();
 $update_leave_stmt->close();
 $approve_stmt->close();
 $conn->close();
