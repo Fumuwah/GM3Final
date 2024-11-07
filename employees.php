@@ -525,7 +525,7 @@ include './layout/header.php';
                     <?php if ($can_manage_roles): ?>
                         <div class="col-3">
                             <label for="role_id">Role</label>
-                            <select name="edit_role_name_select" id="edit_role_name_select" class="form-control" required>
+                            <select name="role_id" id="edit_role_name_select" class="form-control" required>
                                 <option value="">Select Role</option>
                                 <option value="1" 
                                     <?php if (isset($employeeData) && $employeeData['role_name'] == 'super admin') echo 'selected'; ?>>
