@@ -15,7 +15,6 @@ if (!isset($_GET['request_id'])) {
 }
 
 $request_id = $_GET['request_id'];
-
 $conn->begin_transaction();
 
 try {
@@ -64,7 +63,7 @@ $sick_leave = $balance['sick_leave'];
 $vacation_leave = $balance['vacation_leave'];
 $leave_without_pay = $balance['leave_without_pay'];
 
-if ($leave_type === 'sick_leave') {
+if ($leave_type === 'sick leave') {
     if ($sick_leave >= $leave_days) {
         $update_leave_query = "UPDATE leaves SET sick_leave = sick_leave - ?, used_leave = used_leave + ? WHERE employee_id = ?";
         $update_leave_stmt = $conn->prepare($update_leave_query);
@@ -75,7 +74,7 @@ if ($leave_type === 'sick_leave') {
         $update_leave_stmt = $conn->prepare($update_leave_query);
         $update_leave_stmt->bind_param("iii", $leave_without_pay_days, $sick_leave, $employee_id);
     }
-} elseif ($leave_type === 'vacation_leave') {
+} elseif ($leave_type === 'vacation leave') {
     if ($vacation_leave >= $leave_days) {
         $update_leave_query = "UPDATE leaves SET vacation_leave = vacation_leave - ?, used_leave = used_leave + ? WHERE employee_id = ?";
         $update_leave_stmt = $conn->prepare($update_leave_query);
