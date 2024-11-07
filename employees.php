@@ -524,7 +524,7 @@ include './layout/header.php';
                         </div>
                     <?php if ($can_manage_roles): ?>
                         <div class="col-3">
-                            <label for="role_name">Role</label>
+                            <label for="role_id">Role</label>
                             <select name="edit_role_name_select" id="edit_role_name_select" class="form-control" required>
                                 <option value="">Select Role</option>
                                 <option value="1" 
