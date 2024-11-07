@@ -13,7 +13,6 @@ $from_date = $_POST['from_date'];
 $to_date = $_POST['to_date'];
 $leave_file = $_FILES['leave_file']['name'] ?? '';
 
-// Check if employee belongs to the same project
 $project_query = "SELECT project_name FROM employees WHERE employee_id = ?";
 $project_stmt = $conn->prepare($project_query);
 $project_stmt->bind_param("i", $employee_id);
