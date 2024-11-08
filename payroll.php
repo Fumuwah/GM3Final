@@ -9,6 +9,9 @@ if (!isset($_SESSION['role_name']) || !isset($_SESSION['employee_id'])) {
     header("Location: login.php");
     exit();
 }
+
+
+
 include './layout/header.php';
 ?>
 <style>
