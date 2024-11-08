@@ -6,11 +6,12 @@ if (!isset($_SESSION['role_name']) || !isset($_SESSION['employee_id'])) {
     header("Location: login.php");
     exit();
 }
-$activePage ='user_controller';
+$activePage = 'user_controller';
 
 include 'database.php';
 
-function fetchTotalEmployeesCount($conn, $search = '') {
+function fetchTotalEmployeesCount($conn, $search = '')
+{
     $search = mysqli_real_escape_string($conn, $search);
     $sql = "SELECT COUNT(*) AS total_count FROM employees e 
             LEFT JOIN positions p ON e.position_id = p.position_id
@@ -29,7 +30,8 @@ function fetchTotalEmployeesCount($conn, $search = '') {
     return 0;
 }
 
-function fetchEmployees($conn, $start, $limit, $search = '') {
+function fetchEmployees($conn, $start, $limit, $search = '')
+{
     $search = mysqli_real_escape_string($conn, $search);
     $sql = "SELECT e.employee_id, e.lastname, e.firstname, 
                    p.position_name, e.project_name, r.role_name, 
@@ -74,7 +76,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['employee_id'])) {
         if ($user_role_id === 1 || $can_manage_roles) {
             $check_role_stmt = $conn->prepare("SELECT role_id FROM employees WHERE employee_id = ?");
             $check_role_stmt->bind_param("i", $employee_id);
-            $check_role_stmt->execute();    
+            $check_role_stmt->execute();
             $check_role_result = $check_role_stmt->get_result();
 
             if ($check_role_result && $check_role_result->num_rows > 0) {
@@ -121,34 +123,34 @@ include './layout/header.php';
 ?>
 
 <script>
-function confirmRoleChange(form) {
-    if (confirm("Are you sure you want to change this employee's role?")) {
-        form.submit();
+    function confirmRoleChange(form) {
+        if (confirm("Are you sure you want to change this employee's role?")) {
+            form.submit();
+        }
+        return false;
     }
-    return false;
-}
 
-function showMessage() {
-    var message = "<?php echo isset($_SESSION['message']) ? $_SESSION['message'] : ''; ?>";
-    if (message) {
-        alert(message);
-        <?php unset($_SESSION['message']); ?>
+    function showMessage() {
+        var message = "<?php echo isset($_SESSION['message']) ? $_SESSION['message'] : ''; ?>";
+        if (message) {
+            alert(message);
+            <?php unset($_SESSION['message']); ?>
+        }
     }
-}
 
-window.onload = showMessage;
+    window.onload = showMessage;
 </script>
 
-<div class="d-flex align-items-stretch">
+<div class="d-flex">
     <?php include './layout/sidebar.php'; ?>
-    <div class="main-content">
+         <div class="main-content" style="max-height: calc(100vh - 80px);overflow-y:scroll">
         <div class="container-fluid">
             <h2>Users</h2>
             <form class="form-inline my-3">
                 <div class="form-group mb-2 col-8 col-lg-6">
-                    <input type="text" class="form-control w-100" id="search-user" name="search" 
-                           placeholder="Search User" 
-                           value="<?php echo htmlspecialchars($search); ?>">
+                    <input type="text" class="form-control w-100" id="search-user" name="search"
+                        placeholder="Search User"
+                        value="<?php echo htmlspecialchars($search); ?>">
                 </div>
                 <button type="submit" class="btn btn-primary mb-2">Search</button>
             </form>
@@ -168,11 +170,11 @@ window.onload = showMessage;
                         </thead>
                         <tbody>
                             <?php if ($employees && mysqli_num_rows($employees) > 0): ?>
-                                <?php 
-                                    $counter = 0;
-                                    while ($row = mysqli_fetch_assoc($employees)): 
-                                        $counter++;
-                                        ?>
+                                <?php
+                                $counter = 0;
+                                while ($row = mysqli_fetch_assoc($employees)):
+                                    $counter++;
+                                ?>
                                     <tr>
                                         <th scope="row"><?php echo $row['employee_id']; ?></th>
                                         <td><?php echo $row['lastname'] . ', ' . $row['firstname']; ?></td>
@@ -197,7 +199,7 @@ window.onload = showMessage;
                                             <?php endif; ?>
                                         </td>
                                     </tr>
-                                <?php endwhile; 
+                                <?php endwhile;
                                 ?>
                             <?php else: ?>
                                 <tr>

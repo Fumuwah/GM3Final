@@ -1,43 +1,159 @@
-body, html {
-    overflow-x: hidden;
+:root {
+    ::-webkit-scrollbar {
+        width: 2px;
+        height: 2px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background-color: rgba(0, 0, 0, 0.2);
+        border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: rgba(0, 0, 0, 0);
+    }
 }
 
-.sidebar-link {
-    list-style: none;
-    padding: 7px 30px;
+html, body {
+    padding: 0;
+    margin: 0;
+    overflow: hidden;
 }
 
-.sidebar-link a {
-    color: rgb(32, 32, 32);
+.navbar {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    height: 80px;
 }
 
-.sidebar-container {
+.main {
+    min-height: calc(100vh - 80px);
+    width: 100%;
+    transition: all 0.25s ease-in-out;
+    background-color: rgb(255, 255, 255);
+    transition: none !important;
+    flex-grow: 1;
+}
+
+#sidebar {
     position: relative;
-    height: 92vh !important;
-    top: 0px;
-    padding: 20px 0px;
+    width: 0;
+    min-width: 0;
+    z-index: 100;
+    transition: all .25s ease-in-out;
+    background: rgb(250, 250, 250);
+    display: flex;
+    flex-direction: column;
+}
+
+#sidebar.expand {
+    width: 250px;
     min-width: 250px;
-    /* height: 92vh; */
-    background-color: rgb(250, 250, 250);
-    z-index: 1;
-    /* margin-left: -250px; */
-    transition: .4s all ease-in-out;
+}
+
+@media only screen and (max-width: 992px) {
+
+    #sidebar,
+    #sidebar.expand {
+        height: 100%;
+        position: absolute;
+        left: 0;
+    }
+}
+
+#sidebar:not(.expand) .sidebar-logo,
+#sidebar:not(.expand) .sidebar-title,
+#sidebar:not(.expand) a.sidebar-link,
+#sidebar:not(.expand) a.sidebar-link span {
+    display: none;
+}
+
+.sidebar-nav {
+    padding: 0 0;
+}
+
+a.sidebar-link {
+    padding: 5px 20px;
+    text-decoration: none;
+    color: black;
+    display: block;
+    font-size: 16px;
+    white-space: nowrap;
+    padding: 1rem 0 1rem 2rem;
+    border-left: 3px solid transparent;
+    transition: all ease-in-out 0.7s;
+}
+
+a.sidebar-link:hover {
+    background-color: rgba(0, 123, 255, 0.1);
+}
+
+.sidebar-item {
+    position: relative;
+}
+
+#sidebar:not(.expand) .sidebar-item .sidebar-dropdown {
+    position: absolute;
+    top: 0;
+    left: 70px;
+    background: radial-gradient(circle at 0.1% 1%, rgb(102, 188, 239) 0%, rgb(215, 248, 247) 100.2%);
+    padding: 0;
+    min-width: 15rem;
+    display: none;
+}
+
+#sidebar:not(.expand) .sidebar-item:hover .has-dropdown+.sidebar-dropdown {
+    display: block;
+    max-height: 15em;
+    width: 100%;
+    opacity: 1;
+}
+
+#sidebar:not(.expand) .sidebar-item:nth-child(3) {
+    display: none;
+}
+
+#sidebar.expand .san1-apperance-button {
+    cursor: default;
+}
+
+#sidebar.expand .sidebar-link[data-bs-toggle="collapse"]::after {
+    border: solid;
+    border-width: 0 .075rem .075rem 0;
+    content: "";
+    display: inline-block;
+    padding: 2px;
+    position: absolute;
+    right: 1.5rem;
+    top: 1.4rem;
+    transform: rotate(-135deg);
+    transition: all .2s ease-out;
+}
+
+#sidebar.expand .sidebar-link[data-bs-toggle="collapse"].collapsed::after {
+    transform: rotate(45deg);
+    transition: all .2s ease-out;
 }
 
 .arrow-container {
+    z-index: 100;
     position: absolute;
-    font-weight: bold;
-    font-size: 40px;
+    font-size: 30px;
     background-color: rgb(26, 26, 26);
     padding: 0px 12px;
     line-height: 43px;
     border-radius: 50%;
     color: white;
     cursor: pointer;
-    left: 100%;
+    left: 101%;
     top: 50%;
     transform: translate(-50%, -50%) rotate(0deg);
 
+}
+
+.arrow-container.rotate {
+    transform: translate(-50%, -50%) rotate(180deg);
 }
 
 #arrow {
@@ -47,10 +163,6 @@ body, html {
 .main-content {
     width: 100%;
     padding-top: 30px;
-}
-
-.sidebar-link.active-link {
-    background: rgb(0, 123, 255, 0.5);
 }
 
 .modal {
@@ -109,17 +221,7 @@ body, html {
 /* .splide{
     height: 100%;
 } */
-@media screen and (max-width: 768px) {
-    .sidebar-container {
-        margin-left: -250px;
-    }
 
-    .arrow-container {
-        transform: translate(-50%, -50%) rotate(180deg);
-
-    }
-
-}
 
 @media screen and (max-width: 992px) {
     .hamburger {
