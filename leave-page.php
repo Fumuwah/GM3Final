@@ -223,31 +223,6 @@ $project_name = $employee['project_name'];
         });
     });
 
-    var arrow = document.querySelector('#arrow');
-    const width = window.innerWidth || document.documentElement.clientWidth ||
-        document.body.clientWidth;
-    console.log(width)
-    if (width < 768) {
-        var show = false;
-    } else {
-        var show = true;
-    }
-
-    arrow.addEventListener('click', function() {
-        var sidebarContainer = document.querySelector('.sidebar-container');
-
-        if (show) {
-            sidebarContainer.style.marginLeft = '-250px';
-            arrow.style.transform = 'translate(-50%,-50%) rotate(180deg)';
-            show = false;
-        } else {
-            sidebarContainer.style.marginLeft = '0px';
-            arrow.style.transform = 'translate(-50%,-50%) rotate(0deg)';
-            show = true;
-        }
-
-    });
-
     var requestLeaveBtn = document.querySelector('#request-leave-btn');
     var requestLeaveModal = document.querySelector('#request-leave-modal');
     var closeModalwForm = document.querySelectorAll('.close-modalwForm');

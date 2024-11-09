@@ -153,7 +153,7 @@ include './layout/header.php';
                             placeholder="Search User"
                             value="<?php echo htmlspecialchars($search); ?>">
                     </div>
-                    <div class="flex-end" style="">''
+                    <div class="flex-end" style="">
                         <button type="submit" class="btn btn-primary mb-2">Search</button>
                     </div>
                 </div>
