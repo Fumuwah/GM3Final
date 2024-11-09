@@ -94,7 +94,7 @@ include './layout/header.php';
     </style>
       <div class="d-flex">
          <?php include './layout/sidebar.php'; ?>
-          <div class="main-content">
+         <div class="main-content" style="max-height: calc(100vh - 70px);overflow-y:scroll">
           <article>
         <div class="title">
             <img src="./assets/images/gm3template.jpg" alt="">

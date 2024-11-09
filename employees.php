@@ -17,43 +17,43 @@ $position_name = isset($_GET['position_name']) ? mysqli_real_escape_string($conn
 $role_name = strtolower($user['role_name'] ?? '');
 
 $sql = "SELECT e.employee_id, e.firstname, e.middlename, e.lastname, e.employee_number, 
-               e.contactno, e.address, e.birthdate, e.civil_status, e.religion, 
-               e.basic_salary, e.hire_date, e.employee_status, e.sss_no, e.philhealth_no, 
-               e.hdmf_no, e.tin_no, e.email, e.password, e.emergency_contactno, 
-               p.position_name, pr.project_name, r.role_name 
+            e.contactno, e.address, e.birthdate, e.civil_status, e.religion, 
+            e.basic_salary, e.hire_date, e.employee_status, e.sss_no, e.philhealth_no, 
+            e.hdmf_no, e.tin_no, e.email, e.password, e.emergency_contactno, 
+            p.position_name, pr.project_name, r.role_name 
         FROM employees e
         JOIN positions p ON e.position_id = p.position_id
         LEFT JOIN projects pr ON e.project_name = pr.project_name
         LEFT JOIN roles r ON e.role_id = r.role_id
-        WHERE e.employee_status != 'Archived'"; 
+        WHERE e.employee_status != 'Archived'";
 
-        if (isset($_GET['employee_number'])) {
-            $employee_number = $_GET['employee_number'];
-        
-            $query = "SELECT e.*, r.role_name FROM employees e
-                      LEFT JOIN roles r ON e.role_id = r.role_id
-                      WHERE e.employee_number = ?";
-            $stmt = $conn->prepare($query);
-            $stmt->bind_param("s", $employee_number);
-            $stmt->execute();
-            $result = $stmt->get_result();
-            
-            if ($result->num_rows > 0) {
-                $employeeData = $result->fetch_assoc();
-            }
-        }
+if (isset($_GET['employee_number'])) {
+    $employee_number = $_GET['employee_number'];
+
+    $query = "SELECT e.*, r.role_name FROM employees e
+                    LEFT JOIN roles r ON e.role_id = r.role_id
+                    WHERE e.employee_number = ?";
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("s", $employee_number);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result->num_rows > 0) {
+        $employeeData = $result->fetch_assoc();
+    }
+}
 
 if (!empty($search)) {
     $sql .= " AND (e.firstname LIKE '%$search%' 
-              OR e.lastname LIKE '%$search%' 
-              OR e.employee_number LIKE '%$search%')";
+            OR e.lastname LIKE '%$search%' 
+            OR e.employee_number LIKE '%$search%')";
 }
 
 $total_sql = "SELECT COUNT(*) as total FROM employees e 
-              JOIN positions p ON e.position_id = p.position_id 
-              LEFT JOIN projects pr ON e.project_name = pr.project_name 
-              LEFT JOIN roles r ON e.role_id = r.role_id 
-              WHERE e.employee_status != 'Archived'";
+            JOIN positions p ON e.position_id = p.position_id 
+            LEFT JOIN projects pr ON e.project_name = pr.project_name 
+            LEFT JOIN roles r ON e.role_id = r.role_id 
+            WHERE e.employee_status != 'Archived'";
 
 if ($status === 'Archived') {
     $total_sql = str_replace("WHERE e.employee_status != 'Archived'", "WHERE e.employee_status = 'Archived'", $total_sql);
@@ -82,25 +82,25 @@ $can_manage_roles = $user['can_manage_roles'] ?? false;
 
 $activePage = 'employees';
 
-var_dump($_GET['position_name'], $_GET['employee_status']);
+// var_dump($_GET['position_name'], $_GET['employee_status']);
 
 
 include './layout/header.php';
 ?>
 
-      <div class="d-flex">
-        <?php include './layout/sidebar.php'; ?>
-          <div class="main-content">
-            <div class="container-fluid">
-                <h2>Pay slip</h2>
-                <div class="d-flex justify-content-between align-items-center">
+<div class="d-flex">
+    <?php include './layout/sidebar.php'; ?>
+    <div class="main p-3" style="max-height: calc(100vh - 80px);overflow-y:scroll">
+        <div class="container-fluid">
+            <h2>Pay slip</h2>
+            <div class="d-flex justify-content-between align-items-center">
                 <form class="form-inline my-3 col-10 pl-0" method="GET" action="">
-                        <div class="form-group col-8 col-lg-3">
-                            <label for="search-user" class="sr-only">Search User</label>
-                            <input type="text" class="form-control w-100" id="search-user" name="search" placeholder="Search User" value="<?php echo isset($_GET['search']) ? htmlspecialchars($_GET['search']) : ''; ?>">
-                        </div>
+                    <div class="form-group col-8 col-lg-3">
+                        <label for="search-user" class="sr-only">Search User</label>
+                        <input type="text" class="form-control w-100" id="search-user" name="search" placeholder="Search User" value="<?php echo isset($_GET['search']) ? htmlspecialchars($_GET['search']) : ''; ?>">
+                    </div>
 
-                        <div class="form-group">
+                    <div class="form-group">
                         <select name="status" id="status" class="form-control">
                             <option value="">Select Status</option>
                             <option value="Regular" <?php echo isset($_GET['status']) && $_GET['status'] == 'Regular' ? 'selected' : ''; ?>>Regular</option>
@@ -108,8 +108,8 @@ include './layout/header.php';
                             <option value="Archived" <?php echo isset($_GET['status']) && $_GET['status'] == 'Archived' ? 'selected' : ''; ?>>Archived</option>
                         </select>
                     </div>
-                      <div class="form-group mx-2">
-                          <select name="position_name" id="position_name" class="form-control">
+                    <div class="form-group mx-2">
+                        <select name="position_name" id="position_name" class="form-control">
                             <option value="">Select Position</option>
                             <option value="Owner" <?php echo isset($_GET['position_name']) && $_GET['position_name'] == 'Owner' ? 'selected' : ''; ?>>Owner</option>
                             <option value="HR/Admin Manager" <?php echo isset($_GET['position_name']) && $_GET['position_name'] == 'HR/Admin Manager' ? 'selected' : ''; ?>>HR/Admin Manager</option>
@@ -131,65 +131,65 @@ include './layout/header.php';
                             <option value="Architectural Designer" <?php echo isset($_GET['position_name']) && $_GET['position_name'] == 'Architectural Designer' ? 'selected' : ''; ?>>Architectural Designer</option>
                             <option value="Admin Specialist" <?php echo isset($_GET['position_name']) && $_GET['position_name'] == 'Admin Specialist' ? 'selected' : ''; ?>>Admin Specialist</option>
                             <option value="HR Specialist" <?php echo isset($_GET['position_name']) && $_GET['position_name'] == 'HR Specialist' ? 'selected' : ''; ?>>HR Specialist</option>
-                          </select>
-                      </div>
+                        </select>
+                    </div>
                     <button type="submit" class="btn btn-primary">Search</button>
                 </form>
                 <div class="d-flex">
                     <form action="profile-change-requests.php">
                         <button type="submit" class="btn btn-success mb-2 mr-2" id="approvals">Approvals</button>
-                      </form>
+                    </form>
 
-                      <form action="">
+                    <form action="">
                         <button type="submit" class="btn btn-success mb-2" id="add-employee-btn">Add Employee</button>
-                      </form>
+                    </form>
                 </div>
-                </div>
-                
-                <div class="row">
-                    <div class="col-12 table-responsive">
-                        <table class="table">
-                            <thead>
-                              <tr>
+            </div>
+
+            <div class="row">
+                <div class="col-12 table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
                                 <th scope="col">#</th>
                                 <th scope="col">Name</th>
                                 <th scope="col">Status</th>
                                 <th scope="col">Position</th>
                                 <th scope="col">Hire Date</th>
                                 <th scope="col">Action</th>
-                              </tr>
-                            </thead>
-                            <tbody>
+                            </tr>
+                        </thead>
+                        <tbody>
                             <?php
-                                $counter = 1;
-                                while ($row = mysqli_fetch_assoc($result)) {
-                                    $employee_id = htmlspecialchars($row['employee_id']);
-                                    $employee_number = htmlspecialchars($row['employee_number']);
-                                    $lastname = htmlspecialchars($row['lastname']);
-                                    $firstname = htmlspecialchars($row['firstname']);
-                                    $middlename = htmlspecialchars($row['middlename']);
-                                    $contactno = htmlspecialchars($row['contactno']);
-                                    $address = htmlspecialchars($row['address'] ?? '');
-                                    $birthdate = htmlspecialchars($row['birthdate'] ?? '');
-                                    $civil_status = htmlspecialchars($row['civil_status'] ?? '');
-                                    $religion = htmlspecialchars($row['religion'] ?? '');
-                                    $basic_salary = htmlspecialchars($row['basic_salary'] ?? '');
-                                    $project_name = htmlspecialchars($row['project_name'] ?? '');
-                                    $position_name = htmlspecialchars($row['position_name'] ?? '');
-                                    $hire_date = htmlspecialchars($row['hire_date'] ?? '');
-                                    $employee_status = htmlspecialchars($row['employee_status'] ?? '');
-                                    $sss_no = htmlspecialchars($row['sss_no'] ?? '');
-                                    $philhealth_no = htmlspecialchars($row['philhealth_no'] ?? '');
-                                    $hdmf_no = htmlspecialchars($row['hdmf_no'] ?? '');
-                                    $tin_no = htmlspecialchars($row['tin_no'] ?? '');
-                                    $email = htmlspecialchars($row['email'] ?? '');
-                                    $password = htmlspecialchars($row['password'] ?? '');
-                                    $emergency_contactno = htmlspecialchars($row['emergency_contactno'] ?? '');
-                                    $role_name = strtolower($row['role_name'] ?? '');
-                                    
-                                    $archiveButtonText = ($employee_status === 'Archived') ? 'Unarchive' : 'Archive';
+                            $counter = 1;
+                            while ($row = mysqli_fetch_assoc($result)) {
+                                $employee_id = htmlspecialchars($row['employee_id']);
+                                $employee_number = htmlspecialchars($row['employee_number']);
+                                $lastname = htmlspecialchars($row['lastname']);
+                                $firstname = htmlspecialchars($row['firstname']);
+                                $middlename = htmlspecialchars($row['middlename']);
+                                $contactno = htmlspecialchars($row['contactno']);
+                                $address = htmlspecialchars($row['address'] ?? '');
+                                $birthdate = htmlspecialchars($row['birthdate'] ?? '');
+                                $civil_status = htmlspecialchars($row['civil_status'] ?? '');
+                                $religion = htmlspecialchars($row['religion'] ?? '');
+                                $basic_salary = htmlspecialchars($row['basic_salary'] ?? '');
+                                $project_name = htmlspecialchars($row['project_name'] ?? '');
+                                $position_name = htmlspecialchars($row['position_name'] ?? '');
+                                $hire_date = htmlspecialchars($row['hire_date'] ?? '');
+                                $employee_status = htmlspecialchars($row['employee_status'] ?? '');
+                                $sss_no = htmlspecialchars($row['sss_no'] ?? '');
+                                $philhealth_no = htmlspecialchars($row['philhealth_no'] ?? '');
+                                $hdmf_no = htmlspecialchars($row['hdmf_no'] ?? '');
+                                $tin_no = htmlspecialchars($row['tin_no'] ?? '');
+                                $email = htmlspecialchars($row['email'] ?? '');
+                                $password = htmlspecialchars($row['password'] ?? '');
+                                $emergency_contactno = htmlspecialchars($row['emergency_contactno'] ?? '');
+                                $role_name = strtolower($row['role_name'] ?? '');
 
-                                    echo "<tr>
+                                $archiveButtonText = ($employee_status === 'Archived') ? 'Unarchive' : 'Archive';
+
+                                echo "<tr>
                                         <th scope='row'>{$counter}</th>
                                         <td>{$firstname} {$lastname}</td>
                                         <td>{$employee_status}</td>
@@ -224,61 +224,61 @@ include './layout/header.php';
                                         </td>
                                     </tr>";
 
-                                    $counter++;
-                                }
+                                $counter++;
+                            }
                             ?>
 
-                            </tbody>
-                          </table>
-                        <div class="d-flex justify-content-end">
-                            <nav aria-label="Page navigation example">
-                                <ul class="pagination">
-                                    <?php if ($page > 1): ?>
-                                        <li class="page-item">
-                                            <a class="page-link" href="?page=<?php echo $page - 1; ?>&search=<?php echo urlencode($search); ?>&status=<?php echo urlencode($status); ?>&position_name=<?php echo urlencode($position_name); ?>">Previous</a>
-                                        </li>
-                                    <?php endif; ?>
-                                    
-                                    <?php for ($i = 1; $i <= $total_pages; $i++): ?>
-                                        <li class="page-item <?php if ($i == $page) echo 'active'; ?>">
-                                            <a class="page-link" href="?page=<?php echo $i; ?>&search=<?php echo $search; ?>&status=<?php echo urlencode($status); ?>&position_name=<?php echo $position_name; ?>"><?php echo $i; ?></a>
-                                        </li>
-                                    <?php endfor; ?>
-                        
-                                    <?php if ($page < $total_pages): ?>
-                                        <li class="page-item">
-                                            <a class="page-link" href="?page=<?php echo $page + 1; ?>&search=<?php echo urlencode($search); ?>&status=<?php echo urlencode($status); ?>&position_name=<?php echo urlencode($position_name); ?>">Previous</a>
-                                        </li>
-                                    <?php endif; ?>
-                                </ul>
-                            </nav>
-                        </div>
+                        </tbody>
+                    </table>
+                    <div class="d-flex justify-content-end">
+                        <nav aria-label="Page navigation example">
+                            <ul class="pagination">
+                                <?php if ($page > 1): ?>
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page=<?php echo $page - 1; ?>&search=<?php echo urlencode($search); ?>&status=<?php echo urlencode($status); ?>&position_name=<?php echo urlencode($position_name); ?>">Previous</a>
+                                    </li>
+                                <?php endif; ?>
+
+                                <?php for ($i = 1; $i <= $total_pages; $i++): ?>
+                                    <li class="page-item <?php if ($i == $page) echo 'active'; ?>">
+                                        <a class="page-link" href="?page=<?php echo $i; ?>&search=<?php echo $search; ?>&status=<?php echo urlencode($status); ?>&position_name=<?php echo $position_name; ?>"><?php echo $i; ?></a>
+                                    </li>
+                                <?php endfor; ?>
+
+                                <?php if ($page < $total_pages): ?>
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page=<?php echo $page + 1; ?>&search=<?php echo urlencode($search); ?>&status=<?php echo urlencode($status); ?>&position_name=<?php echo urlencode($position_name); ?>">Previous</a>
+                                    </li>
+                                <?php endif; ?>
+                            </ul>
+                        </nav>
                     </div>
-                </div>
-            </div>
-          </div>
-      </div>
-   
-        <div class="modal fade" id="delete-modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Archive Employee</h5>
-                </div>
-                <div class="modal-body">
-                    Are you sure you want to archive this employee?
-                    <input type="hidden" id="employee-id" value="">
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-success close-modal" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-danger" id="confirm-archive">Archive Employee</button>
                 </div>
             </div>
         </div>
     </div>
+</div>
+
+<div class="modal fade" id="delete-modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Archive Employee</h5>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to archive this employee?
+                <input type="hidden" id="employee-id" value="">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success close-modal" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-danger" id="confirm-archive">Archive Employee</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 
-    <div class="modal fade" id="edit-modal" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="edit-modal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <form action="update_employee.php" method="POST">
             <div class="modal-content">
@@ -292,73 +292,73 @@ include './layout/header.php';
                     <div class="form-row form-group">
                         <div class="col-3">
                             <label for="employee_number">Employee Number</label>
-                    <input type="text" class="form-control" name="employee_number" id="edit_employee_number" required pattern="\d+" title="Please enter a valid integer.">
-                    <?php
-                    if ($_SERVER["REQUEST_METHOD"] == "POST") {
-                        $employee_number = $_POST['employee_number'];
-                        if (!filter_var($employee_number, FILTER_VALIDATE_INT)) {
-                            echo "Employee Number must be an integer.";
-                        }
-                    }
-                    ?>
+                            <input type="text" class="form-control" name="employee_number" id="edit_employee_number" required pattern="\d+" title="Please enter a valid integer.">
+                            <?php
+                            if ($_SERVER["REQUEST_METHOD"] == "POST") {
+                                $employee_number = $_POST['employee_number'];
+                                if (!filter_var($employee_number, FILTER_VALIDATE_INT)) {
+                                    echo "Employee Number must be an integer.";
+                                }
+                            }
+                            ?>
                         </div>
                         <div class="col-3">
-                           <label for="lastname">Last Name</label>
-                    <input type="text" class="form-control" name="lastname" id="edit_lastname" required pattern="^[A-Za-zÀ-ÖØ-ÿ]+$" title="Please enter a valid last name (only letters are allowed).">
-                    <?php
-                    if ($_SERVER["REQUEST_METHOD"] == "POST") {
-                        $lastname = $_POST['lastname'];
-                        if (!preg_match("/^[A-Za-zÀ-ÖØ-ÿ]+$/", $lastname)) {
-                            echo "<p style='color:red;'>Last Name must contain only letters and cannot include numbers or special characters.</p>";
-                        } else {
-                            echo "<p style='color:green;'>Last Name is valid.</p>";
-                        }
-                    }
-                    ?>
+                            <label for="lastname">Last Name</label>
+                            <input type="text" class="form-control" name="lastname" id="edit_lastname" required pattern="^[A-Za-zÀ-ÖØ-ÿ]+$" title="Please enter a valid last name (only letters are allowed).">
+                            <?php
+                            if ($_SERVER["REQUEST_METHOD"] == "POST") {
+                                $lastname = $_POST['lastname'];
+                                if (!preg_match("/^[A-Za-zÀ-ÖØ-ÿ]+$/", $lastname)) {
+                                    echo "<p style='color:red;'>Last Name must contain only letters and cannot include numbers or special characters.</p>";
+                                } else {
+                                    echo "<p style='color:green;'>Last Name is valid.</p>";
+                                }
+                            }
+                            ?>
                         </div>
                         <div class="col-3">
-                          <label for="firstname">First Name</label>
-                    <input type="text" class="form-control" name="firstname" id="edit_firstname" required pattern="^[A-Za-zÀ-ÖØ-ÿ\s]+$" title="Please enter a valid first name (only letters and spaces are allowed).">
-                    <?php
-                    if ($_SERVER["REQUEST_METHOD"] == "POST") {
-                        $firstname = $_POST['firstname'];
-                        if (!preg_match("/^[A-Za-zÀ-ÖØ-ÿ\s]+$/", $firstname)) {
-                            echo "<p style='color:red;'>First Name must contain only letters and spaces, and cannot include numbers or special characters.</p>";
-                        } else {
-                            echo "<p style='color:green;'>First Name is valid.</p>";
-                        }
-                    }
-                    ?>
+                            <label for="firstname">First Name</label>
+                            <input type="text" class="form-control" name="firstname" id="edit_firstname" required pattern="^[A-Za-zÀ-ÖØ-ÿ\s]+$" title="Please enter a valid first name (only letters and spaces are allowed).">
+                            <?php
+                            if ($_SERVER["REQUEST_METHOD"] == "POST") {
+                                $firstname = $_POST['firstname'];
+                                if (!preg_match("/^[A-Za-zÀ-ÖØ-ÿ\s]+$/", $firstname)) {
+                                    echo "<p style='color:red;'>First Name must contain only letters and spaces, and cannot include numbers or special characters.</p>";
+                                } else {
+                                    echo "<p style='color:green;'>First Name is valid.</p>";
+                                }
+                            }
+                            ?>
                         </div>
                         <div class="col-3">
                             <label for="middlename">Middle Name</label>
-                <input type="text" class="form-control" name="middlename" id="edit_middlename" required pattern="^[A-Za-zÀ-ÖØ-ÿ\s]+$" title="Please enter a valid middle name (only letters and spaces are allowed).">
-                <?php
-                if ($_SERVER["REQUEST_METHOD"] == "POST") {
-                    $middlename = $_POST['middlename'];
-                    if (!preg_match("/^[A-Za-zÀ-ÖØ-ÿ\s]+$/", $middlename)) {
-                        echo "<p style='color:red;'>Middle Name must contain only letters and spaces, and cannot include numbers or special characters.</p>";
-                    } else {
-                        echo "<p style='color:green;'>Middle Name is valid.</p>";
-                    }
-                }
-                ?>
+                            <input type="text" class="form-control" name="middlename" id="edit_middlename" required pattern="^[A-Za-zÀ-ÖØ-ÿ\s]+$" title="Please enter a valid middle name (only letters and spaces are allowed).">
+                            <?php
+                            if ($_SERVER["REQUEST_METHOD"] == "POST") {
+                                $middlename = $_POST['middlename'];
+                                if (!preg_match("/^[A-Za-zÀ-ÖØ-ÿ\s]+$/", $middlename)) {
+                                    echo "<p style='color:red;'>Middle Name must contain only letters and spaces, and cannot include numbers or special characters.</p>";
+                                } else {
+                                    echo "<p style='color:green;'>Middle Name is valid.</p>";
+                                }
+                            }
+                            ?>
                         </div>
                     </div>
                     <div class="form-row form-group">
                         <div class="col-3">
-                          <label for="contactno">Contact No.</label>
-                        <input type="text" class="form-control" name="contactno" id="edit_contactno" required pattern="\d{11}" title="Please enter a valid contact number (11 digits are required)." maxlength="11">
-                        <?php
-                        if ($_SERVER["REQUEST_METHOD"] == "POST") {
-                            $contactno = $_POST['contactno'];
-                            if (!preg_match('/^\d{11}$/', $contactno)) {
-                                echo "<p style='color:red;'>Contact No. must be exactly 11 digits.</p>";
-                            } else {
-                                echo "<p style='color:green;'>Contact No. is valid.</p>";
+                            <label for="contactno">Contact No.</label>
+                            <input type="text" class="form-control" name="contactno" id="edit_contactno" required pattern="\d{11}" title="Please enter a valid contact number (11 digits are required)." maxlength="11">
+                            <?php
+                            if ($_SERVER["REQUEST_METHOD"] == "POST") {
+                                $contactno = $_POST['contactno'];
+                                if (!preg_match('/^\d{11}$/', $contactno)) {
+                                    echo "<p style='color:red;'>Contact No. must be exactly 11 digits.</p>";
+                                } else {
+                                    echo "<p style='color:green;'>Contact No. is valid.</p>";
+                                }
                             }
-                        }
-                        ?>
+                            ?>
                         </div>
                         <div class="col-9">
                             <label for="address">Address</label>
@@ -385,56 +385,56 @@ include './layout/header.php';
                         </div>
                         <div class="col-3">
                             <label for="basic_salary">Basic Salary</label>
-                           <input type="text" class="form-control" name="basic_salary" id="edit_basic_salary" required pattern="\d+" title="Please enter a valid integer.">
-                    <?php
-                    if ($_SERVER["REQUEST_METHOD"] == "POST") {
-                        $basic_salary = $_POST['basic_salary'];
-                        if (!filter_var($basic_salary, FILTER_VALIDATE_INT)) {
-                            echo "Basic Salary must be an integer.";
-                        }
-                    }
-                    ?>
+                            <input type="text" class="form-control" name="basic_salary" id="edit_basic_salary" required pattern="\d+" title="Please enter a valid integer.">
+                            <?php
+                            if ($_SERVER["REQUEST_METHOD"] == "POST") {
+                                $basic_salary = $_POST['basic_salary'];
+                                if (!filter_var($basic_salary, FILTER_VALIDATE_INT)) {
+                                    echo "Basic Salary must be an integer.";
+                                }
+                            }
+                            ?>
                         </div>
                     </div>
                     <div class="form-row form-group">
-                    <div class="col-3">
-                    <label for="project_name">Project</label>
-                        <select name="project_name" id="edit_project_name" class="form-control" onchange="toggleProjectField()" required>
-                            <option value="">Select Project</option>
-                            <?php
-                            require_once "database.php";
-                            $projectQuery = "SELECT project_name FROM projects";
-                            $projectResult = $conn->query($projectQuery);
-                            while ($projectRow = $projectResult->fetch_assoc()) {
-                                echo "<option value='"  . htmlspecialchars($projectRow['project_name'], ENT_QUOTES, 'UTF-8') . "'>" . htmlspecialchars($projectRow['project_name'], ENT_QUOTES, 'UTF-8') . "</option>";
-                            }
-                            ?>
-                        </select>
+                        <div class="col-3">
+                            <label for="project_name">Project</label>
+                            <select name="project_name" id="edit_project_name" class="form-control" onchange="toggleProjectField()" required>
+                                <option value="">Select Project</option>
+                                <?php
+                                require_once "database.php";
+                                $projectQuery = "SELECT project_name FROM projects";
+                                $projectResult = $conn->query($projectQuery);
+                                while ($projectRow = $projectResult->fetch_assoc()) {
+                                    echo "<option value='"  . htmlspecialchars($projectRow['project_name'], ENT_QUOTES, 'UTF-8') . "'>" . htmlspecialchars($projectRow['project_name'], ENT_QUOTES, 'UTF-8') . "</option>";
+                                }
+                                ?>
+                            </select>
                         </div>
                         <div class="col-3">
                             <label for="position">Position</label>
                             <select name="position" id="edit_position_select" class="form-control" required>
-                              <option value="">Select Position</option>
-                              <option value="Owner">Owner</option>
-                              <option value="HR/Admin Manager">HR/Admin Manager</option>
-                              <option value="Foreman">Foreman</option>
-                              <option value="Leadman">Leadman</option>
-                              <option value="Civil Engineer">Civil Engineer</option>
-                              <option value="Mechanical Engineer">Mechanical Engineer</option>
-                              <option value="Laborer">Laborer</option>
-                              <option value="HR Officer">HR Officer</option>
-                              <option value="Field Coordinator">Field Coordinator</option>
-                              <option value="Warehouse Man">Warehouse Man</option>
-                              <option value="Electrician">Electrician</option>
-                              <option value="Mason">Mason</option>
-                              <option value="Surveyor">Surveyor</option>
-                              <option value="Driver">Driver</option>
-                              <option value="Project Engineer">Project Engineer</option>
-                              <option value="Safety Officer">Safety Officer</option>
-                              <option value="Helper">Helper</option>
-                              <option value="Architectural Designer">Architectural Designer</option>
-                              <option value="Admin Specialist">Admin Specialist</option>
-                              <option value="HR Specialist">HR Specialist</option>
+                                <option value="">Select Position</option>
+                                <option value="Owner">Owner</option>
+                                <option value="HR/Admin Manager">HR/Admin Manager</option>
+                                <option value="Foreman">Foreman</option>
+                                <option value="Leadman">Leadman</option>
+                                <option value="Civil Engineer">Civil Engineer</option>
+                                <option value="Mechanical Engineer">Mechanical Engineer</option>
+                                <option value="Laborer">Laborer</option>
+                                <option value="HR Officer">HR Officer</option>
+                                <option value="Field Coordinator">Field Coordinator</option>
+                                <option value="Warehouse Man">Warehouse Man</option>
+                                <option value="Electrician">Electrician</option>
+                                <option value="Mason">Mason</option>
+                                <option value="Surveyor">Surveyor</option>
+                                <option value="Driver">Driver</option>
+                                <option value="Project Engineer">Project Engineer</option>
+                                <option value="Safety Officer">Safety Officer</option>
+                                <option value="Helper">Helper</option>
+                                <option value="Architectural Designer">Architectural Designer</option>
+                                <option value="Admin Specialist">Admin Specialist</option>
+                                <option value="HR Specialist">HR Specialist</option>
                             </select>
                         </div>
                         <div class="col-3">
@@ -444,69 +444,69 @@ include './layout/header.php';
                         <div class="col-3">
                             <label for="employee_status">Employee Status</label>
                             <select name="employee_status" id="edit_employee_status_select" class="form-control" required>
-                              <option value="">Select Status</option>
-                              <option value="Regular">Regular</option>
-                              <option value="Probationary">Probationary</option>
-                              <option value="Archived">Archived</option>
+                                <option value="">Select Status</option>
+                                <option value="Regular">Regular</option>
+                                <option value="Probationary">Probationary</option>
+                                <option value="Archived">Archived</option>
                             </select>
                         </div>
                     </div>
                     <div class="form-row form-group">
                         <div class="col-3">
                             <label for="sss_no">SSS No.</label>
-                    <input type="text" class="form-control" name="sss_no" id="edit_sss_no" required pattern="\d{13}" title="Please enter a valid SSS Number (13 digits are required)." maxlength="13">
-                    <?php
-                    if ($_SERVER["REQUEST_METHOD"] == "POST") {
-                        $sss_no = $_POST['sss_no'];
-                        if (!preg_match('/^\d{13}$/', $sss_no)) {
-                            echo "<p style='color:red;'>SSS No. must be exactly 13 digits.</p>";
-                        } else {
-                            echo "<p style='color:green;'>SSS No. is valid.</p>";
-                        }
-                    }
-                    ?>
+                            <input type="text" class="form-control" name="sss_no" id="edit_sss_no" required pattern="\d{13}" title="Please enter a valid SSS Number (13 digits are required)." maxlength="13">
+                            <?php
+                            if ($_SERVER["REQUEST_METHOD"] == "POST") {
+                                $sss_no = $_POST['sss_no'];
+                                if (!preg_match('/^\d{13}$/', $sss_no)) {
+                                    echo "<p style='color:red;'>SSS No. must be exactly 13 digits.</p>";
+                                } else {
+                                    echo "<p style='color:green;'>SSS No. is valid.</p>";
+                                }
+                            }
+                            ?>
                         </div>
                         <div class="col-3">
                             <label for="Philhealth_no">Philhealth No.</label>
-                        <input type="text" class="form-control" name="philhealth_no" id="edit_philhealth_no" required pattern="\d{13}" title="Please enter a valid Philhealth Number (13 digits are required)." maxlength="13">
-                        <?php
-                        if ($_SERVER["REQUEST_METHOD"] == "POST") {
-                            $philhealth_no = $_POST['philhealth_no'];
-                            if (!preg_match('/^\d{13}$/', $philhealth_no)) {
-                                echo "<p style='color:red;'>Philhealth No. must be exactly 13 digits.</p>";
-                            } else {
-                                echo "<p style='color:green;'>Philhealth No. is valid.</p>";
+                            <input type="text" class="form-control" name="philhealth_no" id="edit_philhealth_no" required pattern="\d{13}" title="Please enter a valid Philhealth Number (13 digits are required)." maxlength="13">
+                            <?php
+                            if ($_SERVER["REQUEST_METHOD"] == "POST") {
+                                $philhealth_no = $_POST['philhealth_no'];
+                                if (!preg_match('/^\d{13}$/', $philhealth_no)) {
+                                    echo "<p style='color:red;'>Philhealth No. must be exactly 13 digits.</p>";
+                                } else {
+                                    echo "<p style='color:green;'>Philhealth No. is valid.</p>";
+                                }
                             }
-                        }
-                        ?>
+                            ?>
                         </div>
                         <div class="col-3">
                             <label for="hdmf_no">HDMF No.</label>
-                        <input type="text" class="form-control" name="hdmf_no" id="edit_hdmf_no" required pattern="\d{12}" title="Please enter a valid HDMF Number (12 digits are required)." maxlength="12">
-                        <?php
-                        if ($_SERVER["REQUEST_METHOD"] == "POST") {
-                            $hdmf_no = $_POST['hdmf_no'];
-                            if (!preg_match('/^\d{12}$/', $tin_no)) {
-                                echo "<p style='color:red;'>hdmf No. must be exactly 12 digits.</p>";
-                            } else {
-                                echo "<p style='color:green;'hdmf No. is valid.</p>";
+                            <input type="text" class="form-control" name="hdmf_no" id="edit_hdmf_no" required pattern="\d{12}" title="Please enter a valid HDMF Number (12 digits are required)." maxlength="12">
+                            <?php
+                            if ($_SERVER["REQUEST_METHOD"] == "POST") {
+                                $hdmf_no = $_POST['hdmf_no'];
+                                if (!preg_match('/^\d{12}$/', $tin_no)) {
+                                    echo "<p style='color:red;'>hdmf No. must be exactly 12 digits.</p>";
+                                } else {
+                                    echo "<p style='color:green;'hdmf No. is valid.</p>";
+                                }
                             }
-                        }
-                        ?>
+                            ?>
                         </div>
                         <div class="col-3">
-                           <label for="Tin_no">TIN No.</label>
-                        <input type="text" class="form-control" name="tin_no" id="edit_tin_no" required pattern="\d{12}" title="Please enter a valid TIN Number (12 digits are required)." maxlength="12">
-                        <?php
-                        if ($_SERVER["REQUEST_METHOD"] == "POST") {
-                            $tin_no = $_POST['tin_no'];
-                            if (!preg_match('/^\d{12}$/', $tin_no)) {
-                                echo "<p style='color:red;'>TIN No. must be exactly 12 digits.</p>";
-                            } else {
-                                echo "<p style='color:green;'>TIN No. is valid.</p>";
+                            <label for="Tin_no">TIN No.</label>
+                            <input type="text" class="form-control" name="tin_no" id="edit_tin_no" required pattern="\d{12}" title="Please enter a valid TIN Number (12 digits are required)." maxlength="12">
+                            <?php
+                            if ($_SERVER["REQUEST_METHOD"] == "POST") {
+                                $tin_no = $_POST['tin_no'];
+                                if (!preg_match('/^\d{12}$/', $tin_no)) {
+                                    echo "<p style='color:red;'>TIN No. must be exactly 12 digits.</p>";
+                                } else {
+                                    echo "<p style='color:green;'>TIN No. is valid.</p>";
+                                }
                             }
-                        }
-                        ?>
+                            ?>
                         </div>
                     </div>
                     <div class="form-row form-group">
@@ -522,26 +522,26 @@ include './layout/header.php';
                             <label for="emergency_contactno">In case of Emergency</label>
                             <input type="text" class="form-control" name="emergency_contactno" id="edit_emergency_contactno">
                         </div>
-                    <?php if ($can_manage_roles): ?>
-                        <div class="col-3">
-                            <label for="role_id">Role</label>
-                            <select name="role_id" id="edit_role_name_select" class="form-control" required>
-                                <option value="">Select Role</option>
-                                <option value="1" 
-                                    <?php if (isset($employeeData) && $employeeData['role_name'] == 'super admin') echo 'selected'; ?>>
-                                    Super Admin
-                                </option>
-                                <option value="2" 
-                                    <?php if (isset($employeeData) && $employeeData['role_name'] == 'admin') echo 'selected'; ?>>
-                                    Admin
-                                </option>
-                                <option value="3" 
-                                    <?php if (isset($employeeData) && $employeeData['role_name'] == 'employee') echo 'selected'; ?>>
-                                    Employee
-                                </option>
-                            </select>
-                        </div>
-                    <?php endif; ?>
+                        <?php if ($can_manage_roles): ?>
+                            <div class="col-3">
+                                <label for="role_id">Role</label>
+                                <select name="role_id" id="edit_role_name_select" class="form-control" required>
+                                    <option value="">Select Role</option>
+                                    <option value="1"
+                                        <?php if (isset($employeeData) && $employeeData['role_name'] == 'super admin') echo 'selected'; ?>>
+                                        Super Admin
+                                    </option>
+                                    <option value="2"
+                                        <?php if (isset($employeeData) && $employeeData['role_name'] == 'admin') echo 'selected'; ?>>
+                                        Admin
+                                    </option>
+                                    <option value="3"
+                                        <?php if (isset($employeeData) && $employeeData['role_name'] == 'employee') echo 'selected'; ?>>
+                                        Employee
+                                    </option>
+                                </select>
+                            </div>
+                        <?php endif; ?>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -554,7 +554,7 @@ include './layout/header.php';
 </div>
 
 
-      <div class="modal fade" id="add-employee-modal" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="add-employee-modal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <form id="employee-form" action="register_employee.php" method="POST">
             <div class="modal-content">
@@ -565,73 +565,73 @@ include './layout/header.php';
                     <div class="form-row form-group">
                         <div class="col-3">
                             <label for="employee_number">Employee Number</label>
-                    <input type="text" class="form-control" name="employee_number" id="employee_number" required pattern="\d+" title="Please enter a valid integer.">
-                    <?php
-                    if ($_SERVER["REQUEST_METHOD"] == "POST") {
-                        $employee_number = $_POST['employee_number'];
-                        if (!filter_var($employee_number, FILTER_VALIDATE_INT)) {
-                            echo "Employee Number must be an integer.";
-                        }
-                    }
-                    ?>
+                            <input type="text" class="form-control" name="employee_number" id="employee_number" required pattern="\d+" title="Please enter a valid integer.">
+                            <?php
+                            if ($_SERVER["REQUEST_METHOD"] == "POST") {
+                                $employee_number = $_POST['employee_number'];
+                                if (!filter_var($employee_number, FILTER_VALIDATE_INT)) {
+                                    echo "Employee Number must be an integer.";
+                                }
+                            }
+                            ?>
                         </div>
                         <div class="col-3">
                             <label for="lastname">Last Name</label>
-                    <input type="text" class="form-control" name="lastname" id="lastname" required pattern="^[A-Za-zÀ-ÖØ-ÿ]+$" title="Please enter a valid last name (only letters are allowed).">
-                    <?php
-                    if ($_SERVER["REQUEST_METHOD"] == "POST") {
-                        $lastname = $_POST['lastname'];
-                        if (!preg_match("/^[A-Za-zÀ-ÖØ-ÿ]+$/", $lastname)) {
-                            echo "<p style='color:red;'>Last Name must contain only letters and cannot include numbers or special characters.</p>";
-                        } else {
-                            echo "<p style='color:green;'>Last Name is valid.</p>";
-                        }
-                    }
-                    ?>
+                            <input type="text" class="form-control" name="lastname" id="lastname" required pattern="^[A-Za-zÀ-ÖØ-ÿ]+$" title="Please enter a valid last name (only letters are allowed).">
+                            <?php
+                            if ($_SERVER["REQUEST_METHOD"] == "POST") {
+                                $lastname = $_POST['lastname'];
+                                if (!preg_match("/^[A-Za-zÀ-ÖØ-ÿ]+$/", $lastname)) {
+                                    echo "<p style='color:red;'>Last Name must contain only letters and cannot include numbers or special characters.</p>";
+                                } else {
+                                    echo "<p style='color:green;'>Last Name is valid.</p>";
+                                }
+                            }
+                            ?>
                         </div>
                         <div class="col-3">
                             <label for="firstname">First Name</label>
-                    <input type="text" class="form-control" name="firstname" id="firstname" required pattern="^[A-Za-zÀ-ÖØ-ÿ\s]+$" title="Please enter a valid first name (only letters and spaces are allowed).">
-                    <?php
-                    if ($_SERVER["REQUEST_METHOD"] == "POST") {
-                        $firstname = $_POST['firstname'];
-                        if (!preg_match("/^[A-Za-zÀ-ÖØ-ÿ\s]+$/", $firstname)) {
-                            echo "<p style='color:red;'>First Name must contain only letters and spaces, and cannot include numbers or special characters.</p>";
-                        } else {
-                            echo "<p style='color:green;'>First Name is valid.</p>";
-                        }
-                    }
-                    ?>
+                            <input type="text" class="form-control" name="firstname" id="firstname" required pattern="^[A-Za-zÀ-ÖØ-ÿ\s]+$" title="Please enter a valid first name (only letters and spaces are allowed).">
+                            <?php
+                            if ($_SERVER["REQUEST_METHOD"] == "POST") {
+                                $firstname = $_POST['firstname'];
+                                if (!preg_match("/^[A-Za-zÀ-ÖØ-ÿ\s]+$/", $firstname)) {
+                                    echo "<p style='color:red;'>First Name must contain only letters and spaces, and cannot include numbers or special characters.</p>";
+                                } else {
+                                    echo "<p style='color:green;'>First Name is valid.</p>";
+                                }
+                            }
+                            ?>
                         </div>
                         <div class="col-3">
                             <label for="middlename">Middle Name</label>
-                <input type="text" class="form-control" name="middlename" id="middlename" required pattern="^[A-Za-zÀ-ÖØ-ÿ\s]+$" title="Please enter a valid middle name (only letters and spaces are allowed).">
-                <?php
-                if ($_SERVER["REQUEST_METHOD"] == "POST") {
-                    $middlename = $_POST['middlename'];
-                    if (!preg_match("/^[A-Za-zÀ-ÖØ-ÿ\s]+$/", $middlename)) {
-                        echo "<p style='color:red;'>Middle Name must contain only letters and spaces, and cannot include numbers or special characters.</p>";
-                    } else {
-                        echo "<p style='color:green;'>Middle Name is valid.</p>";
-                    }
-                }
-                ?>
+                            <input type="text" class="form-control" name="middlename" id="middlename" required pattern="^[A-Za-zÀ-ÖØ-ÿ\s]+$" title="Please enter a valid middle name (only letters and spaces are allowed).">
+                            <?php
+                            if ($_SERVER["REQUEST_METHOD"] == "POST") {
+                                $middlename = $_POST['middlename'];
+                                if (!preg_match("/^[A-Za-zÀ-ÖØ-ÿ\s]+$/", $middlename)) {
+                                    echo "<p style='color:red;'>Middle Name must contain only letters and spaces, and cannot include numbers or special characters.</p>";
+                                } else {
+                                    echo "<p style='color:green;'>Middle Name is valid.</p>";
+                                }
+                            }
+                            ?>
                         </div>
                     </div>
                     <div class="form-row form-group">
                         <div class="col-3">
                             <label for="contactno">Contact No.</label>
-                        <input type="text" class="form-control" name="contactno" id="contactno" required pattern="\d{11}" title="Please enter a valid contact number (11 digits are required)." maxlength="11">
-                        <?php
-                        if ($_SERVER["REQUEST_METHOD"] == "POST") {
-                            $contactno = $_POST['contactno'];
-                            if (!preg_match('/^\d{11}$/', $contactno)) {
-                                echo "<p style='color:red;'>Contact No. must be exactly 11 digits.</p>";
-                            } else {
-                                echo "<p style='color:green;'>Contact No. is valid.</p>";
+                            <input type="text" class="form-control" name="contactno" id="contactno" required pattern="\d{11}" title="Please enter a valid contact number (11 digits are required)." maxlength="11">
+                            <?php
+                            if ($_SERVER["REQUEST_METHOD"] == "POST") {
+                                $contactno = $_POST['contactno'];
+                                if (!preg_match('/^\d{11}$/', $contactno)) {
+                                    echo "<p style='color:red;'>Contact No. must be exactly 11 digits.</p>";
+                                } else {
+                                    echo "<p style='color:green;'>Contact No. is valid.</p>";
+                                }
                             }
-                        }
-                        ?>
+                            ?>
                         </div>
                         <div class="col-9">
                             <label for="address">Address</label>
@@ -657,35 +657,35 @@ include './layout/header.php';
                             <input type="text" class="form-control" name="religion">
                         </div>
                         <div class="col-3">
-                             <label for="basic_salary">Basic Salary</label>
-                           <input type="text" class="form-control" name="basic_salary" id="basic_salary" required pattern="\d+" title="Please enter a valid integer.">
-                    <?php
-                    if ($_SERVER["REQUEST_METHOD"] == "POST") {
-                        $basic_salary = $_POST['basic_salary'];
-                        if (!filter_var($basic_salary, FILTER_VALIDATE_INT)) {
-                            echo "Basic Salary must be an integer.";
-                        } else {
-                        }
-                    }
-                    ?>
+                            <label for="basic_salary">Basic Salary</label>
+                            <input type="text" class="form-control" name="basic_salary" id="basic_salary" required pattern="\d+" title="Please enter a valid integer.">
+                            <?php
+                            if ($_SERVER["REQUEST_METHOD"] == "POST") {
+                                $basic_salary = $_POST['basic_salary'];
+                                if (!filter_var($basic_salary, FILTER_VALIDATE_INT)) {
+                                    echo "Basic Salary must be an integer.";
+                                } else {
+                                }
+                            }
+                            ?>
                         </div>
                     </div>
                     <div class="form-row form-group">
-                    <div class="col-3">
-                    <label for="project_name">Project</label>
-                        <select name="project_name" id="project_name" class="form-control" onchange="toggleProjectField()" required>
-                            <option value="">Select Project</option>
-                            <?php
-                            require_once "database.php";
-                            $projectQuery = "SELECT project_name FROM projects";
-                            $projectResult = $conn->query($projectQuery);
+                        <div class="col-3">
+                            <label for="project_name">Project</label>
+                            <select name="project_name" id="project_name" class="form-control" onchange="toggleProjectField()" required>
+                                <option value="">Select Project</option>
+                                <?php
+                                require_once "database.php";
+                                $projectQuery = "SELECT project_name FROM projects";
+                                $projectResult = $conn->query($projectQuery);
 
-                            while ($projectRow = $projectResult->fetch_assoc()) {
-                                echo "<option value='"  . htmlspecialchars($projectRow['project_name'], ENT_QUOTES, 'UTF-8') . "'>" . htmlspecialchars($projectRow['project_name'], ENT_QUOTES, 'UTF-8') . "</option>";
-                            }
-                            ?>
-                            <option value="add_new">Add New Project</option>
-                        </select>
+                                while ($projectRow = $projectResult->fetch_assoc()) {
+                                    echo "<option value='"  . htmlspecialchars($projectRow['project_name'], ENT_QUOTES, 'UTF-8') . "'>" . htmlspecialchars($projectRow['project_name'], ENT_QUOTES, 'UTF-8') . "</option>";
+                                }
+                                ?>
+                                <option value="add_new">Add New Project</option>
+                            </select>
                         </div>
                         <div class="col-9" id="new_project_field" style="display: none;">
                             <label for="new_project_name">New Project Name</label>
@@ -694,27 +694,27 @@ include './layout/header.php';
                         <div class="col-3">
                             <label for="position_name">Position</label>
                             <select name="position_name" id="position_name" class="form-control" required>
-                              <option value="">Select Position</option>
-                              <option value="Owner">Owner</option>
-                              <option value="HR/Admin Manager">HR/Admin Manager</option>
-                              <option value="Foreman">Foreman</option>
-                              <option value="Leadman">Leadman</option>
-                              <option value="Civil Engineer">Civil Engineer</option>
-                              <option value="Mechanical Engineer">Mechanical Engineer</option>
-                              <option value="Laborer">Laborer</option>
-                              <option value="HR Officer">HR Officer</option>
-                              <option value="Field Coordinator">Field Coordinator</option>
-                              <option value="Warehouse Man">Warehouse Man</option>
-                              <option value="Electrician">Electrician</option>
-                              <option value="Mason">Mason</option>
-                              <option value="Surveyor">Surveyor</option>
-                              <option value="Driver">Driver</option>
-                              <option value="Project Engineer">Project Engineer</option>
-                              <option value="Safety Officer">Safety Officer</option>
-                              <option value="Helper">Helper</option>
-                              <option value="Architectural Designer">Architectural Designer</option>
-                              <option value="Admin Specialist">Admin Specialist</option>
-                              <option value="HR Specialist">HR Specialist</option>
+                                <option value="">Select Position</option>
+                                <option value="Owner">Owner</option>
+                                <option value="HR/Admin Manager">HR/Admin Manager</option>
+                                <option value="Foreman">Foreman</option>
+                                <option value="Leadman">Leadman</option>
+                                <option value="Civil Engineer">Civil Engineer</option>
+                                <option value="Mechanical Engineer">Mechanical Engineer</option>
+                                <option value="Laborer">Laborer</option>
+                                <option value="HR Officer">HR Officer</option>
+                                <option value="Field Coordinator">Field Coordinator</option>
+                                <option value="Warehouse Man">Warehouse Man</option>
+                                <option value="Electrician">Electrician</option>
+                                <option value="Mason">Mason</option>
+                                <option value="Surveyor">Surveyor</option>
+                                <option value="Driver">Driver</option>
+                                <option value="Project Engineer">Project Engineer</option>
+                                <option value="Safety Officer">Safety Officer</option>
+                                <option value="Helper">Helper</option>
+                                <option value="Architectural Designer">Architectural Designer</option>
+                                <option value="Admin Specialist">Admin Specialist</option>
+                                <option value="HR Specialist">HR Specialist</option>
                             </select>
                         </div>
                         <div class="col-3">
@@ -724,70 +724,70 @@ include './layout/header.php';
                         <div class="col-3">
                             <label for="employee_status">Employee Status</label>
                             <select name="employee_status" id="employee_status" class="form-control" required>
-                              <option value="">Select Status</option>
-                              <option value="Regular">Regular</option>
-                              <option value="Probationary">Probationary</option>
-                              <option value="Resgined">Resigned</option>
-                              <option value="Retired">Retired</option>
+                                <option value="">Select Status</option>
+                                <option value="Regular">Regular</option>
+                                <option value="Probationary">Probationary</option>
+                                <option value="Resgined">Resigned</option>
+                                <option value="Retired">Retired</option>
                             </select>
                         </div>
                     </div>
                     <div class="form-row form-group">
                         <div class="col-3">
-                             <label for="sss_no">SSS No.</label>
-                    <input type="text" class="form-control" name="sss_no" id="sss_no" required pattern="\d{13}" title="Please enter a valid SSS Number (13 digits are required)." maxlength="13">
-                    <?php
-                    if ($_SERVER["REQUEST_METHOD"] == "POST") {
-                        $sss_no = $_POST['sss_no'];
-                        if (!preg_match('/^\d{13}$/', $sss_no)) {
-                            echo "<p style='color:red;'>SSS No. must be exactly 13 digits.</p>";
-                        } else {
-                            echo "<p style='color:green;'>SSS No. is valid.</p>";
-                        }
-                    }
-                    ?>
+                            <label for="sss_no">SSS No.</label>
+                            <input type="text" class="form-control" name="sss_no" id="sss_no" required pattern="\d{13}" title="Please enter a valid SSS Number (13 digits are required)." maxlength="13">
+                            <?php
+                            if ($_SERVER["REQUEST_METHOD"] == "POST") {
+                                $sss_no = $_POST['sss_no'];
+                                if (!preg_match('/^\d{13}$/', $sss_no)) {
+                                    echo "<p style='color:red;'>SSS No. must be exactly 13 digits.</p>";
+                                } else {
+                                    echo "<p style='color:green;'>SSS No. is valid.</p>";
+                                }
+                            }
+                            ?>
                         </div>
                         <div class="col-3">
                             <label for="Philhealth_no">Philhealth No.</label>
-                        <input type="text" class="form-control" name="philhealth_no" id="philhealth_no" required pattern="\d{13}" title="Please enter a valid Philhealth Number (13 digits are required)." maxlength="13">
-                        <?php
-                        if ($_SERVER["REQUEST_METHOD"] == "POST") {
-                            $philhealth_no = $_POST['philhealth_no'];
-                            if (!preg_match('/^\d{13}$/', $philhealth_no)) {
-                                echo "<p style='color:red;'>Philhealth No. must be exactly 13 digits.</p>";
-                            } else {
-                                echo "<p style='color:green;'>Philhealth No. is valid.</p>";
+                            <input type="text" class="form-control" name="philhealth_no" id="philhealth_no" required pattern="\d{13}" title="Please enter a valid Philhealth Number (13 digits are required)." maxlength="13">
+                            <?php
+                            if ($_SERVER["REQUEST_METHOD"] == "POST") {
+                                $philhealth_no = $_POST['philhealth_no'];
+                                if (!preg_match('/^\d{13}$/', $philhealth_no)) {
+                                    echo "<p style='color:red;'>Philhealth No. must be exactly 13 digits.</p>";
+                                } else {
+                                    echo "<p style='color:green;'>Philhealth No. is valid.</p>";
+                                }
                             }
-                        }
-                        ?>
+                            ?>
                         </div>
                         <div class="col-3">
                             <label for="hdmf_no">HDMF No.</label>
-                        <input type="text" class="form-control" name="hdmf_no" id="hdmf_no" required pattern="\d{12}" title="Please enter a valid HDMF Number (12 digits are required)." maxlength="12">
-                        <?php
-                        if ($_SERVER["REQUEST_METHOD"] == "POST") {
-                            $hdmf_no = $_POST['hdmf_no'];
-                            if (!preg_match('/^\d{12}$/', $tin_no)) {
-                                echo "<p style='color:red;'>hdmf No. must be exactly 12 digits.</p>";
-                            } else {
-                                echo "<p style='color:green;'hdmf No. is valid.</p>";
+                            <input type="text" class="form-control" name="hdmf_no" id="hdmf_no" required pattern="\d{12}" title="Please enter a valid HDMF Number (12 digits are required)." maxlength="12">
+                            <?php
+                            if ($_SERVER["REQUEST_METHOD"] == "POST") {
+                                $hdmf_no = $_POST['hdmf_no'];
+                                if (!preg_match('/^\d{12}$/', $tin_no)) {
+                                    echo "<p style='color:red;'>hdmf No. must be exactly 12 digits.</p>";
+                                } else {
+                                    echo "<p style='color:green;'hdmf No. is valid.</p>";
+                                }
                             }
-                        }
-                        ?>
+                            ?>
                         </div>
                         <div class="col-3">
                             <label for="Tin_no">TIN No.</label>
-                        <input type="text" class="form-control" name="tin_no" id="tin_no" required pattern="\d{12}" title="Please enter a valid TIN Number (12 digits are required)." maxlength="12">
-                        <?php
-                        if ($_SERVER["REQUEST_METHOD"] == "POST") {
-                            $tin_no = $_POST['tin_no'];
-                            if (!preg_match('/^\d{12}$/', $tin_no)) {
-                                echo "<p style='color:red;'>TIN No. must be exactly 12 digits.</p>";
-                            } else {
-                                echo "<p style='color:green;'>TIN No. is valid.</p>";
+                            <input type="text" class="form-control" name="tin_no" id="tin_no" required pattern="\d{12}" title="Please enter a valid TIN Number (12 digits are required)." maxlength="12">
+                            <?php
+                            if ($_SERVER["REQUEST_METHOD"] == "POST") {
+                                $tin_no = $_POST['tin_no'];
+                                if (!preg_match('/^\d{12}$/', $tin_no)) {
+                                    echo "<p style='color:red;'>TIN No. must be exactly 12 digits.</p>";
+                                } else {
+                                    echo "<p style='color:green;'>TIN No. is valid.</p>";
+                                }
                             }
-                        }
-                        ?>
+                            ?>
                         </div>
                     </div>
                     <div class="form-row form-group">
@@ -808,14 +808,14 @@ include './layout/header.php';
                             <select name="role_id" id="role_id" class="form-control" required>
                                 <option value="">Select Role</option>
                                 <option value="1"
-                                <?php if (isset($employeeData) && $employeeData['role_name'] == 'super admin') echo 'selected'; ?>>
+                                    <?php if (isset($employeeData) && $employeeData['role_name'] == 'super admin') echo 'selected'; ?>>
                                     Super Admin
                                 </option>
-                                <option value="2" 
+                                <option value="2"
                                     <?php if (isset($employeeData) && $employeeData['role_name'] == 'admin') echo 'selected'; ?>>
                                     Admin
                                 </option>
-                                <option value="3" 
+                                <option value="3"
                                     <?php if (isset($employeeData) && $employeeData['role_name'] == 'employee') echo 'selected'; ?>>
                                     Employee
                                 </option>
@@ -834,61 +834,61 @@ include './layout/header.php';
 
 
 
-      <div class="modal fade" id="leave-modal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-          <div class="modal-content">
+<div class="modal fade" id="leave-modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title" id="exampleModalLabel">Employee Leave Details</h5>
+                <h5 class="modal-title" id="exampleModalLabel">Employee Leave Details</h5>
             </div>
             <div class="modal-body">
-              <div class="table-responsive">
-                <table class="table">
-                  <thead>
-                    <tr>
-                      <th scope="col">Vacation Leave</th>
-                      <th scope="col">Sick Leave</th>
-                      <th scope="col">Leave without Pay</th>
-                      <th scope="col">Leave without Pay</th>
-                      <th scope="col">Total Leave</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td>1</td>
-                      <td>4</td>
-                      <td>5</td>
-                      <td>6</td>
-                      <td>13</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Vacation Leave</th>
+                                <th scope="col">Sick Leave</th>
+                                <th scope="col">Leave without Pay</th>
+                                <th scope="col">Leave without Pay</th>
+                                <th scope="col">Total Leave</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>1</td>
+                                <td>4</td>
+                                <td>5</td>
+                                <td>6</td>
+                                <td>13</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-success close-modal">Close</button>
+                <button type="button" class="btn btn-success close-modal">Close</button>
             </div>
-          </div>
         </div>
-      </div>
-      <script>
-        document.addEventListener('DOMContentLoaded', function () {
+    </div>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
 
         var deleteBtn = document.querySelectorAll('.delete-btn');
         var deleteModal = document.querySelector('#delete-modal');
         var closeModal = document.querySelectorAll('.close-modal');
 
-        closeModal.forEach((d)=>{
-            d.addEventListener('click',function(i){
+        closeModal.forEach((d) => {
+            d.addEventListener('click', function(i) {
                 var modalParent = d.parentNode.parentNode.parentNode.parentNode;
                 modalParent.classList.add('fade');
-                setTimeout(function(){
-                  modalParent.style.display = 'none';
-                },400)
+                setTimeout(function() {
+                    modalParent.style.display = 'none';
+                }, 400)
             });
         });
 
-        deleteBtn.forEach((d)=>{
-            d.addEventListener('click',function(){
+        deleteBtn.forEach((d) => {
+            d.addEventListener('click', function() {
                 deleteModal.classList.remove('fade');
                 deleteModal.style.display = 'block';
             });
@@ -907,19 +907,19 @@ include './layout/header.php';
             const employeeId = document.getElementById('employee-id').value;
 
             fetch('archive_employee.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                },
-                body: new URLSearchParams({
-                    'id': employeeId
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: new URLSearchParams({
+                        'id': employeeId
+                    })
                 })
-            })
-            .then(response => response.text())
-            .then(data => {
-                alert(data);
-                location.reload();
-            });
+                .then(response => response.text())
+                .then(data => {
+                    alert(data);
+                    location.reload();
+                });
         });
 
         var addEmployeeBtn = document.querySelector('#add-employee-btn');
@@ -948,7 +948,7 @@ include './layout/header.php';
         const editModal = document.querySelector('#edit-modal');
 
         editBtns.forEach((button) => {
-            button.addEventListener('click', function () {
+            button.addEventListener('click', function() {
                 const employeeId = button.getAttribute('data-employee-id');
                 const employeeNumber = button.getAttribute('data-employee-number');
                 const lastname = button.getAttribute('data-lastname');
@@ -1026,14 +1026,14 @@ include './layout/header.php';
         var leavelBtn = document.querySelectorAll('.leaves-btn');
         var leaveModal = document.querySelector('#leave-modal');
 
-        leavelBtn.forEach((d)=>{
-            d.addEventListener('click',function(){
+        leavelBtn.forEach((d) => {
+            d.addEventListener('click', function() {
                 leaveModal.classList.remove('fade');
                 leaveModal.style.display = 'block';
             });
         })
 
-    
+
 
     });
 
@@ -1049,5 +1049,5 @@ include './layout/header.php';
             document.getElementById('new_project_name').required = false;
         }
     }
-      </script>
-      <?php include './layout/footer.php'; ?>
+</script>
+<?php include './layout/footer.php'; ?>
