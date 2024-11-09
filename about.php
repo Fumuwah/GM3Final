@@ -9,9 +9,8 @@ if (!isset($_SESSION['role_name']) || !isset($_SESSION['employee_id'])) {
 // $role = $_SESSION['role'];
 $employee_id = $_SESSION['employee_id'];
 
-include('database.php'); // Replace with your actual database connection file
+include('database.php'); 
 
-// Fetch employee name based on employee_id
 $name = '';
 $query = "SELECT lastname FROM employees WHERE employee_id = ?";
 if ($stmt = $conn->prepare($query)) {
