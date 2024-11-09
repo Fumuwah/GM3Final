@@ -78,7 +78,7 @@ include 'layout/header.php';
     <?php include 'layout/sidebar.php';
     ?>
     <div class="main pt-3" style="max-height: calc(100vh - 80px);overflow-y:scroll">
-        <div class="container">
+        <div class="container-fluid pl-5">
             <h2>Hello, <?php echo htmlspecialchars($name); ?>!</h2>
             <div class="row">
                 <div class="col-12 col-lg-8 pt-3 pt-md-0">

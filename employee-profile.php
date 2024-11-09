@@ -79,14 +79,14 @@ $age = date_diff(date_create($employee['birthdate']), date_create('today'))->y;
 
 <div class="d-flex">
     <?php include './layout/sidebar.php'; ?>
-    <div class="main p-3" style="max-height: calc(100vh - 80px);overflow-y:scroll">
-        <div class="container-fluid">
-            <div class="row">
-                <div class="col-12 col-lg-8">
-                    <div class="card">
-                        <div class="card-body d-flex align-items-center">
-                            <div>
-                                
+    <div class="main pt-3" style="max-height: calc(100vh - 80px);overflow-y:scroll">
+        <div class="container-fluid pl-5">
+            <div class="card">
+                <div class="card-body d-flex align-items-center">
+                    <div>
+                        <?php
+                        $imagePath = isset($_GET['image']) ? $_GET['image'] : 'default.jpg';
+                        ?>
 
                         <form action="submit_employee_image.php" enctype="multipart/form-data" id="form" method="POST">
                             <img src="<?php echo $imagePath; ?>" style="width:150px; height:150px; border-radius: 50%; object-fit: cover;">
