@@ -83,8 +83,8 @@ $project_name = $employee['project_name'];
 
 <div class="d-flex">
     <?php include 'layout/sidebar.php'; ?>
-    <div class="main p-3" style="max-height: calc(100vh - 80px);overflow-y:scroll">
-        <div class="container-fluid">
+    <div class="main pt-3" style="max-height: calc(100vh - 80px);overflow-y:scroll">
+        <div class="container">
             <div class="row">
                 <div class="col-12">
                     <h2>Leave Credits</h2>
@@ -221,31 +221,6 @@ $project_name = $employee['project_name'];
                 document.getElementById('request-leave-modal').style.display = 'none';
             }, 400);
         });
-    });
-
-    var arrow = document.querySelector('#arrow');
-    const width = window.innerWidth || document.documentElement.clientWidth ||
-        document.body.clientWidth;
-    console.log(width)
-    if (width < 768) {
-        var show = false;
-    } else {
-        var show = true;
-    }
-
-    arrow.addEventListener('click', function() {
-        var sidebarContainer = document.querySelector('.sidebar-container');
-
-        if (show) {
-            sidebarContainer.style.marginLeft = '-250px';
-            arrow.style.transform = 'translate(-50%,-50%) rotate(180deg)';
-            show = false;
-        } else {
-            sidebarContainer.style.marginLeft = '0px';
-            arrow.style.transform = 'translate(-50%,-50%) rotate(0deg)';
-            show = true;
-        }
-
     });
 
     var requestLeaveBtn = document.querySelector('#request-leave-btn');
