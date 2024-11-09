@@ -130,14 +130,31 @@ session_start();
                             $_SESSION['can_edit_data'] = $permissions['can_edit_data'];
                             $_SESSION['can_manage_roles'] = $permissions['can_manage_roles'];
 
+                            // die(json_encode($user));
+                            $employee_id = $user["employee_id"];
+                            $title = "User Logged In";
+                            $report = $user['firstname'] . " " . $user['lastname'] . " Logged In";
+                            
+                            $logging_sql = "INSERT INTO logs (employee_id, title, report) VALUES (?, ?, ?)";
+                            $logging_prep = $conn->prepare($logging_sql);
+
+                            $logging_prep->bind_param('sss', $employee_id, $title, $report);
+                        
+
                             // Redirect based on role or permissions
                             if ($_SESSION['role_name'] === 'super  admin' || $_SESSION['can_manage_roles']) {
+                                $logging_prep->execute();
+                                $logging_prep->close();
                                 header("Location: index.php");
                                 exit();
                             } elseif ($_SESSION['role_name'] === 'admin' || $_SESSION['can_view_team_data']) {
+                                $logging_prep->execute();
+                                $logging_prep->close();
                                 header("Location: index.php");
                                 exit();
                             } elseif ($_SESSION['role_name'] === 'employee' || $_SESSION['can_view_own_data']) {
+                                $logging_prep->execute();
+                                $logging_prep->close();
                                 header("Location: employee_dashboard.php");
                                 exit();
                             } else {
