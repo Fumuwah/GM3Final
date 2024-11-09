@@ -135,7 +135,7 @@ include 'layout/header.php';
 
 <div class="d-flex align-items-stretch">
     <?php include 'layout/sidebar.php';?>
-    <div class="main-content">
+    <div class="main p-3">
         <div class="container-fluid">
             <div class="decorative-background">
                 <div class="logo-container">

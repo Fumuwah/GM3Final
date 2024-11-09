@@ -15,7 +15,7 @@ include 'layout/header.php';
 ?>
       <div class="d-flex align-items-stretch">
         <?php include 'layout/sidebar.php';?>
-          <div class="main-content">
+        <div class="main-content" style="max-height: calc(100vh - 70px);overflow-y:scroll">
             <div class="container-fluid">
                 <h2>Hello <?php echo htmlspecialchars($name); ?></h2>
                 <div class="row">

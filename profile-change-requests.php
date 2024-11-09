@@ -56,7 +56,7 @@ include './layout/header.php';
 ?>
       <div class="d-flex">
         <?php include './layout/sidebar.php'; ?>
-          <div class="main-content">
+        <div class="main p-3">
             <div class="container-fluid">
                 <h2>Employees</h2>
                 <div class="d-flex justify-content-between align-items-center">
