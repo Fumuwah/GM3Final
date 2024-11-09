@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 09, 2024 at 01:38 AM
+-- Generation Time: Nov 09, 2024 at 10:13 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -38,14 +38,14 @@ CREATE TABLE `dtr` (
   `total_hrs` float DEFAULT NULL,
   `other_ot` float DEFAULT NULL,
   `date` date DEFAULT NULL,
-  `time` time DEFAULT NULL
+  `dtr_status` varchar(10) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `dtr`
 --
 
-INSERT INTO `dtr` (`dtr_id`, `employee_id`, `day`, `month`, `year`, `time_in`, `time_out`, `total_hrs`, `other_ot`, `date`, `time`) VALUES
+INSERT INTO `dtr` (`dtr_id`, `employee_id`, `day`, `month`, `year`, `time_in`, `time_out`, `total_hrs`, `other_ot`, `date`, `dtr_status`) VALUES
 (35, 1, 28, 10, 2024, '19:53:00', '00:54:00', 18.9833, 0, '2024-10-28', NULL),
 (36, 2, 28, 10, 2024, '07:00:00', '17:00:00', 10, 2, '2024-10-28', NULL),
 (37, 1, NULL, NULL, NULL, '07:00:00', '17:00:00', 10, NULL, '2024-10-29', NULL),
@@ -89,30 +89,30 @@ CREATE TABLE `employees` (
   `emergency_contactno` varchar(15) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  `archived` tinyint(1) DEFAULT 0,
   `position_id` int(11) DEFAULT NULL,
   `role_id` int(11) DEFAULT NULL,
   `project_name` varchar(100) DEFAULT NULL,
-  `last_leave_reset_year` int(11) DEFAULT NULL
+  `last_leave_reset_year` int(11) DEFAULT NULL,
+  `image_path` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `employees`
 --
 
-INSERT INTO `employees` (`employee_id`, `employee_number`, `lastname`, `firstname`, `middlename`, `contactno`, `address`, `birthdate`, `civil_status`, `religion`, `basic_salary`, `hire_date`, `employee_status`, `sss_no`, `philhealth_no`, `hdmf_no`, `tin_no`, `email`, `password`, `emergency_contactno`, `created_at`, `updated_at`, `archived`, `position_id`, `role_id`, `project_name`, `last_leave_reset_year`) VALUES
-(1, '001', 'Caragan', 'Justin Kyle', 'O', '09090909099', 'Antipolo Rizal', '2024-09-03', 'Single', 'Catholic', 25000.00, '2024-09-03', 'Regular', '545256', '216548954', '12335135', '124124', 'caraganhr@example.com', '$2y$10$2/1gaZ1IR2tVttOabx/R9OLqD5851USH4dxeylMzSePTcWiB36WLO', '065411004', '2024-09-03 15:09:00', '2024-10-25 09:09:50', 0, 1, 1, 'Jollibee', 2024),
-(2, '002', 'Bonifacio', 'Mianah Venice', 'M', '03030303033', 'Binangonan', '2024-09-03', 'Single', 'Christian', 50.00, '2024-09-03', 'Probationary', '562626', '15614658', '164984', '18494', 'bonifaciohr@example.com', '$2y$10$hHM.QVObuMYjF.j961hP3edLZrJn.o5JUV4HThMYJO8nrdwq3u.Na', '022020220202', '2024-09-03 15:21:30', '2024-10-25 09:27:46', 0, 19, 1, 'Kenny Rogers', 2024),
-(3, '003', 'Magno', 'Jessy Ville', 'R', '0909090099099', 'Antipolo', '2024-09-04', 'Single', 'Christian', 25.00, '2024-09-04', 'Regular', '645646', '12412412', '35631', '3421', 'magnohr@example.com', '$2y$10$8nokcNH9xbU0wTP65h3LUOXhZwowg7Ao1R3oGAeABrrlBaxeLpKu6', '', '2024-09-04 12:25:17', '2024-10-28 17:35:21', 0, 9, 2, 'McDo', 2024),
-(4, '004', 'Francisco', 'Christian Jake', 'F', '020909090909871', 'Taytay', '2024-09-04', 'Single', 'Christian', 25.00, '2024-09-04', 'Regular', '564654', '46546545', '546554', '5412', 'franciscohr@example.com', '$2y$10$rvJeJg9bID9uV5RNDIUmpOE4TXADKugjCg.XCtAdD6918OlO1145e', '', '2024-09-04 13:32:07', '2024-10-25 09:27:46', 0, 10, 2, 'Jollibee', 2024),
-(5, '005', 'Ortiz', 'Kristoffer', 'C', '02121021122', 'Antipolo', '2024-09-05', 'Single', 'Catholic', 100.00, '2024-10-25', 'Regular', '641654', '54861251', '2165464', '1234', 'ortizemp@example.com', '$2y$10$2.aRuaCkMTEpcvxK3vwn0OYcA2tWLv8GOtCKcrRHq9im6JxXosixi', '', '2024-09-05 06:37:59', '2024-10-25 10:14:50', 0, 17, 3, 'Kupal', 2024),
-(7, 'C', 'C', 'C', 'C', '02', 'C', '2024-09-18', 'Single', 'c', 1.00, '2024-09-18', 'Archived', '1', '1', '1', '1', 'chr@example.com', '$2y$10$ixLqdyPdrBB4C2FHmgdt2OX178gZABxekbVPrCgjvrBWRjXJ8XCtK', '1', '2024-09-18 07:56:57', '2024-10-25 09:27:46', 0, 12, 3, NULL, 2024),
-(8, '008', 'Caragan', 'Kyle', 'C', '031012302', 'asdad', '2024-10-01', 'Single', 'catholic', 1000000.00, '2024-10-01', 'Archived', '1231', '124124124', '1251', '12412', 'caraganad@example.com', '$2y$10$1pxOVawT54qqLw1gXeFmEOiPM3RFn7TnYP.rvEftQJ.uoLV2ePdo2', '231321231321', '2024-10-01 14:44:14', '2024-10-25 09:27:46', 0, 17, 3, NULL, 2024),
-(9, '09', 'a', 'a', 'a', '1', 'a', '2024-10-03', 'Single', 'a', 1.00, '2024-10-03', 'Regular', '1', '2', '2', '2', 'e@example.com', '$2y$10$Z37VUEn32N/yobcZ4OK1ZeSGW/Y/F9ACtdzEvqepxSdMKpVjY8yR.', '1', '2024-10-02 18:46:02', '2024-10-25 10:10:47', 0, 3, 3, 'Mang Inasal', 2024),
-(16, '021', 'V', 'V', 'V', '1', 'V', '2024-10-25', 'Married', 'V', 1.00, '2024-10-25', 'Archived', '1', '1', '1', '1', 'v@example.com', '$2y$10$YeqhwO6AFKFqKfVFhCO2H.P93Qa5RxTJnptTCBB/Tn4D3EJ2xItpK', '', '2024-10-25 14:36:14', '2024-10-25 14:36:22', 0, 18, 2, 'Kenny Rogers', NULL),
-(17, '0022', 'Silva', 'Austin', 'K', '0936225156', 'CA', '2024-10-31', 'Single', 'C', 100000.00, '2024-10-31', 'Regular', '1232567891234', '1234567891', '123456789123', '123456789132', 'silva@example.com', '$2y$10$nPurjxOnDB.MYmrYqFRp0.2olGjirqdDbA8Lc6SYlwZ7CJbSMMo8y', '', '2024-10-31 05:14:39', '2024-10-31 05:14:39', 0, 7, 2, 'Kupal', NULL),
-(25, '018', 'D', 'D', 'D', '12', 'D', '2024-10-31', 'Single', 'D', 123.00, '2024-10-31', 'Probationary', '1', '1', '1', '1', 'sa@example.com', '$2y$10$ktMfvx2RR.7TuLyPUIKyG.w7rYOrR7Zf7Dkel5OOlGReaD9b.Ojiu', '', '2024-10-31 05:54:57', '2024-10-31 05:54:57', 0, 13, 2, 'Kupal', NULL),
-(26, '050', '123', '123', '123', 'asd', '123', '2024-11-04', 'Single', '123', 0.00, '2024-11-04', 'Regular', 'asd', 'asd', 'asd', 'asd', 's@example.com', '$2y$10$wtZy/88vGIkwKTiluh4M1ueD128CuH6Up/BfmGrDQi7v8faLaU9lK', '', '2024-11-04 05:13:20', '2024-11-04 05:13:20', 0, 12, 2, 'Kupal', NULL);
+INSERT INTO `employees` (`employee_id`, `employee_number`, `lastname`, `firstname`, `middlename`, `contactno`, `address`, `birthdate`, `civil_status`, `religion`, `basic_salary`, `hire_date`, `employee_status`, `sss_no`, `philhealth_no`, `hdmf_no`, `tin_no`, `email`, `password`, `emergency_contactno`, `created_at`, `updated_at`, `position_id`, `role_id`, `project_name`, `last_leave_reset_year`, `image_path`) VALUES
+(1, '001', 'Caragan', 'Justin Kyle', 'O', '09090909099', 'Antipolo Rizal', '2024-09-03', 'Single', 'Catholic', 25000.00, '2024-09-03', 'Regular', '545256', '216548954', '12335135', '124124', 'caraganhr@example.com', '$2y$10$2/1gaZ1IR2tVttOabx/R9OLqD5851USH4dxeylMzSePTcWiB36WLO', '065411004', '2024-09-03 15:09:00', '2024-10-25 09:09:50', 1, 1, 'Jollibee', 2024, ''),
+(2, '002', 'Bonifacio', 'Mianah Venice', 'M', '03030303033', 'Binangonan', '2024-09-03', 'Single', 'Christian', 50.00, '2024-09-03', 'Probationary', '562626', '15614658', '164984', '18494', 'bonifaciohr@example.com', '$2y$10$hHM.QVObuMYjF.j961hP3edLZrJn.o5JUV4HThMYJO8nrdwq3u.Na', '022020220202', '2024-09-03 15:21:30', '2024-10-25 09:27:46', 19, 1, 'Kenny Rogers', 2024, ''),
+(3, '003', 'Magno', 'Jessy Ville', 'R', '0909090099099', 'Antipolo', '2024-09-04', 'Single', 'Christian', 25.00, '2024-09-04', 'Regular', '645646', '12412412', '35631', '3421', 'magnohr@example.com', '$2y$10$8nokcNH9xbU0wTP65h3LUOXhZwowg7Ao1R3oGAeABrrlBaxeLpKu6', '', '2024-09-04 12:25:17', '2024-10-28 17:35:21', 9, 2, 'McDo', 2024, ''),
+(4, '004', 'Francisco', 'Christian Jake', 'F', '020909090909871', 'Taytay', '2024-09-04', 'Single', 'Christian', 25.00, '2024-09-04', 'Regular', '564654', '46546545', '546554', '5412', 'franciscohr@example.com', '$2y$10$rvJeJg9bID9uV5RNDIUmpOE4TXADKugjCg.XCtAdD6918OlO1145e', '', '2024-09-04 13:32:07', '2024-10-25 09:27:46', 10, 2, 'Jollibee', 2024, ''),
+(5, '005', 'Ortiz', 'Kristoffer', 'C', '02121021122', 'Antipolo', '2024-09-05', 'Single', 'Catholic', 100.00, '2024-10-25', 'Regular', '641654', '54861251', '2165464', '1234', 'ortizemp@example.com', '$2y$10$2.aRuaCkMTEpcvxK3vwn0OYcA2tWLv8GOtCKcrRHq9im6JxXosixi', '', '2024-09-05 06:37:59', '2024-10-25 10:14:50', 17, 3, 'Kupal', 2024, ''),
+(7, 'C', 'C', 'C', 'C', '02', 'C', '2024-09-18', 'Single', 'c', 1.00, '2024-09-18', 'Archived', '1', '1', '1', '1', 'chr@example.com', '$2y$10$ixLqdyPdrBB4C2FHmgdt2OX178gZABxekbVPrCgjvrBWRjXJ8XCtK', '1', '2024-09-18 07:56:57', '2024-10-25 09:27:46', 12, 3, NULL, 2024, ''),
+(8, '008', 'Caragan', 'Kyle', 'C', '031012302', 'asdad', '2024-10-01', 'Single', 'catholic', 1000000.00, '2024-10-01', 'Archived', '1231', '124124124', '1251', '12412', 'caraganad@example.com', '$2y$10$1pxOVawT54qqLw1gXeFmEOiPM3RFn7TnYP.rvEftQJ.uoLV2ePdo2', '231321231321', '2024-10-01 14:44:14', '2024-10-25 09:27:46', 17, 3, NULL, 2024, ''),
+(9, '09', 'a', 'a', 'a', '1', 'a', '2024-10-03', 'Single', 'a', 1.00, '2024-10-03', 'Regular', '1', '2', '2', '2', 'e@example.com', '$2y$10$Z37VUEn32N/yobcZ4OK1ZeSGW/Y/F9ACtdzEvqepxSdMKpVjY8yR.', '1', '2024-10-02 18:46:02', '2024-10-25 10:10:47', 3, 3, 'Mang Inasal', 2024, ''),
+(16, '021', 'V', 'V', 'V', '1', 'V', '2024-10-25', 'Married', 'V', 1.00, '2024-10-25', 'Archived', '1', '1', '1', '1', 'v@example.com', '$2y$10$YeqhwO6AFKFqKfVFhCO2H.P93Qa5RxTJnptTCBB/Tn4D3EJ2xItpK', '', '2024-10-25 14:36:14', '2024-10-25 14:36:22', 18, 2, 'Kenny Rogers', NULL, ''),
+(17, '0022', 'Silva', 'Austin', 'K', '0936225156', 'CA', '2024-10-31', 'Single', 'C', 100000.00, '2024-10-31', 'Regular', '1232567891234', '1234567891', '123456789123', '123456789132', 'silva@example.com', '$2y$10$nPurjxOnDB.MYmrYqFRp0.2olGjirqdDbA8Lc6SYlwZ7CJbSMMo8y', '', '2024-10-31 05:14:39', '2024-10-31 05:14:39', 7, 2, 'Kupal', NULL, ''),
+(25, '018', 'D', 'D', 'D', '12', 'D', '2024-10-31', 'Single', 'D', 123.00, '2024-10-31', 'Probationary', '1', '1', '1', '1', 'sa@example.com', '$2y$10$ktMfvx2RR.7TuLyPUIKyG.w7rYOrR7Zf7Dkel5OOlGReaD9b.Ojiu', '', '2024-10-31 05:54:57', '2024-10-31 05:54:57', 13, 2, 'Kupal', NULL, ''),
+(26, '050', '123', '123', '123', 'asd', '123', '2024-11-04', 'Single', '123', 0.00, '2024-11-04', 'Regular', 'asd', 'asd', 'asd', 'asd', 's@example.com', '$2y$10$wtZy/88vGIkwKTiluh4M1ueD128CuH6Up/BfmGrDQi7v8faLaU9lK', '', '2024-11-04 05:13:20', '2024-11-04 05:13:20', 12, 2, 'Kupal', NULL, '');
 
 -- --------------------------------------------------------
 
