@@ -57,7 +57,14 @@ $query = "
     LEFT JOIN positions p ON e.position_id = p.position_id
     WHERE e.employee_id = ?
 ";
+
+
+
 $stmt = $conn->prepare($query);
+if (!$stmt) {
+    die("Error preparing statement: " . $conn->error); // Debug output for prepare error
+}
+
 $stmt->bind_param("i", $employee_id);
 $stmt->execute();
 $result = $stmt->get_result();
