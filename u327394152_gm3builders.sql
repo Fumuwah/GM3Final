@@ -90,11 +90,11 @@ CREATE TABLE `employees` (
   `emergency_contactno` varchar(15) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  `archived` tinyint(1) DEFAULT 0,
   `position_id` int(11) DEFAULT NULL,
   `project_name` varchar(100) DEFAULT NULL,
   `role_id` int(11) DEFAULT NULL,
-  `last_leave_reset_year` int(11) DEFAULT NULL
+  `last_leave_reset_year` int(11) DEFAULT NULL,
+  `image_path` varchar(255) DEFAULT 'assets/images/account.png'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --

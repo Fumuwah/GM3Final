@@ -1,8 +1,8 @@
 <?php
 
 $hostName = "localhost";
-$dbUser = "root";
-$dbPassword = "";
+$dbUser = "u327394152_gm3builders";
+$dbPassword = "GM3builders";
 $dbName = "u327394152_gm3builders";
 
 // MySQLi connection
