@@ -3,53 +3,61 @@ session_start();
 include 'database.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $employee_number = $_POST['employee_number'];
-
-    // Step 1: Retrieve the employee_id using the employee_number
-    $query = "SELECT employee_id FROM employees WHERE employee_number = ?";
-    $stmt = $conn->prepare($query);
-    $stmt->bind_param("s", $employee_number);
-    $stmt->execute();
-    $stmt->bind_result($employee_id);
-    $stmt->fetch();
-    $stmt->close();
-
-    // Step 2: Retrieve the payroll data from the POST request
-    $basic_salary = floatval($_POST['basic_salary']);
-    $allowance = floatval($_POST['allowance']);
-    $monthly = floatval($_POST['monthly']);
-    $daily = floatval($_POST['daily']);
-    $hourly = floatval($_POST['hourly']);
-    $total_hrs = floatval($_POST['total_hrs']);
-    $other_ot = floatval($_POST['other_ot']);
-    $salary = floatval($_POST['salary']);
-    $specialHoliday = floatval($_POST['special_holiday']);
-    $specialLeave = floatval($_POST['special_leave']);
-    $incentives = floatval($_POST['incentives']);
-    $gross = floatval($_POST['gross']);
-    $less_cont = floatval($_POST['less_cont']);
-    $cash_adv = floatval($_POST['cash_adv']);
+    $fromDay = mysqli_real_escape_string($conn, $_POST['fromDay']);
+    $toDay = mysqli_real_escape_string($conn, $_POST['toDay']);
+    $employee_number = mysqli_real_escape_string($conn, $_POST['employee_number']);
+    $withhold_tax = mysqli_real_escape_string($conn, $_POST['withhold_tax']);
+    $sss_con = mysqli_real_escape_string($conn, $_POST['sss_con']);
+    $philhealth_con = mysqli_real_escape_string($conn, $_POST['philhealth_con']);
+    $pag_ibig_con = mysqli_real_escape_string($conn, $_POST['pag-ibig_con']);
+    $other_deduc = mysqli_real_escape_string($conn, $_POST['other_deduc']);
+    $allowance = mysqli_real_escape_string($conn, $_POST['allowance']);
+    $monthly = mysqli_real_escape_string($conn, $_POST['monthly']);
+    $daily = mysqli_real_escape_string($conn, $_POST['daily']);
+    $hourly = mysqli_real_escape_string($conn, $_POST['hourly']);
+    $total_hrs = mysqli_real_escape_string($conn, $_POST['total_hrs']);
+    $other_ot = mysqli_real_escape_string($conn, $_POST['other_ot']);
+    $totalhrs = mysqli_real_escape_string($conn, $_POST['totalhrs']);
+    $special_holiday = mysqli_real_escape_string($conn, $_POST['special_holiday']);
+    $special_leave = mysqli_real_escape_string($conn, $_POST['special_leave']);
+    $gross = mysqli_real_escape_string($conn, $_POST['gross']);
+    $cash_adv = mysqli_real_escape_string($conn, $_POST['cash_adv']);
+    $total_deduc = mysqli_real_escape_string($conn, $_POST['total_deduc']);
+    $netpay = mysqli_real_escape_string($conn, $_POST['netpay']);
     
-    // Calculate total deduction and netpay
-    $total_deduc = $less_cont + $cash_adv;
-    $netpay = $gross - $total_deduc;
-
-    // Step 3: Insert payroll data into the `payroll` table, including the employee_id
-    $query = "INSERT INTO payroll (employee_id, employee_number, basic_salary, allowance, monthly, daily, hourly, total_hrs, other_ot, salary, special_holiday, special_leave, incentives, gross, less_cont, cash_adv, total_deduc, netpay) 
-              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        $result = mysqli_query($conn, "SELECT employee_id FROM employees WHERE employee_number = '$employee_number'");
+        if ($result && mysqli_num_rows($result) > 0) {
+            $row = mysqli_fetch_assoc($result);
+            $employee_id = $row['employee_id'];
+        } else {
+            die("Employee not found with the given employee number.");
+        }
     
-    $stmt = $conn->prepare($query);
-    $stmt->bind_param("isssssssssssssssss", $employee_id, $employee_number, $basic_salary, $allowance, $monthly, $daily, $hourly, $total_hrs, $other_ot, $salary, $specialHoliday, $specialLeave, $incentives, $gross, $less_cont, $cash_adv, $total_deduc, $netpay);
-
-    if ($stmt->execute()) {
-        header("Location: payroll.php?status=success");
-    } else {
-        echo "Error: " . $stmt->error;
+        $payroll_period = date('m', strtotime($fromDay)) . '/' . date('d', strtotime($fromDay)) . '-' . date('d', strtotime($toDay)) . '/' . date('y', strtotime($toDay));
+    
+        $query = "
+            INSERT INTO payroll (
+                payroll_period, employee_id,
+                withhold_tax, sss_con, philhealth_con, pag_ibig_con, other_deduc,
+                allowance, monthly, daily, hourly,
+                total_hrs, other_ot, totalhrs, special_holiday, special_leave,
+                gross, cash_adv, total_deduc, netpay
+            ) VALUES (
+                '$payroll_period', '$employee_id',
+                '$withhold_tax', '$sss_con', '$philhealth_con', '$pag_ibig_con', '$other_deduc',
+                '$allowance', '$monthly', '$daily', '$hourly',
+                '$total_hrs', '$other_ot', '$totalhrs', '$special_holiday', '$special_leave',
+                '$gross', '$cash_adv', '$total_deduc', '$netpay'
+            )";
+    
+        if (mysqli_query($conn, $query)) {
+            echo "Payroll data submitted successfully.";
+            header("Location: payroll.php");
+            exit();
+        } else {
+            echo "Error: " . $query . "<br>" . mysqli_error($conn);
+        }
     }
-
-    $stmt->close();
-    $conn->close();
-} else {
-    header("Location: payroll.php?status=error");
-}
+    
+    mysqli_close($conn);    
 ?>

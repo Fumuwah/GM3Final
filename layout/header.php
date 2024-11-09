@@ -171,8 +171,8 @@
             <li class="nav-item active mx-3 d-flex align-items-center">
                 <img src="assets/images/home.png" class="header-icons mr-2" href="index.php"> <a class="nav-link" href="index.php">Home<span class="sr-only">(current)</span></a>
             </li>
-            <li class="nav-item mx-3 d-flex align-items-center">
-            <img src="assets/images/about.png" class="header-icons mr-1"> <a class="nav-link" href="about.php">About</a>
+            <img src="assets/images/about.png" class="header-icons mr-1">
+            <a class="nav-link about-text" href="about.php">About</a>
             </li>
             <li class="nav-item mx-3" id="notification-icon">
                 <a class="nav-link" href="#"><img src="assets/images/notification.png" class="header-icons" alt=""></a>
