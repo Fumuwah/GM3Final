@@ -52,6 +52,15 @@ html, body {
     min-width: 250px;
 }
 
+#sidebar .sidebar-nav, #sidebar .sidebar-title {
+    margin-left: -250px;
+    transition: all ease-in-out 0.35s;
+}
+
+#sidebar.expand .sidebar-nav, #sidebar.expand .sidebar-title {
+    margin-left: 0;
+}
+
 @media only screen and (max-width: 992px) {
 
     #sidebar,
@@ -62,12 +71,6 @@ html, body {
     }
 }
 
-#sidebar:not(.expand) .sidebar-logo,
-#sidebar:not(.expand) .sidebar-title,
-#sidebar:not(.expand) a.sidebar-link,
-#sidebar:not(.expand) a.sidebar-link span {
-    display: none;
-}
 
 .sidebar-nav {
     padding: 0 0;
@@ -82,7 +85,6 @@ a.sidebar-link {
     white-space: nowrap;
     padding: 1rem 0 1rem 2rem;
     border-left: 3px solid transparent;
-    transition: all ease-in-out 0.7s;
 }
 
 a.sidebar-link:hover {
@@ -114,10 +116,6 @@ a.sidebar-link:hover {
     display: none;
 }
 
-#sidebar.expand .san1-apperance-button {
-    cursor: default;
-}
-
 #sidebar.expand .sidebar-link[data-bs-toggle="collapse"]::after {
     border: solid;
     border-width: 0 .075rem .075rem 0;
@@ -139,14 +137,14 @@ a.sidebar-link:hover {
 .arrow-container {
     z-index: 100;
     position: absolute;
-    font-size: 30px;
+    font-size: 20px;
     background-color: rgb(26, 26, 26);
-    padding: 0px 12px;
-    line-height: 43px;
+    display: block;
+    padding: 5px 15px;
     border-radius: 50%;
     color: white;
     cursor: pointer;
-    left: 101%;
+    left: 103%;
     top: 50%;
     transform: translate(-50%, -50%) rotate(0deg);
 
@@ -158,6 +156,31 @@ a.sidebar-link:hover {
 
 #arrow {
     transition: .4s all ease-in-out;
+}
+
+.pagination-container {
+    display: inline-block;
+    margin-top: 10px;
+}
+
+.pagination-container a {
+    color: #00B8FD;
+    background-color: var(--primary-color);
+    float: left;
+    padding: 4px 10px;
+    text-decoration: none;
+    border: solid 1px var(--secondary-color);
+    transition: 0.5s;
+}
+
+.pagination-container a.active {
+    background-color: #00B8FD;
+    color: white;
+}
+
+.pagination-container a:hover:not(.active) {
+    background-color: var(--secondary-color);
+    color: var(--primary-color);
 }
 
 .main-content {

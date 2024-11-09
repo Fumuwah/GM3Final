@@ -12,10 +12,9 @@ include './layout/header.php';
 ?>
 <div class="d-flex align-items-stretch">
     <?php include './layout/sidebar.php'; ?>
-    <div class="main p-3" style="max-height: calc(100vh - 80px);overflow-y:scroll">
-        <div class="container-fluid">
+    <div class="main pt-3" style="max-height: calc(100vh - 80px);overflow-y:scroll">
+        <div class="container">
             <h2>Payroll Summary</h2>
-
             <form class="form-row align-items-center">
                 <div class="form-group col-md-3 mb-2">
                     <div class="input-group">
@@ -26,7 +25,6 @@ include './layout/header.php';
                         </div>
                     </div>
                 </div>
-
                 <div class="form-group col-md-2 mb-2">
                     <select name="" id="" class="form-control">
                         <option value="">Select Project</option>
@@ -35,7 +33,6 @@ include './layout/header.php';
                         <option value="Budget Office">Budget Office</option>
                     </select>
                 </div>
-
                 <div class="form-group col-md-2 mb-2">
                     <select name="" id="" class="form-control">
                         <option value="">Role</option>
@@ -43,7 +40,6 @@ include './layout/header.php';
                         <option value="Site 2">Site 2</option>
                     </select>
                 </div>
-
                 <div class="form-group col-md-2 mb-2">
                     <select name="" id="" class="form-control">
                         <option value="">Payroll Period</option>
@@ -53,15 +49,6 @@ include './layout/header.php';
                         <option value="April">April</option>
                     </select>
                 </div>
-
-                <div class="form-group col-md-1 mb-2">
-                    <input type="number" class="form-control" placeholder="From">
-                </div>
-
-                <div class="form-group col-md-1 mb-2">
-                    <input type="number" class="form-control" placeholder="To">
-                </div>
-
                 <div class="form-group col-md-1 mb-2">
                     <button type="submit" class="btn btn-primary ml-2" value="Generate">Generate</button>
                 </div>
@@ -72,11 +59,10 @@ include './layout/header.php';
                     <table class="table table-bordered">
                         <thead>
                             <tr>
-                                <th></th>
-                                <th></th>
-                                <th></th>
+                                <th colspan="3"></th>
                                 <th colspan=2 class="text-center">Rate</th>
                                 <th colspan=2 class="text-center">Payroll</th>
+                                <th colspan="5"></th>
                             </tr>
                             <tr>
                                 <th>Emp #</th>
@@ -105,6 +91,7 @@ include './layout/header.php';
                                 <td>546</td>
                                 <td>64564</td>
                                 <td>234</td>
+                                <td>534</td>
                                 <td>534</td>
                             </tr>
                         </tbody>
