@@ -48,7 +48,7 @@ include './layout/header.php';
                 <div class="row flex-wrap">
 
                     <div class="col-lg-6 col-md-6 col-12 mb-3">
-                        <div class="container-fluid pl-5">
+                        <div class="card">
                             <div class="card-body">
                                 <h4>Employee Detail</h4>
                                 <div class="col-4">Payroll Period:</div>
