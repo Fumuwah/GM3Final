@@ -123,7 +123,7 @@ $activePage = 'dtr';
 <div class="d-flex">
     <?php include './layout/sidebar.php'; ?>
     <div class="main p-3" style="max-height: calc(100vh - 80px);overflow-y:scroll">
-        <div class="container">
+    <div class="container-fluid pl-5">
             <h2>Generate Daily Time Record</h2>
             <form action="" method="POST">
                 <div class="form-group row">
