@@ -127,6 +127,13 @@ $activePage = $activePage ?? '';
                 </a>
             </li>
         <?php endif; ?>
+        <?php if ($role_name === 'super admin'): ?>
+            <li class="sidebar-item" style="">
+                <a class="sidebar-link" href="logging.php" style="<?= ($activePage === 'logging') ? 'background-color:rgba(0, 123, 255, 0.5);border-left: 3px solid #3b7ddd;' : ''; ?>">
+                    <span>Admin Logs</span>
+                </a>
+            </li>
+        <?php endif; ?>
     </ul>
 </aside>
 
