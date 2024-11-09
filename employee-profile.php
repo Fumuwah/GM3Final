@@ -70,6 +70,7 @@ $stmt->execute();
 $result = $stmt->get_result();
 $employee = $result->fetch_assoc();
 
+
 $imagePath = $employee['image_path'] != null ? $employee['image_path'] : 'assets/images/account.png';
 
 $hire_date = date("m/d/Y", strtotime($employee['hire_date']));
@@ -86,9 +87,7 @@ $age = date_diff(date_create($employee['birthdate']), date_create('today'))->y;
                     <div class="card">
                         <div class="card-body d-flex align-items-center">
                             <div>
-                                <?php
-                                $imagePath = isset($_GET['image']) ? $_GET['image'] : 'default.jpg';
-                                ?>
+                                
 
                                 <form action="submit_employee_image.php" enctype="multipart/form-data" id="form" method="POST">
                                     <img src="<?php echo $imagePath; ?>" style="width:150px; height:150px; border-radius: 50%; object-fit: cover;" alt="Employee Image">
