@@ -100,8 +100,8 @@ session_start();
                         echo "<div class='alert alert-danger'>Your account has been archived and cannot access the website.</div>";
                     } else {
                         // Verify the password
-                        // if (password_verify($pass, $user["password"])) {  //JUST COMMENTED THIS FOR LOGIN
-                        if ($pass == $user['password']) { //GONNA UNCOMMENT THIS WHEN THE SYSTEM IS DONE
+                        if (password_verify($pass, $user["password"])) {  //JUST COMMENTED THIS FOR LOGIN
+                        // if ($pass == $user['password']) { //GONNA UNCOMMENT THIS WHEN THE SYSTEM IS DONE
                             $_SESSION['employee_id'] = $user['employee_id'];
 
                             // Get the employee's role and permissions using role_id
