@@ -12,8 +12,8 @@ include './layout/header.php';
 ?>
 <div class="d-flex align-items-stretch">
     <?php include './layout/sidebar.php'; ?>
-    <div class="main p-3" style="max-height: calc(100vh - 80px);overflow-y:scroll">
-        <div class="container-fluid">
+    <div class="main pt-3" style="max-height: calc(100vh - 80px);overflow-y:scroll">
+        <div class="container">
             <h2>Payroll Summary</h2>
 
             <form class="form-row align-items-center">

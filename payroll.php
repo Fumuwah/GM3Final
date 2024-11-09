@@ -38,7 +38,7 @@ include './layout/header.php';
       <div class="d-flex">
          <?php include './layout/sidebar.php'; ?>
          <div class="main-content" style="max-height: calc(100vh - 80px);overflow-y:scroll">
-    <div class="container-fluid">
+    <div class="container">
         <h2>Employee Payroll</h2>
         <form action="submit_payroll.php" id="payrollform" method="post">
             <div class="row flex-wrap">

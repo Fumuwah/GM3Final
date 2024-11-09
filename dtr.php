@@ -116,7 +116,7 @@ $activePage = 'dtr';
             <div class="d-flex">
                 <?php include './layout/sidebar.php'; ?>
                 <div class="main p-3" style="max-height: calc(100vh - 80px);overflow-y:scroll">
-                    <div class="container-fluid">
+                    <div class="container">
                         <h2>Generate Daily Time Record</h2>
                         <form action="" method="POST">
                             <div class="form-group row">
@@ -149,7 +149,7 @@ $activePage = 'dtr';
                                         } ?>
                                     </select>
                                 </div>
-                                <div class="col-sm-1">
+                                <div class="col-sm-2">
                                     <select name="day" id="day" class="form-control">
                                         <option value="">Day</option>
                                         <?php for ($d = 1; $d <= 31; $d++) {
