@@ -15,7 +15,7 @@ include './layout/header.php';
 <div class="d-flex">
     <?php include './layout/sidebar.php'; ?>
     <div class="main pt-3" style="max-height: calc(100vh - 80px);overflow-y:scroll">
-        <div class="container">
+    <div class="container-fluid pl-5">
             <h2>Memorandum</h2>
             <div class="d-flex justify-content-between align-items-center flex-column flex-lg-row">
                 <form class="form-inline my-3 col-12 col-lg-10 pl-0">

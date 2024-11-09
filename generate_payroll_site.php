@@ -13,7 +13,7 @@ include './layout/header.php';
 <div class="d-flex align-items-stretch">
     <?php include './layout/sidebar.php'; ?>
     <div class="main pt-3" style="max-height: calc(100vh - 80px);overflow-y:scroll">
-        <div class="container">
+    <div class="container-fluid pl-5">
             <h2>Payroll Summary</h2>
             <form class="form-row align-items-center">
                 <div class="form-group col-md-3 mb-2">

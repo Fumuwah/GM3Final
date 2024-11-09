@@ -148,7 +148,7 @@ include './layout/header.php';
 <div class="d-flex">
     <?php include './layout/sidebar.php'; ?>
     <div class="main pt-3" style="max-height: calc(100vh - 80px);overflow-y:scroll">
-        <div class="container">
+    <div class="container-fluid pl-5">
             <h2>Users</h2>
             <form class="form-inline my-3">
                 <div class="d-flex w-100 mb-2 justify-content-between">

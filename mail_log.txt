@@ -1,0 +1,7 @@
+Failed to send mail: SMTP connect() failed. https://github.com/PHPMailer/PHPMailer/wiki/Troubleshooting
+Failed to send mail: 2
+Failed to send mail: 2
+Failed to send mail: SMTP connect() failed. https://github.com/PHPMailer/PHPMailer/wiki/Troubleshooting
+Mail sent successfully to gm3buildershris@gmail.com
+Mail sent successfully to dandrecollera@gmail.com
+Mail sent successfully to dandrecollera@gmail.com
