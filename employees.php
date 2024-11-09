@@ -14,6 +14,7 @@ $offset = ($page - 1) * $results_per_page;
 $search = isset($_GET['search']) ? mysqli_real_escape_string($conn, $_GET['search']) : '';
 $status = isset($_GET['status']) ? mysqli_real_escape_string($conn, $_GET['status']) : '';
 $position_name = isset($_GET['position_name']) ? mysqli_real_escape_string($conn, $_GET['position_name']) : '';
+// die($position_name);
 $role_name = strtolower($user['role_name'] ?? '');
 
 $sql = "SELECT e.employee_id, e.firstname, e.middlename, e.lastname, e.employee_number, 
@@ -62,7 +63,6 @@ if ($status === 'Archived') {
 if (!empty($search)) {
     $total_sql .= " AND (e.firstname LIKE '%$search%' OR e.lastname LIKE '%$search%' OR e.employee_number LIKE '%$search%')";
 }
-
 if (!empty($position_name)) {
     $total_sql .= " AND p.position_name = '$position_name'";
 }
@@ -91,7 +91,7 @@ include './layout/header.php';
 <div class="d-flex">
     <?php include './layout/sidebar.php'; ?>
     <div class="main pt-3" style="max-height: calc(100vh - 80px);overflow-y:scroll">
-        <div class="container">
+    <div class="container-fluid pl-5">
             <h2>Pay slip</h2>
             <div class="d-flex justify-content-between align-items-center">
                 <form class="form-inline my-3 col-10 pl-0" method="GET" action="">
@@ -167,7 +167,7 @@ include './layout/header.php';
                                 $employee_number = htmlspecialchars($row['employee_number']);
                                 $lastname = htmlspecialchars($row['lastname']);
                                 $firstname = htmlspecialchars($row['firstname']);
-                                $middlename = htmlspecialchars($row['middlename']);
+                                $middlename = ($row['middlename']) != null ? htmlspecialchars($row['middlename']) : '';
                                 $contactno = htmlspecialchars($row['contactno']);
                                 $address = htmlspecialchars($row['address'] ?? '');
                                 $birthdate = htmlspecialchars($row['birthdate'] ?? '');
@@ -175,7 +175,7 @@ include './layout/header.php';
                                 $religion = htmlspecialchars($row['religion'] ?? '');
                                 $basic_salary = htmlspecialchars($row['basic_salary'] ?? '');
                                 $project_name = htmlspecialchars($row['project_name'] ?? '');
-                                $position_name = htmlspecialchars($row['position_name'] ?? '');
+                                $position_name2 = htmlspecialchars($row['position_name'] ?? '');
                                 $hire_date = htmlspecialchars($row['hire_date'] ?? '');
                                 $employee_status = htmlspecialchars($row['employee_status'] ?? '');
                                 $sss_no = htmlspecialchars($row['sss_no'] ?? '');
@@ -193,7 +193,7 @@ include './layout/header.php';
                                         <th scope='row'>{$counter}</th>
                                         <td>{$firstname} {$lastname}</td>
                                         <td>{$employee_status}</td>
-                                        <td>{$position_name}</td> 
+                                        <td>{$position_name2}</td> 
                                         <td>{$hire_date}</td>
                                         <td>
                                             <button type='button' class='btn btn-danger mb-2 delete-btn' data-id='{$employee_number}'>{$archiveButtonText}</button>
@@ -201,7 +201,7 @@ include './layout/header.php';
                                             data-employee-number='{$employee_number}' 
                                             data-lastname='{$lastname}' 
                                             data-firstname='{$firstname}' 
-                                            data-middlename='" . htmlspecialchars($row['middlename']) . "' 
+                                            data-middlename='{$middlename}' 
                                             data-contactno='{$contactno}' 
                                             data-address='{$address}' 
                                             data-birthdate='{$birthdate}' 
@@ -247,7 +247,7 @@ include './layout/header.php';
 
                                 <?php if ($page < $total_pages): ?>
                                     <li class="page-item">
-                                        <a class="page-link" href="?page=<?php echo $page + 1; ?>&search=<?php echo urlencode($search); ?>&status=<?php echo urlencode($status); ?>&position_name=<?php echo urlencode($position_name); ?>">Previous</a>
+                                        <a class="page-link" href="?page=<?php echo $page + 1; ?>&search=<?php echo urlencode($search); ?>&status=<?php echo urlencode($status); ?>&position_name=<?php echo urlencode($position_name); ?>">Next</a>
                                     </li>
                                 <?php endif; ?>
                             </ul>
