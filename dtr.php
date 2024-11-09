@@ -293,7 +293,7 @@ $activePage = 'dtr';
                 <h5 class="modal-title" id="attendanceModalLabel">Attendance</h5>
             </div>
             <div class="modal-body">
-                <form id="attendanceForm" action="submit_attendance.php" method="POST" autocomplete="off">
+                <form id="attendanceForm" action="submit_attendance.php" method="POST" autocomplete="off" onsubmit="return validateAttendanceForm()">
                     <div class="form-group">
                         <label for="employee_number">Employee Number:</label>
                         <input type="text" id="employee_number" name="employee_number" class="form-control" placeholder="Enter employee number" required>
@@ -321,6 +321,7 @@ $activePage = 'dtr';
         </div>
     </div>
 </div>
+
 <script>
     var attendanceBtn = document.querySelector('#attendance-btn');
     var attendanceModal = document.querySelector('#attendance-modal');
@@ -404,5 +405,16 @@ $activePage = 'dtr';
             $('form')[0].reset();
         });
     });
+
+    function validateAttendanceForm() {
+        const attendanceAction = document.querySelector('input[name="attendance_action"]:checked');
+        
+        if (!attendanceAction) {
+            alert("Please select either Time-In or Time-Out.");
+            return false;
+        }
+        
+        return true;
+    }
 </script>
 <?php include './layout/footer.php'; ?>
