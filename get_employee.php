@@ -1,8 +1,10 @@
 <?php
 include 'database.php';
 
-if (isset($_GET['employee_number'])) {
+if (isset($_GET['employee_number']) && isset($_GET['fromDay']) && isset($_GET['toDay'])) {
     $employee_number = $_GET['employee_number'];
+    $fromDay = $_GET['fromDay'];
+    $toDay = $_GET['toDay'];
 
     $sql = "
         SELECT e.employee_id, CONCAT(e.lastname, ', ', e.firstname, ' ', e.middlename) AS name, 
@@ -19,14 +21,15 @@ if (isset($_GET['employee_number'])) {
 
     if ($result->num_rows > 0) {
         $employee = $result->fetch_assoc();
+
         $dtr_sql = "
             SELECT 
-                SUM(total_hrs + other_ot) AS total_hrs, 
+                SUM(total_hrs) AS total_hrs, 
                 SUM(other_ot) AS other_ot 
             FROM dtr 
-            WHERE employee_id = ?";
+            WHERE employee_id = ? AND date BETWEEN ? AND ?";
         $dtr_stmt = $conn->prepare($dtr_sql);
-        $dtr_stmt->bind_param("i", $employee['employee_id']);
+        $dtr_stmt->bind_param("iss", $employee['employee_id'], $fromDay, $toDay);
         $dtr_stmt->execute();
         $dtr_result = $dtr_stmt->get_result();
 
@@ -42,6 +45,6 @@ if (isset($_GET['employee_number'])) {
     $stmt->close();
     $conn->close();
 } else {
-    echo json_encode(['error' => 'No employee number provided']);
+    echo json_encode(['error' => 'Employee number or date range not provided']);
 }
 ?>

@@ -1,6 +1,7 @@
 <?php
 
 session_start();
+include 'database.php';
 
 $activePage = 'payroll';
 
@@ -9,8 +10,6 @@ if (!isset($_SESSION['role_name']) || !isset($_SESSION['employee_id'])) {
     header("Location: login.php");
     exit();
 }
-
-
 
 include './layout/header.php';
 ?>
@@ -50,6 +49,15 @@ include './layout/header.php';
                     <div class="card">
                         <div class="card-body">
                             <h4>Employee Detail</h4>
+                            <div class="col-4">Payroll Period:</div>
+                                    <div class="form-group div form-row align-items-center">
+                                    <div class="col-6">
+                                        <input type="date" class="form-control" placeholder="From" name="fromDay" id="fromDay">
+                                    </div>
+                                    <div class="col-6">
+                                        <input type="date" class="form-control" placeholder="To" name="toDay" id="toDay">
+                                    </div>
+                                    </div>
                             <div class="form-group mb-3">
                                 <label for="employee_number">Employee No</label>
                                 <input type="text" class="form-control" id="employee_number" name="employee_number">
@@ -134,15 +142,6 @@ include './layout/header.php';
                                 <div class="card-body">
                                     <h4>Rate</h4>
                                     <div class="form-group div form-row align-items-center">
-                                    <div class="col-4">Payroll Period:</div>
-                                    <div class="form-group div form-row align-items-center">
-                                    <div class="col-6">
-                                        <input type="date" class="form-control" placeholder="From" id="fromDay">
-                                    </div>
-                                    <div class="col-6">
-                                        <input type="date" class="form-control" placeholder="To" id="toDay">
-                                    </div>
-                                    </div>
                                 </div>
                                     <div class="form-group div form-row align-items-center">
                                         <div class="col-4">Basic Salary:</div>
@@ -218,7 +217,7 @@ include './layout/header.php';
                             </div>
                             <div class="form-group mb-3">
                                 <label for="">Total Deductions</label>
-                                <input type="text" class="form-control" name="totalDeductions" id="totalDeductions">
+                                <input type="text" class="form-control" name="total_deduc" id="total_deduc">
                             </div>
                             <div class="form-group mb-3">
                                 <label for="">Net Pay</label>
@@ -248,7 +247,7 @@ include './layout/header.php';
         
             const totalDeductions = withholdTax + sssCon + philhealthCon + pagIbigCon + otherDeduc;
             
-            document.getElementById('totalDeductions').value = totalDeductions.toFixed(2);
+            document.getElementById('total_deduc').value = totalDeductions.toFixed(2);
         
             calculateNetPay();
         }
@@ -295,7 +294,7 @@ include './layout/header.php';
         }
         
         function calculateNetPay() {
-            const totalDeductions = parseFloat(document.getElementById('totalDeductions').value) || 0;
+            const totalDeductions = parseFloat(document.getElementById('total_deduc').value) || 0;
             const cashAdv = parseFloat(document.getElementById('cash_adv').value) || 0;
             const gross = parseFloat(document.getElementById('gross').value) || 0;
             
@@ -333,7 +332,7 @@ include './layout/header.php';
         const fields = [
             'name', 'hire_date', 'position', 'role', 'basic_salary', 'monthly', 'daily', 
             'hourly', 'total_hrs', 'other_ot', 'salary', 'special_holiday', 'allowance', 
-            'special_leave', 'gross', 'netpay', 'total_deduc', 'cash_adv', 'totalhrs', 'totalDeductions',
+            'special_leave', 'gross', 'netpay', 'total_deduc', 'cash_adv', 'totalhrs', 'total_deduc',
             'withhold_tax', 'sss_con', 'philhealth_con', 'pag-ibig_con', 'other_deduc'
         ];
 
@@ -355,36 +354,39 @@ include './layout/header.php';
     }
 
     document.getElementById('employee_number').addEventListener('blur', function () {
-        const employeeNumber = this.value.trim();
+    const employeeNumber = this.value.trim();
+    const fromDay = document.getElementById('fromDay').value;
+    const toDay = document.getElementById('toDay').value;
 
-        if (employeeNumber) {
-            fetch(`get_employee.php?employee_number=${employeeNumber}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.error) {
-                        alert(data.error);
-                    } else {
-                        document.getElementById('name').value = data.name || '';
-                        document.getElementById('hire_date').value = data.hire_date || '';
-                        document.getElementById('position').value = data.position_name || '';
-                        document.getElementById('role').value = data.role_name || '';
-                        document.getElementById('basic_salary').value = data.basic_salary || '';
-                        document.getElementById('allowance').value = data.allowance || '0';
-                        document.getElementById('total_hrs').value = data.total_hrs || '0';
-                        document.getElementById('other_ot').value = data.other_ot || '0';
+    if (employeeNumber && fromDay && toDay) {
+        fetch(`get_employee.php?employee_number=${employeeNumber}&fromDay=${fromDay}&toDay=${toDay}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                } else {
+                    document.getElementById('name').value = data.name || '';
+                    document.getElementById('hire_date').value = data.hire_date || '';
+                    document.getElementById('position').value = data.position_name || '';
+                    document.getElementById('role').value = data.role_name || '';
+                    document.getElementById('basic_salary').value = data.basic_salary || '';
+                    document.getElementById('allowance').value = data.allowance || '0';
+                    document.getElementById('total_hrs').value = data.total_hrs || '0';
+                    document.getElementById('other_ot').value = data.other_ot || '0';
 
-                        calculateSalary();
-                        calculateTotalHours();
-                        calculateGross();
-                        calculateNetPay();
-                        calculateTotalDeductions
-                    }
-                })
-                .catch(error => console.error('Error fetching employee details:', error));
-        } else {
-            clearFields();
-        }
-    });
+                    calculateSalary();
+                    calculateTotalHours();
+                    calculateGross();
+                    calculateNetPay();
+                    calculateTotalDeductions();
+                }
+            })
+            .catch(error => console.error('Error fetching employee details:', error));
+    } else {
+        clearFields();
+    }
+});
+
 
     var deleteBtn = document.querySelectorAll('.delete-btn');
     var deleteModal = document.querySelector('#delete-modal');
