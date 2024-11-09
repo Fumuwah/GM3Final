@@ -34,8 +34,8 @@ function fetchEmployees($conn, $start, $limit, $search = '')
 {
     $search = mysqli_real_escape_string($conn, $search);
     $sql = "SELECT e.employee_id, e.lastname, e.firstname, 
-                   p.position_name, e.project_name, r.role_name, 
-                   IFNULL(perm.can_manage_roles, 0) AS can_manage_roles 
+                p.position_name, e.project_name, r.role_name, 
+                IFNULL(perm.can_manage_roles, 0) AS can_manage_roles 
             FROM employees e
             LEFT JOIN positions p ON e.position_id = p.position_id
             LEFT JOIN roles r ON e.role_id = r.role_id
@@ -64,10 +64,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['employee_id'])) {
     $new_role_id = $_POST['role_id'];
 
     $role_stmt = $conn->prepare("SELECT r.role_id, perm.can_manage_roles 
-                                 FROM employees e 
-                                 LEFT JOIN roles r ON e.role_id = r.role_id
-                                 LEFT JOIN permissions perm ON r.role_id = perm.role_id
-                                 WHERE e.employee_id = ?");
+                                FROM employees e 
+                                LEFT JOIN roles r ON e.role_id = r.role_id
+                                LEFT JOIN permissions perm ON r.role_id = perm.role_id
+                                WHERE e.employee_id = ?");
     $role_stmt->bind_param("i", $_SESSION['employee_id']);
     $role_stmt->execute();
     $role_result = $role_stmt->get_result();
@@ -147,95 +147,102 @@ include './layout/header.php';
 
 <div class="d-flex">
     <?php include './layout/sidebar.php'; ?>
-         <div class="main-content" style="max-height: calc(100vh - 80px);overflow-y:scroll">
-        <div class="container-fluid">
+    <div class="main pt-3" style="max-height: calc(100vh - 80px);overflow-y:scroll">
+        <div class="container">
             <h2>Users</h2>
             <form class="form-inline my-3">
-                <div class="form-group mb-2 col-8 col-lg-6">
-                    <input type="text" class="form-control w-100" id="search-user" name="search"
-                        placeholder="Search User"
-                        value="<?php echo htmlspecialchars($search); ?>">
+                <div class="d-flex w-100 mb-2 justify-content-between">
+                    <div class="flex-grow" style="flex-grow: 1;">
+                        <input type="text" class="form-control w-100" id="search-user" name="search"
+                            placeholder="Search User"
+                            value="<?php echo htmlspecialchars($search); ?>">
+                    </div>
+                    <div class="flex-end" style="">
+                        <button type="submit" class="btn btn-primary mb-2">Search</button>
+                    </div>
                 </div>
-                <button type="submit" class="btn btn-primary mb-2">Search</button>
             </form>
-
-            <div class="row">
-                <div class="col-12">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th scope="col">#</th>
-                                <th scope="col">Name</th>
-                                <th scope="col">Position</th>
-                                <th scope="col">Project</th>
-                                <th scope="col">Role</th>
-                                <th scope="col">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php if ($employees && mysqli_num_rows($employees) > 0): ?>
-                                <?php
-                                $counter = 0;
-                                while ($row = mysqli_fetch_assoc($employees)):
-                                    $counter++;
-                                ?>
-                                    <tr>
-                                        <th scope="row"><?php echo $row['employee_id']; ?></th>
-                                        <td><?php echo $row['lastname'] . ', ' . $row['firstname']; ?></td>
-                                        <td><?php echo ucfirst($row['position_name']); ?></td>
-                                        <td><?php echo ucfirst($row['project_name']); ?></td>
-                                        <td><?php echo ucfirst($row['role_name']); ?></td>
-                                        <td>
-                                            <?php if ($row['can_manage_roles'] || $_SESSION['role_name'] == 'Super Admin'): ?>
-                                                <form method="POST" onsubmit="return confirmRoleChange(this);">
-                                                    <input type="hidden" name="employee_id" value="<?php echo $row['employee_id']; ?>">
-                                                    <div class="form-group">
+            <div class="table-responsive-lg" style="overflow-x: scroll;">
+                <table class="table align-middle">
+                    <thead>
+                        <tr>
+                            <th scope="col" style="width: 5%;">#</th>
+                            <th scope="col" style="width: 30%;">Name</th>
+                            <th scope="col" style="width: 10%;">Position</th>
+                            <th scope="col" style="width: 15%;">Project</th>
+                            <th scope="col" style="width: 10%;">Role</th>
+                            <th scope="col" style="width: 30%;">Update Role</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php if ($employees && mysqli_num_rows($employees) > 0): ?>
+                            <?php
+                            $counter = 0;
+                            while ($row = mysqli_fetch_assoc($employees)):
+                                $counter++;
+                            ?>
+                                <tr>
+                                    <th scope="row"><?php echo $row['employee_id']; ?></th>
+                                    <td><?php echo $row['lastname'] . ', ' . $row['firstname']; ?></td>
+                                    <td><?php echo ucfirst($row['position_name']); ?></td>
+                                    <td><?php echo ucfirst($row['project_name']); ?></td>
+                                    <td><?php echo ucfirst($row['role_name']); ?></td>
+                                    <td>
+                                        <?php if ($row['can_manage_roles'] || $_SESSION['role_name'] == 'Super Admin'): ?>
+                                            <form method="POST" onsubmit="return confirmRoleChange(this);">
+                                                <input type="hidden" name="employee_id" value="<?php echo $row['employee_id']; ?>">
+                                                <div class="d-flex">
+                                                    <div class="flex-fill">
                                                         <select name="role_id" class="form-control">
                                                             <option value="1" <?php if ($row['role_name'] == 'Super Admin') echo 'selected'; ?>>Super Admin</option>
                                                             <option value="2" <?php if ($row['role_name'] == 'Admin') echo 'selected'; ?>>Admin</option>
                                                             <option value="3" <?php if ($row['role_name'] == 'Employee') echo 'selected'; ?>>Employee</option>
                                                         </select>
                                                     </div>
-                                                    <button type="submit" class="btn btn-primary">Update Role</button>
-                                                </form>
-                                            <?php else: ?>
-                                                <span>No permission to manage roles</span>
-                                            <?php endif; ?>
-                                        </td>
-                                    </tr>
-                                <?php endwhile;
-                                ?>
-                            <?php else: ?>
-                                <tr>
-                                    <td colspan="6">No employees found.</td>
+                                                    <div class="flex-end">
+                                                        <button type="submit" class="btn btn-primary">Submit</button>
+                                                    </div>
+                                                </div>
+
+                                            </form>
+                                        <?php else: ?>
+                                            <span>No permission to manage roles</span>
+                                        <?php endif; ?>
+                                    </td>
                                 </tr>
-                            <?php endif; ?>
-                        </tbody>
-                    </table>
-                    <div class="d-flex justify-content-end">
-                        <nav aria-label="Page navigation example">
-                            <ul class="pagination">
-                                <?php if ($current_page > 1): ?>
-                                    <li class="page-item">
-                                        <a class="page-link" href="?page=<?php echo $current_page - 1; ?>&search=<?php echo htmlspecialchars($search); ?>">Previous</a>
-                                    </li>
-                                <?php endif; ?>
+                            <?php endwhile;
+                            ?>
+                        <?php else: ?>
+                            <tr>
+                                <td colspan="6">No employees found.</td>
+                            </tr>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
 
-                                <?php for ($i = 1; $i <= $total_pages; $i++): ?>
-                                    <li class="page-item <?php if ($current_page == $i) echo 'active'; ?>">
-                                        <a class="page-link" href="?page=<?php echo $i; ?>&search=<?php echo htmlspecialchars($search); ?>"><?php echo $i; ?></a>
-                                    </li>
-                                <?php endfor; ?>
+            <div class="d-flex justify-content-end">
+                <nav aria-label="Page navigation example">
+                    <ul class="pagination">
+                        <?php if ($current_page > 1): ?>
+                            <li class="page-item">
+                                <a class="page-link" href="?page=<?php echo $current_page - 1; ?>&search=<?php echo htmlspecialchars($search); ?>">Previous</a>
+                            </li>
+                        <?php endif; ?>
 
-                                <?php if ($current_page < $total_pages): ?>
-                                    <li class="page-item">
-                                        <a class="page-link" href="?page=<?php echo $current_page + 1; ?>&search=<?php echo htmlspecialchars($search); ?>">Next</a>
-                                    </li>
-                                <?php endif; ?>
-                            </ul>
-                        </nav>
-                    </div>
-                </div>
+                        <?php for ($i = 1; $i <= $total_pages; $i++): ?>
+                            <li class="page-item <?php if ($current_page == $i) echo 'active'; ?>">
+                                <a class="page-link" href="?page=<?php echo $i; ?>&search=<?php echo htmlspecialchars($search); ?>"><?php echo $i; ?></a>
+                            </li>
+                        <?php endfor; ?>
+
+                        <?php if ($current_page < $total_pages): ?>
+                            <li class="page-item">
+                                <a class="page-link" href="?page=<?php echo $current_page + 1; ?>&search=<?php echo htmlspecialchars($search); ?>">Next</a>
+                            </li>
+                        <?php endif; ?>
+                    </ul>
+                </nav>
             </div>
         </div>
     </div>

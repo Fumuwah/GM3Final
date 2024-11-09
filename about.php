@@ -6,7 +6,7 @@ if (!isset($_SESSION['role_name']) || !isset($_SESSION['employee_id'])) {
   exit();
 }
 
-$role = $_SESSION['role'];
+// $role = $_SESSION['role'];
 $employee_id = $_SESSION['employee_id'];
 
 include('database.php'); // Replace with your actual database connection file
