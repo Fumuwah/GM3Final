@@ -173,16 +173,8 @@ $project_name = $employee['project_name'];
     </div>
 </div>
 
-<script src="../assets/js/jquery-3.7.1.min.js"></script>
+
 <script>
-    $(document).ready(function() {
-        $('#collapse1').on('click', function() {
-            $('#collapsetest1').slideToggle()
-        })
-        $('#collapse2').on('click', function() {
-            $('#collapsetest2').slideToggle()
-        })
-    });
 
     document.getElementById('leave-form').addEventListener('submit', function(e) {
         e.preventDefault();
