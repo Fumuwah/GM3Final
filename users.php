@@ -40,13 +40,17 @@ function fetchEmployees($conn, $start, $limit, $search = '')
             LEFT JOIN positions p ON e.position_id = p.position_id
             LEFT JOIN roles r ON e.role_id = r.role_id
             LEFT JOIN permissions perm ON r.role_id = perm.role_id
-            WHERE 1";
+            -- WHERE 1
+            WHERE e.employee_status != 'Archived'
+            ";
 
     if (!empty($search)) {
         $sql .= " AND (e.firstname LIKE '%$search%' OR e.lastname LIKE '%$search%' OR e.employee_number LIKE '%$search%')";
     }
 
     $sql .= " LIMIT $start, $limit";
+
+    
 
     $result = mysqli_query($conn, $sql);
     if (!$result) {
