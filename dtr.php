@@ -258,23 +258,34 @@ $activePage = 'dtr';
                                 </table>
                             </div>
                         </div>
-                                    
-                        <div class="pagination">
-                            <?php if ($current_page > 1): ?>
-                                <a href="?page=<?php echo $current_page - 1; ?>">&laquo; Previous</a>
-                            <?php endif; ?>
-                        
-                            <?php for ($page = 1; $page <= $total_pages; $page++): ?>
-                                <?php if ($page == $current_page): ?>
-                                    <strong><?php echo $page; ?></strong>
-                                <?php else: ?>
-                                    <a href="?page=<?php echo $page; ?>"><?php echo $page; ?></a>
-                                <?php endif; ?>
-                            <?php endfor; ?>
-                        
-                            <?php if ($current_page < $total_pages): ?>
-                                <a href="?page=<?php echo $current_page + 1; ?>">Next &raquo;</a>
-                            <?php endif; ?>
+                        <div class="d-flex justify-content-end">
+                            <nav>
+                                <ul class="pagination">
+                                    <?php if ($current_page > 1): ?>
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page=<?php echo $current_page - 1; ?>">&laquo; Previous</a>
+                                        </li>
+                                    <?php endif; ?>
+                                
+                                    <?php for ($page = 1; $page <= $total_pages; $page++): ?>
+                                        <?php if ($page == $current_page): ?>
+                                            <li class="page-item">
+                                            <strong class="page-link"><?php echo $page; ?></strong>
+                                            </li>
+                                        <?php else: ?>
+                                            <li class="page-item">
+                                            <a class="page-link" href="?page=<?php echo $page; ?>"><?php echo $page; ?></a>
+                                            </li>
+                                        <?php endif; ?>
+                                    <?php endfor; ?>
+                                
+                                    <?php if ($current_page < $total_pages): ?>
+                                        <li class="page-item">
+                                        <a class="page-link" href="?page=<?php echo $current_page + 1; ?>">Next &raquo;</a>
+                                        </li>
+                                    <?php endif; ?>
+                                </ul>
+                            </nav>
                         </div>
                     </div>
                 </div>
