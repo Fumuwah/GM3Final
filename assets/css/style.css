@@ -8097,3 +8097,9 @@ a.text-dark:hover, a.text-dark:focus {
 .sidebar, .sidebar-section {
   overflow: visible;
 }
+
+@media screen and (max-width: 450px){
+  .about-text{
+    display: none;
+  }
+}
