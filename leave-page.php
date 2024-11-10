@@ -235,4 +235,5 @@ $project_name = $employee['project_name'];
         });
     });
 </script>
+<?php include './layout/script.php'; ?>
 <?php include './layout/footer.php'; ?>

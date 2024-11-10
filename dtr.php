@@ -29,6 +29,7 @@ $year_filter = $_GET['year'] ?? '';
 $day_filter = $_GET['day'] ?? '';
 $today_filter = '';
 if (empty($day_filter)) {
+    date_default_timezone_set("Asia/Manila");
     $today_filter = date('Y-m-d');
 }
 
@@ -183,7 +184,7 @@ $activePage = 'dtr';
                     </div>
                     <div class="d-flex col-sm-2">
                         <button type="submit" class="btn btn-primary">Filter</button>
-                        <a href="#" class="btn btn-secondary" id="attendance-btn">Attendance</a>
+                        <button type="button" class="btn btn-secondary" id="attendance-btn">Attendance</button>
                     </div>
                 </div>
             </form>
@@ -268,7 +269,7 @@ $activePage = 'dtr';
                                     echo "<td>$time_out_display</td>";
                                     echo "<td>" . number_format($cumulative_ot, 2) . "</td>";
                                     echo "<td>" . number_format($cumulative_hrs, 2) . "</td>";
-                                    echo "<td><a href='#' class='btn btn-success'>Edit</a></td>";
+                                    echo "<td><button type='button' class='btn btn-success edit-btn' data-timein='$time_in_display' data-timeout='$time_out_display' data-did='" . $row['dtr_id'] . "'>Edit</button></td>";
                                     echo "</tr>";
 
                                     $i++;
@@ -338,6 +339,35 @@ $activePage = 'dtr';
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary close-modal">Close</button>
                         <button type="submit" class="btn btn-primary">Submit</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="edit-modal" tabindex="-1" aria-labelledby="attendanceModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="attendanceModalLabel">Attendance</h5>
+            </div>
+            <div class="modal-body">
+                <form id="attendanceForm" action="edit_timein_timeout.php" method="POST" autocomplete="off">
+                    <div class="form-group">
+                        <input type="hidden" class="form-control edit-id" name="edit_id">
+                        <div class="form-group mb-3">
+                            <label for="edit_timein">Time-In:</label>
+                            <input class="form-control edit-timein" type="text" id="edit_timein" name="edit_timein" value="" placeholder="Time in">
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="edit_timeout">Time-Out:</label>
+                            <input class="form-control edit-timeout" type="text" id="edit_timeout" name="edit_timeout" value="" placeholder="Time out">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary edit-close">Close</button>
+                        <button type="submit" class="btn btn-primary" name="submit">Submit</button>
                     </div>
                 </form>
             </div>
@@ -439,5 +469,28 @@ $activePage = 'dtr';
 
         return true;
     }
+</script>
+<?php include './layout/script.php'; ?>
+<script>
+    $(document).ready(function() {
+        let editButton = $('.edit-btn');
+        let editModal = $('#edit-modal')
+
+        editButton.on('click', function() {
+            let timein = $(this).data('timein');
+            let timeout = $(this).data('timeout');
+            let dtrID = $(this).data('did');
+            editModal.removeClass('fade').css('display', 'block');
+            $('.edit-id').val(dtrID);
+            $('.edit-timein').val(timein);
+            $('.edit-timeout').val(timeout);
+        });
+        $('.edit-close').on('click', function() {
+            editModal.addClass('fade');
+            setTimeout(function() {
+                editModal.css('display', 'none');
+            }, 400);
+        });
+    });
 </script>
 <?php include './layout/footer.php'; ?>

@@ -111,7 +111,7 @@ $stmt = $conn->prepare($query);
 
 $params[] = $recordsPerPage;
 $params[] = $offset;
-$types .= "ii"; 
+$types .= "ii";
 $stmt->bind_param($types, ...$params);
 
 $stmt->execute();
@@ -124,7 +124,7 @@ include './layout/header.php';
 <div class="d-flex">
     <?php include './layout/sidebar.php'; ?>
     <div class="main pt-3" style="max-height: calc(100vh - 80px);overflow-y:scroll">
-    <div class="container-fluid pl-5">
+        <div class="container-fluid pl-5">
             <h2>Leaves</h2>
             <div class="d-flex justify-content-between align-items-center">
                 <form class="form-inline my-3 col-10 pl-0" method="get">
@@ -143,21 +143,21 @@ include './layout/header.php';
                     </div>
 
                     <div class="form-group mb-2 col-4 col-lg-2">
-                    <label for="month" class="sr-only">Month</label>
-                    <select name="month" id="month" class="form-control w-100">
-                        <option value="">All Months</option>
-                        <?php for ($m = 1; $m <= 12; $m++): ?>
-                            <option value="<?= $m ?>" <?= (isset($_GET['month']) && $_GET['month'] == $m) ? 'selected' : '' ?>>
-                                <?= date('F', mktime(0, 0, 0, $m, 1)) ?>
-                            </option>
-                        <?php endfor; ?>
-                    </select>
-                </div>
+                        <label for="month" class="sr-only">Month</label>
+                        <select name="month" id="month" class="form-control w-100">
+                            <option value="">All Months</option>
+                            <?php for ($m = 1; $m <= 12; $m++): ?>
+                                <option value="<?= $m ?>" <?= (isset($_GET['month']) && $_GET['month'] == $m) ? 'selected' : '' ?>>
+                                    <?= date('F', mktime(0, 0, 0, $m, 1)) ?>
+                                </option>
+                            <?php endfor; ?>
+                        </select>
+                    </div>
 
-                <div class="form-group mb-2 col-4 col-lg-2">
-                    <label for="year" class="sr-only">Year</label>
-                    <input type="number" name="year" id="year" class="form-control w-100" placeholder="Year" value="<?= htmlspecialchars($_GET['year'] ?? '') ?>">
-                </div>
+                    <div class="form-group mb-2 col-4 col-lg-2">
+                        <label for="year" class="sr-only">Year</label>
+                        <input type="number" name="year" id="year" class="form-control w-100" placeholder="Year" value="<?= htmlspecialchars($_GET['year'] ?? '') ?>">
+                    </div>
                     <button type="submit" class="btn btn-primary mb-2">Search</button>
                 </form>
             </div>
@@ -232,6 +232,5 @@ include './layout/header.php';
         </div>
     </div>
 </div>
-</div>
-</div>
+<?php include './layout/script.php'; ?>
 <?php include './layout/footer.php'; ?>
