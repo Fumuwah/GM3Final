@@ -1050,4 +1050,5 @@ include './layout/header.php';
         }
     }
 </script>
+<?php include './layout/script.php'; ?>
 <?php include './layout/footer.php'; ?>

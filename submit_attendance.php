@@ -106,5 +106,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Return the response as JSON
     echo json_encode($response);
+    header('location:dtr.php');
 }
 ?>

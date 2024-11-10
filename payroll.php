@@ -42,7 +42,7 @@ include './layout/header.php';
 <div class="d-flex">
     <?php include './layout/sidebar.php'; ?>
     <div class="main-content" style="max-height: calc(100vh - 80px);overflow-y:scroll">
-    <div class="container-fluid pl-5">
+        <div class="container-fluid pl-5">
             <h2>Employee Payroll</h2>
             <form action="submit_payroll.php" id="payrollform" method="post">
                 <div class="row flex-wrap">
@@ -412,4 +412,5 @@ include './layout/header.php';
     </script>
 
 
+    <?php include './layout/script.php'; ?>
     <?php include './layout/footer.php'; ?>

@@ -242,6 +242,7 @@ $age = date_diff(date_create($employee['birthdate']), date_create('today'))->y;
         </script>
     </div>
 </div>
+<?php include './layout/script.php'; ?>
 <?php
 include './layout/footer.php';
 ?>
