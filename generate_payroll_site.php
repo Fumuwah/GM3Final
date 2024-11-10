@@ -20,7 +20,7 @@ $totalRecords = $totalRow['total'] != null ? $totalRow['total'] : 0;
 $total_pages = ceil($totalRecords / $recordsPerPage);
 
 $query = "SELECT e.employee_id AS employee_id, e.firstname, e.middlename, e.lastname, 
-        pr.basic_salary, pr.allowance, pr.total_hrs, pr.other_ot, pr.special_holiday, 
+        pr.monthly, pr.allowance, pr.total_hrs, pr.other_ot, pr.special_holiday, 
         pr.gross, pr.cash_adv, pr.total_deduc, pr.netpay
         FROM payroll pr 
         LEFT JOIN employees e ON e.employee_id = pr.employee_id
@@ -109,7 +109,7 @@ include './layout/header.php';
                                 <tr>
                                     <td><?php echo htmlspecialchars($payroll['employee_id']); ?></td>
                                     <td><?php echo htmlspecialchars($payroll['firstname'] . ' ' . $payroll['middlename'] . ' ' . $payroll['lastname']); ?></td>
-                                    <td><?php echo number_format($payroll['basic_salary'], 2); ?></td>
+                                    <td><?php echo number_format($payroll['monthly'], 2); ?></td>
                                     <td><?php echo number_format($payroll['allowance'], 2); ?></td>
                                     <td><?php echo number_format($payroll['total_hrs'], 2); ?></td>
                                     <td><?php echo number_format($payroll['other_ot'], 2); ?></td>
