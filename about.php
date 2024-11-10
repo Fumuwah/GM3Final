@@ -134,8 +134,8 @@ include 'layout/header.php';
 
 <div class="d-flex align-items-stretch">
     <?php include 'layout/sidebar.php';?>
-    <div class="main p-3">
-        <div class="container-fluid">
+    <div class="main p-3" style="max-height: calc(100vh - 80px);overflow-y:scroll">
+        <div class="container-fluid pl-5">
             <div class="decorative-background">
                 <div class="logo-container">
                     <img src="assets/images/gm3-logo-small.png" alt="GM3 Builders Logo">
