@@ -5,3 +5,14 @@ Failed to send mail: SMTP connect() failed. https://github.com/PHPMailer/PHPMail
 Mail sent successfully to gm3buildershris@gmail.com
 Mail sent successfully to dandrecollera@gmail.com
 Mail sent successfully to dandrecollera@gmail.com
+Mail sent successfully to dandrecollera@gmail.com
+Mail sent successfully to azurineshiko@gmail.com
+Mail sent successfully to dandrecollera@gmail.com
+Mail sent successfully to azurineshiko@gmail.com
+Mail sent successfully to ortizemp@example.com
+Mail sent successfully to chr@example.com
+Mail sent successfully to caraganad@example.com
+Mail sent successfully to e@example.com
+Mail sent successfully to s@example.com
+Mail sent successfully to caraganhr@example.com
+Mail sent successfully to shikoazurine@gmail.com
