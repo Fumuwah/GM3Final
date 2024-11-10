@@ -101,7 +101,7 @@ session_start();
                     } else {
                         // Verify the password
                         if (password_verify($pass, $user["password"])) {  //JUST COMMENTED THIS FOR LOGIN
-                        // if ($pass == $user['password']) { //GONNA UNCOMMENT THIS WHEN THE SYSTEM IS DONE
+                            // if ($pass == $user['password']) { //GONNA UNCOMMENT THIS WHEN THE SYSTEM IS DONE
                             $_SESSION['employee_id'] = $user['employee_id'];
 
                             // Get the employee's role and permissions using role_id
@@ -134,12 +134,12 @@ session_start();
                             $employee_id = $user["employee_id"];
                             $title = "User Logged In";
                             $report = $user['firstname'] . " " . $user['lastname'] . " Logged In";
-                            
+
                             $logging_sql = "INSERT INTO logs (employee_id, title, report) VALUES (?, ?, ?)";
                             $logging_prep = $conn->prepare($logging_sql);
 
                             $logging_prep->bind_param('sss', $employee_id, $title, $report);
-                        
+
 
                             // Redirect based on role or permissions
                             if ($_SESSION['role_name'] === 'super  admin' || $_SESSION['can_manage_roles']) {
