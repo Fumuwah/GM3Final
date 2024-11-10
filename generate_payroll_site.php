@@ -20,11 +20,10 @@ $totalRecords = $totalRow['total'] != null ? $totalRow['total'] : 0;
 $total_pages = ceil($totalRecords / $recordsPerPage);
 
 $query = "SELECT e.employee_id AS employee_id, e.firstname, e.middlename, e.lastname, 
-        ps.position_name AS position_name, pr.basic_salary, pr.allowance, pr.total_hrs, 
-        pr.other_ot, pr.special_holiday, pr.gross, pr.cash_adv, pr.total_deduc, pr.netpay
+        pr.basic_salary, pr.allowance, pr.total_hrs, pr.other_ot, pr.special_holiday, 
+        pr.gross, pr.cash_adv, pr.total_deduc, pr.netpay
         FROM payroll pr 
         LEFT JOIN employees e ON e.employee_id = pr.employee_id
-        LEFT JOIN positions ps ON ps.position_id = pr.position_id
         LIMIT :limit 
         OFFSET :offset
 ";
@@ -87,7 +86,7 @@ include './layout/header.php';
                     <table class="table table-bordered">
                         <thead>
                             <tr>
-                                <th colspan="3"></th>
+                                <th colspan="2"></th>
                                 <th colspan=2 class="text-center">Rate</th>
                                 <th colspan=2 class="text-center">Payroll</th>
                                 <th colspan="5"></th>
@@ -95,7 +94,6 @@ include './layout/header.php';
                             <tr>
                                 <th>Emp #</th>
                                 <th>Name</th>
-                                <th>Position</th>
                                 <th>Basic Salary</th>
                                 <th>Allowance</th>
                                 <th>REG</th>
@@ -111,7 +109,6 @@ include './layout/header.php';
                                 <tr>
                                     <td><?php echo htmlspecialchars($payroll['employee_id']); ?></td>
                                     <td><?php echo htmlspecialchars($payroll['firstname'] . ' ' . $payroll['middlename'] . ' ' . $payroll['lastname']); ?></td>
-                                    <td><?php echo htmlspecialchars($payroll['position_name']); ?></td>
                                     <td><?php echo number_format($payroll['basic_salary'], 2); ?></td>
                                     <td><?php echo number_format($payroll['allowance'], 2); ?></td>
                                     <td><?php echo number_format($payroll['total_hrs'], 2); ?></td>
