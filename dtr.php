@@ -220,61 +220,12 @@ $activePage = 'dtr';
                                         $time_out = new DateTime($row['time_out']);
                                         $interval = $time_in->diff($time_out);
                                         $today_hrs = $interval->h + ($interval->i / 60);
-                                    } else {
-                                        $today_hrs = 0;
-                                    }
-
-                                    // Assume an 8-hour threshold for regular work hours
-                                    $overtime_threshold = 8;
-
-                                    if (!empty($row['time_in']) && !empty($row['time_out'])) {
-                                        $time_in = new DateTime($row['time_in']);
-                                        $time_out = new DateTime($row['time_out']);
-                                        $interval = $time_in->diff($time_out);
-                                        $today_hrs = $interval->h + ($interval->i / 60);
-
-                                        // Calculate overtime hours if total hours exceed the threshold
-                                        $today_ot = ($today_hrs > $overtime_threshold) ? $today_hrs - $overtime_threshold : 0;
+                                        $overtime_threshold = 8;
+                                        $today_ot = max(0, $today_hrs - $overtime_threshold);
                                     } else {
                                         $today_hrs = 0;
                                         $today_ot = 0;
                                     }
-
-                                    $update_sql = "UPDATE dtr 
-                                                SET total_hrs = ?, other_ot = ? 
-                                                WHERE employee_id = ? AND date = ?";
-                                    $update_stmt = $conn->prepare($update_sql);
-                                    $update_stmt->bind_param("ddis", $today_hrs, $today_ot, $employee_id, $row['date']);
-
-                                    if (!$update_stmt->execute()) {
-                                        die("Error updating total_hrs and other_ot: " . $update_stmt->error);
-                                    }
-
-                                    $sql = "SELECT time_in, time_out, other_ot FROM dtr 
-                                                        WHERE employee_id = ? AND date < ?";
-                                    $stmt = $conn->prepare($sql);
-                                    $stmt->bind_param("is", $employee_id, $row['date']);
-                                    $stmt->execute();
-                                    $result = $stmt->get_result();
-
-                                    $previous_hrs = 0;
-                                    $previous_ot = 0;
-
-                                    while ($previous_row = $result->fetch_assoc()) {
-                                        if (!empty($previous_row['time_in']) && !empty($previous_row['time_out'])) {
-                                            $prev_in = new DateTime($previous_row['time_in']);
-                                            $prev_out = new DateTime($previous_row['time_out']);
-                                            $prev_interval = $prev_in->diff($prev_out);
-                                            $previous_hrs += $prev_interval->h + ($prev_interval->i / 60);
-                                        }
-
-                                        $previous_ot += !empty($previous_row['other_ot']) ? $previous_row['other_ot'] : 0;
-                                    }
-
-                                    $today_ot = !empty($row['other_ot']) ? $row['other_ot'] : 0;
-                                    $cumulative_ot = $previous_ot + $today_ot;
-
-                                    $cumulative_hrs = $today_hrs + $previous_hrs;
 
                                     echo "<tr>";
                                     echo "<th scope='row'>$i</th>";
@@ -283,8 +234,8 @@ $activePage = 'dtr';
                                     echo "<td>" . ($row['project_name'] ?? 'No Project Assigned') . "</td>";
                                     echo "<td>$time_in_display</td>";
                                     echo "<td>$time_out_display</td>";
-                                    echo "<td>" . number_format($cumulative_ot, 2) . "</td>";
-                                    echo "<td>" . number_format($cumulative_hrs, 2) . "</td>";
+                                    echo "<td>" . number_format($today_ot, 2) . "</td>";
+                                    echo "<td>" . number_format($today_hrs, 2) . "</td>";
                                     echo "<td><button type='button' class='btn btn-success edit-btn' data-timein='{$row['time_in']}' data-timeout='{$row['time_out']}' data-did='{$row['dtr_id']}'>Edit</button></td>";
                                     echo "</tr>";
 
@@ -485,6 +436,9 @@ $activePage = 'dtr';
 
         return true;
     }
+</script>
+<?php include './layout/script.php'; ?>
+<script>
     $(document).ready(function() {
         let editButton = $('.edit-btn');
         let editModal = $('#edit-modal')
