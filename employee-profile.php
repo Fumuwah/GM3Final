@@ -119,23 +119,21 @@ $age = date_diff(date_create($employee['birthdate']), date_create('today'))->y;
                     </button>
                     <div class="card accordion" id="resignation-form">
                         <div class="card-body">
-                            <h2>Leaves</h2>
+                            <h2>Resignation Form</h2>
                             <div class="table-responsive">
                                 <table class="table">
-                                    <thead>
-                                        <tr>
-                                            <th scope="col">#</th>
-                                            <th scope="col">Name</th>
-                                            <th scope="col">Status</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td>1</td>
-                                            <td>SMD Building</td>
-                                            <td>On-Going</td>
-                                        </tr>
-                                    </tbody>
+                                <tbody>
+                                <tr>
+                                    <td>1</td>
+                                    <td>Resignation</td>
+                                    <td style="text-align: right;">
+                                    <a id="rform" href="assets/files/resignation.pdf" target="_blank"
+                                    style="display: inline-block; padding: 8px 16px; color: #fff; background-color: red; border-radius: 5px; text-decoration: none; font-weight: bold; cursor: pointer;">
+                                        Download
+                                    </a>
+                                    </td>
+                                </tr>
+                            </tbody>
                                 </table>
                             </div>
                         </div>

@@ -1,4 +1,4 @@
-<script src="../assets/js/jquery-3.7.1.min.js"></script>
+<script src="./assets/js/jquery-3.7.1.min.js"></script>
 <script>
     $(document).ready(function() {
         $(window).resize(function() {
@@ -31,17 +31,6 @@
     accordionBtn.forEach((d) => {
         d.addEventListener('click', function() {
             var getAccordion = document.querySelector('#' + d.getAttribute('data-accordion'));
-            if (this.innerHTML.trim() == "Resignation Form") {
-                window.open("assets/files/resignation.pdf", '_blank').focus();
-            }
-            accordionBtn.forEach((i) => {
-                if (i != d) {
-                    i.classList.remove('btn-primary')
-                } else {
-                    i.classList.add('btn-primary')
-                }
-
-            });
             accordions.forEach((d) => {
                 if (d != getAccordion) {
                     d.classList.remove('active');
@@ -51,6 +40,11 @@
             });
         });
     });
+
+    var resigBtn = document.getElementById('rform');
+    resigBtn.addEventListener('click', function() {
+    window.open("assets/files/resignation.pdf", '_blank').focus();
+ });
 
 
     var accountIcon = document.querySelector('#account-icon');
