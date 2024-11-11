@@ -220,12 +220,42 @@ $activePage = 'dtr';
                                         $time_out = new DateTime($row['time_out']);
                                         $interval = $time_in->diff($time_out);
                                         $today_hrs = $interval->h + ($interval->i / 60);
-                                        $overtime_threshold = 8;
-                                        $today_ot = max(0, $today_hrs - $overtime_threshold);
+                                    } else {
+                                        $today_hrs = 0;
+                                    }
+                                    $overtime_threshold = 8;
+
+                                    if (!empty($row['time_in']) && !empty($row['time_out'])) {
+                                        $time_in = new DateTime($row['time_in']);
+                                        $time_out = new DateTime($row['time_out']);
+                                        $interval = $time_in->diff($time_out);
+                                        $today_hrs = $interval->h + ($interval->i / 60);
+
+                                        // Calculate overtime hours if total hours exceed the threshold
+                                        $today_ot = ($today_hrs > $overtime_threshold) ? $today_hrs - $overtime_threshold : 0;
                                     } else {
                                         $today_hrs = 0;
                                         $today_ot = 0;
                                     }
+
+                                    $update_sql = "UPDATE dtr 
+                                                SET total_hrs = ?, other_ot = ? 
+                                                WHERE employee_id = ? AND date = ?";
+                                    $update_stmt = $conn->prepare($update_sql);
+                                    $update_stmt->bind_param("ddis", $today_hrs, $today_ot, $employee_id, $row['date']);
+
+                                    if (!$update_stmt->execute()) {
+                                        die("Error updating total_hrs and other_ot: " . $update_stmt->error);
+                                    }
+
+                                    $sql = "SELECT time_in, time_out, other_ot FROM dtr 
+                                                        WHERE employee_id = ? AND date < ?";
+                                    $stmt = $conn->prepare($sql);
+                                    $stmt->bind_param("is", $employee_id, $row['date']);
+                                    $stmt->execute();
+                                    $result = $stmt->get_result();
+
+                                    $today_ot = !empty($row['other_ot']) ? $row['other_ot'] : 0;
 
                                     echo "<tr>";
                                     echo "<th scope='row'>$i</th>";
