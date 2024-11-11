@@ -1,30 +1,25 @@
 <?php
+session_start();
+if (!isset($_SESSION['role_name']) || !isset($_SESSION['employee_id'])) {
+    header("Location: login.php");
+    exit();
+}
+
 require_once "database.php";
+if (isset($_POST['submit'])) {
+    $id = $_POST['archive_id'];
+    $sql = "UPDATE employees SET employee_status = 'Archived' WHERE employee_number = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("i", $id);
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $employeeId = $_POST['id'];
-
-    if (!empty($employeeId)) {
-        $sql = "UPDATE employees SET employee_status = 'Archived' WHERE employee_number = ?";
-        if ($stmt = mysqli_prepare($conn, $sql)) {
-            mysqli_stmt_bind_param($stmt, "s", $employeeId);
-            
-            if (mysqli_stmt_execute($stmt)) {
-                echo "Employee archived successfully.";
-            } else {
-                echo "Error executing query: " . mysqli_stmt_error($stmt);
-            }
-            
-            mysqli_stmt_close($stmt);
-        } else {
-            echo "Error preparing query: " . mysqli_error($conn);
-        }
+    if ($stmt->execute()) {
+        header("Location: employees.php");
+        exit();
     } else {
-        echo "Invalid employee ID.";
+        echo "Error updating record: " . $conn->error;
     }
 
-    mysqli_close($conn);
-} else {
-    echo "Invalid request.";
+
+    $stmt->close();
+    $conn->close();
 }
-?>
