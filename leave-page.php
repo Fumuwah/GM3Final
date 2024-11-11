@@ -148,6 +148,8 @@ $project_name = $employee['project_name'];
                                 <option value="">Select Type of Leave</option>
                                 <option value="Sick Leave">Sick Leave</option>
                                 <option value="Vacation Leave">Vacation Leave</option>
+                                <option value="Emergency Leave">Emergency Leave</option>
+                                <option value="Leave Without Pay">Leave Without Pay</option>
                             </select>
                         </div>
                         <div class="col-4">

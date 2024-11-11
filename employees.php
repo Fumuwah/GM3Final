@@ -26,7 +26,13 @@ $sql = "SELECT e.employee_id, e.firstname, e.middlename, e.lastname, e.employee_
         JOIN positions p ON e.position_id = p.position_id
         LEFT JOIN projects pr ON e.project_name = pr.project_name
         LEFT JOIN roles r ON e.role_id = r.role_id
-        WHERE e.employee_status != 'Archived'";
+        WHERE 1=1";
+
+if ($status === 'Archived') {
+    $sql .= " AND e.employee_status = 'Archived'";
+} elseif (!empty($status)) {
+    $sql .= " AND e.employee_status = '" . $status . "'";
+}
 
 if (isset($_GET['employee_number'])) {
     $employee_number = $_GET['employee_number'];
@@ -54,10 +60,12 @@ $total_sql = "SELECT COUNT(*) as total FROM employees e
             JOIN positions p ON e.position_id = p.position_id 
             LEFT JOIN projects pr ON e.project_name = pr.project_name 
             LEFT JOIN roles r ON e.role_id = r.role_id 
-            WHERE e.employee_status != 'Archived'";
+            WHERE 1=1";
 
 if ($status === 'Archived') {
-    $total_sql = str_replace("WHERE e.employee_status != 'Archived'", "WHERE e.employee_status = 'Archived'", $total_sql);
+    $total_sql .= " AND e.employee_status = 'Archived'";
+} elseif (!empty($status)) {
+    $total_sql .= " AND e.employee_status = '" . $status . "'";
 }
 
 if (!empty($search)) {
@@ -188,6 +196,7 @@ include './layout/header.php';
                                 $role_name = strtolower($row['role_name'] ?? '');
 
                                 $archiveButtonText = ($employee_status === 'Archived') ? 'Unarchive' : 'Archive';
+                                $dataStatus = ($employee_status === 'Archived') ? 'Archived' : 'Regular';
 
                                 echo "<tr>
                                         <th scope='row'>{$counter}</th>
@@ -921,6 +930,33 @@ include './layout/header.php';
                     location.reload();
                 });
         });
+
+        document.querySelectorAll('.delete-btn').forEach(function(button) {
+        button.addEventListener('click', function() {
+            const employeeId = this.getAttribute('data-employee-id');
+            const currentStatus = this.getAttribute('data-employee-status');
+            
+            if (currentStatus === 'Archived') {
+                fetch('unarchive_employee.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: new URLSearchParams({
+                        'employee_id': employeeId
+                    })
+                })
+                .then(response => response.text())
+                .then(data => {
+                    alert(data);
+                    location.reload();
+                });
+            } else {
+                const deleteModal = new bootstrap.Modal(document.getElementById('delete-modal'));
+                deleteModal.show();
+            }
+        });
+    });
 
         var addEmployeeBtn = document.querySelector('#add-employee-btn');
         var addEmployeeModal = document.querySelector('#add-employee-modal');
