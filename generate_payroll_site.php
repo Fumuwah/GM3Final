@@ -203,3 +203,4 @@ include './layout/header.php';
 </div>
 
 <?php include './layout/script.php'; ?>
+<?php include './layout/footer.php'; ?>
