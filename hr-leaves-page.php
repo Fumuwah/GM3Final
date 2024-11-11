@@ -59,6 +59,7 @@ $totalPages = ceil($totalRecords / $recordsPerPage);
 
 $query = "
     SELECT lr.request_id, e.employee_id, e.firstname, e.lastname, lr.leave_type, lr.start_date, lr.end_date, lr.reason,
+    (DATEDIFF(lr.end_date, lr.start_date) + 1) AS days_requested,
     (COALESCE(l.sick_leave, 0) + COALESCE(l.vacation_leave, 0)) AS total_leaves,
     lr.status
     FROM leave_requests lr
@@ -82,7 +83,7 @@ if (!empty($_GET['month'])) {
     $types .= "i";
 }
 
-if (!empty($_GET['year'])) {
+if (!empty($_GET['year']) && (int)$_GET['year'] > 0) {
     $conditions[] = "YEAR(lr.start_date) = ?";
     $params[] = $_GET['year'];
     $types .= "i";
@@ -127,15 +128,17 @@ include './layout/header.php';
         <div class="container-fluid pl-5">
             <h2>Leaves</h2>
             <div class="d-flex justify-content-between align-items-center">
-                <form class="form-inline my-3 col-10 pl-0" method="get">
-                    <div class="form-group mb-2 col-8 col-lg-3">
-                        <label for="type-of-leaves" class="sr-only">Type of Leaves</label>
-                        <select name="leave_type" id="type-of-leaves" class="form-control w-100">
-                            <option value="">All Types</option>
-                            <option value="Sick Leave" <?= $selectedLeaveType === 'Sick' ? 'selected' : '' ?>>Sick Leave</option>
-                            <option value="Vacation Leave" <?= $selectedLeaveType === 'Vacation' ? 'selected' : '' ?>>Vacation Leave</option>
-                        </select>
-                    </div>
+            <form class="form-inline my-3 col-10 pl-0" method="get">
+                <div class="form-group mb-2 col-8 col-lg-3">
+                    <label for="type-of-leaves" class="sr-only">Type of Leaves</label>
+                    <select name="leave_type" id="type-of-leaves" class="form-control w-100">
+                        <option value="">All Types</option>
+                        <option value="Sick Leave" <?= $selectedLeaveType === 'Sick Leave' ? 'selected' : '' ?>>Sick Leave</option>
+                        <option value="Vacation Leave" <?= $selectedLeaveType === 'Vacation Leave' ? 'selected' : '' ?>>Vacation Leave</option>
+                        <option value="Emergency Leave" <?= $selectedLeaveType === 'Emergency Leave' ? 'selected' : '' ?>>Emergency Leave</option>
+                        <option value="Leave Without Pay" <?= $selectedLeaveType === 'Leave Without Pay' ? 'selected' : '' ?>>Leave Without Pay</option>
+                    </select>
+                </div>
 
                     <div class="form-group mb-2 col-8 col-lg-4">
                         <label for="employee-name" class="sr-only">Employee Name</label>
@@ -177,7 +180,7 @@ include './layout/header.php';
                             <th scope="col">Employee Name</th>
                             <th scope="col">Leave Type</th>
                             <th scope="col">Description</th>
-                            <th scope="col">No. Of Leaves</th>
+                            <th scope="col">Days Requested</th>
                             <th scope="col">From Date</th>
                             <th scope="col">To Date</th>
                             <th scope="col">Action</th>
@@ -190,7 +193,7 @@ include './layout/header.php';
                                 <td><?= $row['firstname'] . ' ' . $row['lastname'] ?></td>
                                 <td><?= $row['leave_type'] ?></td>
                                 <td><?= $row['reason'] ?></td>
-                                <td><?= $row['total_leaves'] ?></td>
+                                <td><?= $row['days_requested'] ?></td>
                                 <td><?= $row['start_date'] ?></td>
                                 <td><?= $row['end_date'] ?></td>
                                 <td>

@@ -7,11 +7,30 @@ if (!isset($_SESSION['role_name']) || !isset($_SESSION['employee_id'])) {
     exit();
 }
 
-$recordsPerPage = 1;
+$recordsPerPage = 5;
 $current_page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $offset = ($current_page - 1) * $recordsPerPage;
 
 $search = isset($_GET['search']) ? $_GET['search'] : '';
+$projectName = isset($_GET['project_name']) ? $_GET['project_name'] : '';
+$roleId = isset($_GET['role_id']) ? $_GET['role_id'] : '';
+$payrollPeriod = isset($_GET['payroll_period']) ? $_GET['payroll_period'] : '';
+
+$projectQuery = "SELECT project_name FROM projects";
+$projectStmt = $pdo->prepare($projectQuery);
+$projectStmt->execute();
+$projects = $projectStmt->fetchAll(PDO::FETCH_ASSOC);
+
+$roleQuery = "SELECT role_id, role_name FROM roles";
+$roleStmt = $pdo->prepare($roleQuery);
+$roleStmt->execute();
+$roles = $roleStmt->fetchAll(PDO::FETCH_ASSOC);
+
+$payrollPeriodQuery = "SELECT DISTINCT payroll_period FROM payroll";
+$payrollPeriodStmt = $pdo->prepare($payrollPeriodQuery);
+$payrollPeriodStmt->execute();
+$payrollPeriods = $payrollPeriodStmt->fetchAll(PDO::FETCH_ASSOC);
+
 
 $totalQuery = "SELECT COUNT(*) as total FROM payroll";
 $totalStmt = $pdo->prepare($totalQuery);
@@ -20,17 +39,41 @@ $totalRow = $totalStmt->fetch(PDO::FETCH_ASSOC);
 $totalRecords = $totalRow['total'] != null ? $totalRow['total'] : 0;
 $total_pages = ceil($totalRecords / $recordsPerPage);
 
-$query = "SELECT e.employee_id AS employee_id, e.firstname, e.middlename, e.lastname, 
-        pr.monthly, pr.allowance, pr.total_hrs, pr.other_ot, pr.special_holiday, 
-        pr.gross, pr.cash_adv, pr.total_deduc, pr.netpay
-        FROM payroll pr 
-        LEFT JOIN employees e ON e.employee_id = pr.employee_id
-        LIMIT :limit 
-        OFFSET :offset
+$query = "
+    SELECT e.employee_id AS employee_id, employee_number, e.firstname, e.middlename, e.lastname, 
+           pr.monthly, pr.allowance, pr.total_hrs, pr.other_ot, pr.special_holiday, 
+           pr.gross, pr.cash_adv, pr.total_deduc, pr.netpay
+    FROM payroll pr
+    LEFT JOIN employees e ON e.employee_id = pr.employee_id
+    WHERE (e.firstname LIKE :search OR e.lastname LIKE :search OR e.employee_number LIKE :search)
 ";
+
+$params = [':search' => '%' . $search . '%'];
+
+if (!empty($projectName)) {
+    $query .= " AND e.project_name = :projectName";
+    $params[':projectName'] = $projectName;
+}
+
+if (!empty($roleId)) {
+    $query .= " AND e.role_id = :roleId";
+    $params[':roleId'] = $roleId;
+}
+
+if (!empty($payrollPeriod)) {
+    $query .= " AND pr.payroll_period = :payrollPeriod";
+    $params[':payrollPeriod'] = $payrollPeriod;
+}
+
+$query .= " LIMIT :limit OFFSET :offset";
 $stmt = $pdo->prepare($query);
-$stmt->bindParam(':limit', $recordsPerPage, PDO::PARAM_INT);
-$stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
+$stmt->bindValue(':limit', $recordsPerPage, PDO::PARAM_INT);
+$stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+
+foreach ($params as $key => $value) {
+    $stmt->bindValue($key, $value);
+}
+
 $stmt->execute();
 $payrolls = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -45,35 +88,46 @@ include './layout/header.php';
             <h2>Payroll Summary</h2>
             <form class="form-row align-items-center">
                 <div class="form-group col-md-3 mb-2">
-                    <input type="text" class="form-control" id="search-user" name="search" placeholder="Search User"
-                        value="">
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="search-user" name="search" placeholder="Search User" value="<?php echo htmlspecialchars($search); ?>">
+                    </div>
                 </div>
+
                 <div class="form-group col-md-2 mb-2">
-                    <select name="" id="" class="form-control">
+                    <select name="project_name" class="form-control">
                         <option value="">Select Project</option>
-                        <option value="IT Office">IT Office</option>
-                        <option value="Accounting Office">Accounting Office</option>
-                        <option value="Budget Office">Budget Office</option>
+                        <?php foreach ($projects as $project): ?>
+                            <option value="<?php echo htmlspecialchars($project['project_name']); ?>">
+                                <?php echo htmlspecialchars($project['project_name']); ?>
+                            </option>
+                        <?php endforeach; ?>
                     </select>
                 </div>
+
                 <div class="form-group col-md-2 mb-2">
-                    <select name="" id="" class="form-control">
+                    <select name="role_id" class="form-control">
                         <option value="">Role</option>
-                        <option value="Site 1">Site 1</option>
-                        <option value="Site 2">Site 2</option>
+                        <?php foreach ($roles as $role): ?>
+                            <option value="<?php echo htmlspecialchars($role['role_id']); ?>">
+                                <?php echo htmlspecialchars($role['role_name']); ?>
+                            </option>
+                        <?php endforeach; ?>
                     </select>
                 </div>
+
                 <div class="form-group col-md-2 mb-2">
-                    <select name="" id="" class="form-control">
+                    <select name="payroll_period" class="form-control">
                         <option value="">Payroll Period</option>
-                        <option value="January">January</option>
-                        <option value="February">February</option>
-                        <option value="March">March</option>
-                        <option value="April">April</option>
+                        <?php foreach ($payrollPeriods as $period): ?>
+                            <option value="<?php echo htmlspecialchars($period['payroll_period']); ?>">
+                                <?php echo htmlspecialchars($period['payroll_period']); ?>
+                            </option>
+                        <?php endforeach; ?>
                     </select>
                 </div>
+
                 <div class="form-group col-md-1 mb-2">
-                    <button type="submit" class="btn btn-primary ml-2">Filter</button>
+                    <button type="submit" class="btn btn-primary ml-2">Generate</button>
                 </div>
             </form>
 
@@ -103,7 +157,7 @@ include './layout/header.php';
                         </thead>
                         <tbody><?php foreach ($payrolls as $payroll): ?>
                                 <tr>
-                                    <td><?php echo htmlspecialchars($payroll['employee_id']); ?></td>
+                                    <td><?php echo htmlspecialchars($payroll['employee_number']); ?></td>
                                     <td><?php echo htmlspecialchars($payroll['firstname'] . ' ' . $payroll['middlename'] . ' ' . $payroll['lastname']); ?></td>
                                     <td><?php echo number_format($payroll['monthly'], 2); ?></td>
                                     <td><?php echo number_format($payroll['allowance'], 2); ?></td>
@@ -149,4 +203,3 @@ include './layout/header.php';
 </div>
 
 <?php include './layout/script.php'; ?>
-<?php include './layout/footer.php'; ?>
