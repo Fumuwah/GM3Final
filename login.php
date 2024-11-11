@@ -132,6 +132,15 @@ session_start();
 
                             // die(json_encode($user));
                             $employee_id = $user["employee_id"];
+
+                            $project_query = "SELECT project_name FROM employees WHERE employee_id = ?";
+                            $project_stmt = mysqli_prepare($conn, $project_query);
+                            mysqli_stmt_bind_param($project_stmt, 'i', $employee_id);
+                            mysqli_stmt_execute($project_stmt);
+                            $project_result = mysqli_stmt_get_result($project_stmt);
+                            $project_data = mysqli_fetch_assoc($project_result);
+                            $_SESSION['project_name'] = $project_data['project_name']; // Set project_name in session
+                            
                             $title = "User Logged In";
                             $report = $user['firstname'] . " " . $user['lastname'] . " Logged In";
 

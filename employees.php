@@ -147,11 +147,10 @@ include './layout/header.php';
                     <form action="profile-change-requests.php">
                         <button type="submit" class="btn btn-success mb-2 mr-2" id="approvals">Approvals</button>
                     </form>
-                    <?php if ($_SESSION['role_name'] == 'Super Admin'): ?>
-                        <form action="">
-                            <button type="submit" class="btn btn-success mb-2" id="add-employee-btn">Add Employee</button>
-                        </form>
-                    <?php endif; ?>
+
+                    <form action="">
+                        <button type="submit" class="btn btn-success mb-2" id="add-employee-btn">Add Employee</button>
+                    </form>
                 </div>
             </div>
 
