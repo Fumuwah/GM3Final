@@ -82,10 +82,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         if (mysqli_stmt_execute($stmt_leave)) {
             echo "<div class='alert alert-success'>Employee and leave record registered successfully!</div>";
-            header(Location: employees.php);
+            header('Location: employees.php');
         } else {
             echo "<div class='alert alert-danger'>Error inserting leave record: " . mysqli_error($conn) . "</div>";
-            header(Location: employees.php);
+            header('Location: employees.php');
         }
         mysqli_stmt_close($stmt_leave);
     } else {

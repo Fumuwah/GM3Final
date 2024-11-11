@@ -1,229 +1,147 @@
 <?php
-
 session_start();
+include 'database.php';
 
-// Ensure session contains role_name and employee_id
 if (!isset($_SESSION['role_name']) || !isset($_SESSION['employee_id'])) {
     header("Location: login.php");
     exit();
 }
 
+$month_filter = isset($_GET['month']) ? (int)$_GET['month'] : '';
+$year_filter = isset($_GET['year']) ? (int)$_GET['year'] : '';
+$payroll_period_filter = isset($_GET['payroll_period']) ? $_GET['payroll_period'] : '';
+
+$recordsPerPage = 1;
+$current_page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+$offset = ($current_page - 1) * $recordsPerPage;
+
+$payrollPeriodQuery = "SELECT DISTINCT payroll_period FROM payroll";
+$payrollPeriodStmt = $pdo->prepare($payrollPeriodQuery);
+$payrollPeriodStmt->execute();
+$payrollPeriods = $payrollPeriodStmt->fetchAll(PDO::FETCH_ASSOC);
+
+$totalQuery = "SELECT COUNT(*) as total FROM payroll";
+$totalStmt = $pdo->prepare($totalQuery);
+$totalStmt->execute();
+$totalRow = $totalStmt->fetch(PDO::FETCH_ASSOC);
+$totalRecords = $totalRow['total'] != null ? $totalRow['total'] : 0;
+$total_pages = ceil($totalRecords / $recordsPerPage);
+
+$query = "SELECT pr.payroll_id, e.firstname, e.middlename, e.lastname, 
+        pr.payroll_period, ps.position_name, pr.netpay
+        FROM payroll pr 
+        LEFT JOIN employees e ON e.employee_id = pr.employee_id
+        LEFT JOIN positions ps ON ps.position_id = e.employee_id
+        LIMIT :limit 
+        OFFSET :offset
+";
+$stmt = $pdo->prepare($query);
+$stmt->bindParam(':limit', $recordsPerPage, PDO::PARAM_INT);
+$stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
+$stmt->execute();
+$payslips = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+
+
+
 $activePage = 'payslip';
 
 include './layout/header.php';
 ?>
-<style>
-    /* Colors #1f4d88 */
-    .main * {
-        margin: 0;
-        padding: 0;
-        font-family: 'Roboto';
-    }
 
-    .main {
-        padding: 50px;
-    }
-
-    .main header,
-    .main footer,
-    .main aside,
-    .main nav,
-    .main form,
-    .main iframe,
-    .main .menu,
-    .main .hero,
-    .main .adslot {
-        display: none;
-    }
-
-    .main .title {
-        column-span: all;
-        display: flex;
-        align-items: baseline;
-        gap: 1em;
-        flex-wrap: wrap;
-    }
-
-    .main .title img {
-        width: 100%;
-    }
-
-    .main .d-flex {
-        display: flex;
-    }
-
-    .main .bg-blue {
-        background-color: #1f4d88;
-    }
-
-    .main .text-white {
-        color: white;
-    }
-
-    .main .justify-content-center {
-        justify-content: center;
-    }
-
-    .main .justify-content-between {
-        justify-content: space-between;
-    }
-
-    .main .align-items-center {
-        align-items: center;
-    }
-
-    .main .personal-info-container {
-        margin-top: 20px;
-        ;
-    }
-
-    .main .my-10 {
-        margin: 10px 0px;
-    }
-
-    .main .py-10 {
-        padding-top: 10px;
-        padding-bottom: 10px0;
-    }
-
-    .main .p-10 {
-        padding: 10px;
-    }
-
-    .main .flex-grow {
-        flex-grow: 1;
-    }
-
-    .main .text-center {
-        text-align: center;
-    }
-
-    .main .text-right {
-        text-align: right;
-    }
-
-    .main .bg-gray {
-        background: #f1f1f1;
-    }
-
-    .main .gap-5 {
-        gap: 5px;
-    }
-
-    .main .mt-20 {
-        margin-top: 20px;
-    }
-
-    @media only screen and (max-width:500px) {
-        .main {
-            padding: 5px;
-        }
-    }
-</style>
 <div class="d-flex">
     <?php include './layout/sidebar.php'; ?>
-    <div class="main" style="max-height: calc(100vh - 70px);overflow-y:scroll">
-        <article>
-            <div class="title">
-                <img src="./assets/images/gm3template.jpg" alt="">
-            </div>
-            <div class="pay-period mt-20">
-                <div class="personal-info text-white">
-                    <h4 class="bg-blue p-10">Pay Period</h4>
+    <div class="main p-3" style="max-height: calc(100vh - 80px);overflow-y:scroll">
+        <h2>Payslips</h2>
+        <form action="" method="get">
+            <div class="row">
+                <div class="col-3">
+                    <div class="form-group">
+                        <select name="month" id="month" class="form-control">
+                            <option value="">Month</option>
+                            <?php for ($i = 1; $i <= 12; $i++) {
+                                $selected = ($i == $month_filter) ? 'selected' : '';
+                                echo "<option value='$i' $selected>" . date("F", mktime(0, 0, 0, $i, 10)) . "</option>";
+                            } ?>
+                        </select>
+                    </div>
                 </div>
-                <div class="d-flex gap-5">
-                    <p class="p-10 bg-gray" style="flex: 1 1 50%;">October 11-15, 2024</p>
-                    <p class="p-10 bg-gray" style="flex: 1 1 50%;">Project #75 Coron</p>
+                <div class="col-3">
+                    <div class="form-group">
+                        <select name="year" id="year" class="form-control">
+                            <option value="">Year</option>
+                            <?php for ($y = 2021; $y <= 2024; $y++) {
+                                $selected = ($y == $year_filter) ? 'selected' : '';
+                                echo "<option value='$y' $selected>$y</option>";
+                            } ?>
+                        </select>
+                    </div>
                 </div>
-            </div>
-            <div class="personal-info-container">
-                <div class="personal-info text-white ">
-                    <h4 class="bg-blue p-10">Personal Information</h4>
+                <div class="col-3">
+                    <select name="payroll_period" class="form-control">
+                        <option value="">Payroll Period</option>
+                        <?php foreach ($payrollPeriods as $period): ?>
+                            <option value="<?php echo htmlspecialchars($period['payroll_period']); ?>">
+                                <?php echo htmlspecialchars($period['payroll_period']); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
                 </div>
-                <div class="d-flex gap-5">
-                    <p class="p-10 flex-grow bg-gray">Employee #001</p>
-                    <p class="p-10 flex-grow text-center bg-gray">Justin Kyle Caragan</p>
-                    <p class="p-10 flex-grow text-right bg-gray">Mechanical Engineer</p>
-                </div>
-            </div>
-
-
-
-            <div class="pay-period mt-20">
-                <div class="text-white">
-                    <h4 class="bg-blue p-10"></h4>
-                </div>
-                <div class="d-flex gap-5">
-                    <p class="p-10 bg-gray" style="flex: 1 1 20%;">Regular Hours</p>
-                    <p class="p-10 bg-gray" style="flex: 1 1 20%;">104</p>
-                    <p class="p-10 bg-gray" style="flex: 1 1 60%;">10000</p>
-                </div>
-                <div class="d-flex gap-5">
-                    <p class="p-10 bg-gray" style="flex: 1 1 20%;">Allowance/Others</p>
-                    <p class="p-10 bg-gray" style="flex: 1 1 20%;">___________</p>
-                    <p class="p-10 bg-gray" style="flex: 1 1 60%;">2000</p>
-                </div>
-                <div class="d-flex gap-5">
-                    <p class="p-10 bg-gray" style="flex: 1 1 20%;"></p>
-                    <p class="p-10 bg-gray" style="flex: 1 1 20%;">___________</p>
-                    <p class="p-10 bg-gray" style="flex: 1 1 60%;"></p>
-                </div>
-                <div class="d-flex gap-5">
-                    <p class="p-10 bg-blue text-white" style="flex: 1 1 40%;"><strong>GROSS PAY</strong></p>
-                    <p class="p-10 bg-blue text-white" style="flex: 1 1 60%;"><strong>12000</strong></p>
+                <div class="col-3">
+                    <button type="submit" class="btn btn-primary">Generate</button>
                 </div>
             </div>
-
-
-            <div class="deduction-container mt-20">
-                <div class="text-white">
-                    <h4 class="bg-blue p-10">Deductions:</h4>
-                </div>
-                <div class="d-flex gap-5">
-                    <p class="p-10 bg-gray" style="flex: 1 1 20%;">Withholding Tax</p>
-                    <p class="p-10 bg-gray" style="flex: 1 1 20%;">___________</p>
-                    <p class="p-10 bg-gray" style="flex: 1 1 60%;">0</p>
-                </div>
-                <div class="d-flex gap-5">
-                    <p class="p-10 bg-gray" style="flex: 1 1 20%;">SSS Contribution</p>
-                    <p class="p-10 bg-gray" style="flex: 1 1 20%;">___________</p>
-                    <p class="p-10 bg-gray" style="flex: 1 1 60%;">200</p>
-                </div>
-                <div class="d-flex gap-5">
-                    <p class="p-10 bg-gray" style="flex: 1 1 20%;">Philhealth</p>
-                    <p class="p-10 bg-gray" style="flex: 1 1 20%;">___________</p>
-                    <p class="p-10 bg-gray" style="flex: 1 1 60%;">50</p>
-                </div>
-                <div class="d-flex gap-5">
-                    <p class="p-10 bg-gray" style="flex: 1 1 20%;">Pag-Ibig</p>
-                    <p class="p-10 bg-gray" style="flex: 1 1 20%;">___________</p>
-                    <p class="p-10 bg-gray" style="flex: 1 1 60%;">0</p>
-                </div>
-                <div class="d-flex gap-5">
-                    <p class="p-10 bg-gray" style="flex: 1 1 20%;">Others</p>
-                    <p class="p-10 bg-gray" style="flex: 1 1 20%;">___________</p>
-                    <p class="p-10 bg-gray" style="flex: 1 1 60%;">0</p>
-                </div>
-                <div class="d-flex gap-5">
-                    <p class="p-10 bg-blue text-white" style="flex: 1 1 40%;"><strong>Total Deduction</strong></p>
-                    <p class="p-10 bg-blue text-white" style="flex: 1 1 60%;"><strong>250</strong></p>
-                </div>
-
-                <div class="d-flex gap-5 mt-20">
-                    <p class="p-10 bg-blue text-white" style="flex: 1 1 40%;"><strong>Net Pay</strong></p>
-                    <p class="p-10 bg-blue text-white" style="flex: 1 1 60%;"><strong>11750</strong></p>
-                </div>
+        </form>
+        <div class="row">
+            <div class="col-12 table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Payroll Period</th>
+                            <th>Position</th>
+                            <th>Net Pay</th>
+                            <th>Payslip</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($payslips as $payslip): ?>
+                            <tr>
+                                <td><?php echo htmlspecialchars($payslip['firstname'] . ' ' . $payslip['middlename'] . ' ' . $payslip['lastname']); ?></td>
+                                <td><?php echo htmlspecialchars($payslip['payroll_period']) ?></td>
+                                <td><?php echo htmlspecialchars($payslip['position_name']) ?></td>
+                                <td><?php echo htmlspecialchars($payslip['netpay']) ?></td>
+                                <td><a class="btn btn-primary text-light" href="payslip_overview?pid=<?php echo $payslip['payroll_id'] ?>">Overview</a></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
             </div>
-            <div class="d-flex justify-content-center align-items-center">
-                <div class="text-center">
-                    <h3 style="padding-top: 10px; border-top: 2px solid black; margin-top:70px;">Justin Kyle Caragan</h3>
-                    <p class="m-0 p-0">Signature Over Printed Name / Date</p>
-                </div>
-            </div>
+        </div>
+        <div class="d-flex justify-content-end">
+            <nav aria-label="Page navigation example">
+                <ul class="pagination">
+                    <?php if ($current_page > 1): ?>
+                        <li class="page-item">
+                            <a class="page-link" href="?page=<?php echo $current_page - 1; ?>&month=<?php $pmonth_filter ?>&year=<?php $year_filter ?>&payroll_period=<?php $payroll_period_filter ?>">Previous</a>
+                        </li>
+                    <?php endif; ?>
 
-        </article>
+                    <?php for ($i = 1; $i <= $total_pages; $i++): ?>
+                        <li class="page-item <?php if ($current_page == $i) echo 'active'; ?>">
+                            <a class="page-link" href="?page=<?php echo $i; ?>&month=<?php $pmonth_filter ?>&year=<?php $year_filter ?>&payroll_period=<?php $payroll_period_filter ?>"><?php echo $i; ?></a>
+                        </li>
+                    <?php endfor; ?>
+
+                    <?php if ($current_page < $total_pages): ?>
+                        <li class="page-item">
+                            <a class="page-link" href="?page=<?php echo $current_page + 1; ?>&month=<?php $pmonth_filter ?>&year=<?php $year_filter ?>&payroll_period=<?php $payroll_period_filter ?>">Next</a>
+                        </li>
+                    <?php endif; ?>
+                </ul>
+            </nav>
+        </div>
     </div>
 </div>
-
-
+<?php include './layout/script.php'; ?>
 <?php include './layout/footer.php'; ?>

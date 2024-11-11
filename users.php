@@ -248,4 +248,5 @@ include './layout/header.php';
     </div>
 </div>
 
+<?php include './layout/script.php'; ?>
 <?php include './layout/footer.php'; ?>

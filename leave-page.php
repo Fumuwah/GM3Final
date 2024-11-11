@@ -84,7 +84,7 @@ $project_name = $employee['project_name'];
 <div class="d-flex">
     <?php include 'layout/sidebar.php'; ?>
     <div class="main pt-3" style="max-height: calc(100vh - 80px);overflow-y:scroll">
-    <div class="container-fluid pl-5">
+        <div class="container-fluid pl-5">
             <div class="row">
                 <div class="col-12">
                     <h2>Leave Credits</h2>
@@ -148,6 +148,8 @@ $project_name = $employee['project_name'];
                                 <option value="">Select Type of Leave</option>
                                 <option value="Sick Leave">Sick Leave</option>
                                 <option value="Vacation Leave">Vacation Leave</option>
+                                <option value="Emergency Leave">Emergency Leave</option>
+                                <option value="Leave Without Pay">Leave Without Pay</option>
                             </select>
                         </div>
                         <div class="col-4">
@@ -175,37 +177,6 @@ $project_name = $employee['project_name'];
 
 
 <script>
-
-    document.getElementById('leave-form').addEventListener('submit', function(e) {
-        e.preventDefault();
-
-        const formData = new FormData(this);
-        fetch('submit_leave.php', {
-                method: 'POST',
-                body: formData,
-            })
-            .then(response => response.text())
-            .then(text => {
-                try {
-                    const data = JSON.parse(text);
-                    if (data.status === 'success') {
-                        alert('Leave request submitted successfully.');
-                        location.reload();
-                    } else {
-                        alert('Error: ' + data.message);
-                    }
-                } catch (error) {
-                    console.error('Invalid JSON:', error, text);
-                    alert('An unexpected error occurred. Please check the console for more details.');
-                }
-            })
-            .catch(error => {
-                console.error('Fetch error:', error);
-                alert('Failed to submit the form. Please try again.');
-            });
-    });
-
-
     document.querySelectorAll('.close-modalwForm').forEach(btn => {
         btn.addEventListener('click', () => {
             document.getElementById('request-leave-modal').classList.add('fade');
@@ -233,6 +204,32 @@ $project_name = $employee['project_name'];
                 modalParent.style.display = 'none';
             }, 400)
         });
+    });
+</script>
+<?php include './layout/script.php'; ?>
+<script>
+    $('#leave-form').submit(function(e) {
+        e.preventDefault();
+
+        const formData = {
+            leave_type: $('#leave-type').val(),
+            start_date: $('#start_date').val(),
+            end_date: $('#end_date').val(),
+            reason: $('#reason').val()
+        };
+
+        $.get('submit_leave.php', formData, function(data) {
+                if (data.status === 'success') {
+                    alert('Leave request submitted successfully.');
+                    location.reload();
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            }, 'json')
+            .fail(function(jqXHR, textStatus, errorThrown) {
+                console.error('Error:', errorThrown);
+                alert('Failed to submit the form. Please try again.');
+            });
     });
 </script>
 <?php include './layout/footer.php'; ?>

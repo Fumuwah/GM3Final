@@ -22,10 +22,16 @@ $records_per_page = 10;
 $current_page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $offset = ($current_page - 1) * $records_per_page;
 
-$search_user = $_POST['search_user'] ?? '';
-$month_filter = $_POST['month'] ?? '';
-$year_filter = $_POST['year'] ?? '';
-$day_filter = $_POST['day'] ?? '';
+$search_user = $_GET['search_user'] ?? '';
+$project_filter = $_GET['project_name'] ?? '';
+$month_filter = $_GET['month'] ?? '';
+$year_filter = $_GET['year'] ?? '';
+$day_filter = $_GET['day'] ?? '';
+$today_filter = '';
+if (empty($day_filter)) {
+    date_default_timezone_set("Asia/Manila");
+    $today_filter = date('Y-m-d');
+}
 
 $query_projects = "SELECT project_name FROM projects";
 $result_projects = mysqli_query($conn, $query_projects) or die("Error fetching projects: " . mysqli_error($conn));
@@ -64,6 +70,7 @@ if (!empty($project_filter)) $query_today .= " AND p.project_name = ?";
 if (!empty($month_filter)) $query_today .= " AND d.month = ?";
 if (!empty($year_filter)) $query_today .= " AND d.year = ?";
 if (!empty($day_filter)) $query_today .= " AND d.day = ?";
+if (!empty($today_filter)) $query_today .= " AND d.date = ?";
 
 $query_today .= " LIMIT ? OFFSET ?";
 
@@ -73,7 +80,7 @@ $params = [];
 if ($role_name !== 'super admin') {
     $params[] = $employee_id;
 }
-if (!empty($search_user)){
+if (!empty($search_user)) {
     $params[] = "%{$search_user}%";
     $params[] = "%{$search_user}%";
     $params[] = "%{$search_user}%";
@@ -82,6 +89,7 @@ if (!empty($project_filter)) $params[] = $project_filter;
 if (!empty($month_filter)) $params[] = $month_filter;
 if (!empty($year_filter)) $params[] = $year_filter;
 if (!empty($day_filter)) $params[] = $day_filter;
+if (!empty($today_filter)) $params[] = $today_filter;
 $params[] = $records_per_page;
 $params[] = $offset;
 // die(json_encode($params));
@@ -94,19 +102,29 @@ if (!$stmt->execute()) {
 }
 $result_today = $stmt->get_result();
 
+
 $total_query = getRoleBasedQuery($role_name, $employee_id);
+if (!empty($search_user)) $total_query .= " AND e.firstname LIKE ? OR e.middlename LIKE ? OR e.lastname LIKE ?";
 if (!empty($project_filter)) $total_query .= " AND p.project_name = ?";
 if (!empty($month_filter)) $total_query .= " AND d.month = ?";
 if (!empty($year_filter)) $total_query .= " AND d.year = ?";
 if (!empty($day_filter)) $total_query .= " AND d.day = ?";
+if (!empty($today_filter)) $total_query .= " AND d.date = ?";
 
 $total_stmt = $conn->prepare($total_query);
 $params_total = [];
 if ($role_name !== 'super admin') $params_total[] = $employee_id;
+
+if (!empty($search_user)) {
+    $params_total[] = "%{$search_user}%";
+    $params_total[] = "%{$search_user}%";
+    $params_total[] = "%{$search_user}%";
+};
 if (!empty($project_filter)) $params_total[] = $project_filter;
 if (!empty($month_filter)) $params_total[] = $month_filter;
 if (!empty($year_filter)) $params_total[] = $year_filter;
 if (!empty($day_filter)) $params_total[] = $day_filter;
+if (!empty($today_filter)) $params_total[] = $today_filter;
 
 if ($params_total) {
     $total_stmt->bind_param(str_repeat('s', count($params_total)), ...$params_total);
@@ -123,9 +141,9 @@ $activePage = 'dtr';
 <div class="d-flex">
     <?php include './layout/sidebar.php'; ?>
     <div class="main p-3" style="max-height: calc(100vh - 80px);overflow-y:scroll">
-    <div class="container-fluid pl-5">
+        <div class="container-fluid pl-5">
             <h2>Generate Daily Time Record</h2>
-            <form action="" method="POST">
+            <form action="" method="GET">
                 <div class="form-group row">
                     <div class="col-sm-3">
                         <input class="form-control" type="text" name="search_user" id="search_user" placeholder="Search User...">
@@ -166,7 +184,7 @@ $activePage = 'dtr';
                     </div>
                     <div class="d-flex col-sm-2">
                         <button type="submit" class="btn btn-primary">Filter</button>
-                        <a href="#" class="btn btn-secondary" id="attendance-btn">Attendance</a>
+                        <button type="button" class="btn btn-secondary" id="attendance-btn">Attendance</button>
                     </div>
                 </div>
             </form>
@@ -251,13 +269,13 @@ $activePage = 'dtr';
                                     echo "<td>$time_out_display</td>";
                                     echo "<td>" . number_format($cumulative_ot, 2) . "</td>";
                                     echo "<td>" . number_format($cumulative_hrs, 2) . "</td>";
-                                    echo "<td><a href='#' class='btn btn-success'>Edit</a></td>";
+                                    echo "<td><button type='button' class='btn btn-success edit-btn' data-timein='{$row['time_in']}' data-timeout='{$row['time_out']}' data-did='{$row['dtr_id']}'>Edit</button></td>";
                                     echo "</tr>";
 
                                     $i++;
                                 }
                             } else {
-                                echo "<tr><td colspan='9'>No attendance records found</td></tr>";
+                                echo "<tr><td colspan='9' style='text-align: center;font-size:20px;'>No attendance records found</td></tr>";
                             }
                             ?>
                         </tbody>
@@ -265,22 +283,28 @@ $activePage = 'dtr';
                 </div>
             </div>
 
-            <div class="pagination">
-                <?php if ($current_page > 1): ?>
-                    <a href="?page=<?php echo $current_page - 1; ?>">&laquo; Previous</a>
-                <?php endif; ?>
+            <div class="d-flex justify-content-end">
+                <nav aria-label="Page navigation example">
+                    <ul class="pagination">
+                        <?php if ($current_page > 1): ?>
+                            <li class="page-item">
+                                <a class="page-link" href="?page=<?php echo $current_page - 1; ?>&search_user=<?php echo $search_user; ?>&project_name=<?php echo $project_filter; ?>&month=<?php echo $month_filter; ?>&year=<?php echo $year_filter; ?>&day=<?php echo $day_filter; ?>">Previous</a>
+                            </li>
+                        <?php endif; ?>
 
-                <?php for ($page = 1; $page <= $total_pages; $page++): ?>
-                    <?php if ($page == $current_page): ?>
-                        <strong><?php echo $page; ?></strong>
-                    <?php else: ?>
-                        <a href="?page=<?php echo $page; ?>"><?php echo $page; ?></a>
-                    <?php endif; ?>
-                <?php endfor; ?>
+                        <?php for ($i = 1; $i <= $total_pages; $i++): ?>
+                            <li class="page-item <?php if ($current_page == $i) echo 'active'; ?>">
+                                <a class="page-link" href="?page=<?php echo $i; ?>&search_user=<?php echo $search_user; ?>&project_name=<?php echo $project_filter; ?>&month=<?php echo $month_filter; ?>&year=<?php echo $year_filter; ?>&day=<?php echo $day_filter; ?>"><?php echo $i; ?></a>
+                            </li>
+                        <?php endfor; ?>
 
-                <?php if ($current_page < $total_pages): ?>
-                    <a href="?page=<?php echo $current_page + 1; ?>">Next &raquo;</a>
-                <?php endif; ?>
+                        <?php if ($current_page < $total_pages): ?>
+                            <li class="page-item">
+                                <a class="page-link" href="?page=<?php echo $current_page + 1; ?>&search_user=<?php echo $search_user; ?>&project_name=<?php echo $project_filter; ?>&month=<?php echo $month_filter; ?>&year=<?php echo $year_filter; ?>&day=<?php echo $day_filter; ?>">Next</a>
+                            </li>
+                        <?php endif; ?>
+                    </ul>
+                </nav>
             </div>
         </div>
     </div>
@@ -315,6 +339,35 @@ $activePage = 'dtr';
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary close-modal">Close</button>
                         <button type="submit" class="btn btn-primary">Submit</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="edit-modal" tabindex="-1" aria-labelledby="attendanceModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="attendanceModalLabel">Attendance</h5>
+            </div>
+            <div class="modal-body">
+                <form id="attendanceForm" action="edit_timein_timeout.php" method="POST" autocomplete="off">
+                    <div class="form-group">
+                        <input type="hidden" class="form-control edit-id" name="edit_id">
+                        <div class="form-group mb-3">
+                            <label for="edit_timein">Time-In:</label>
+                            <input class="form-control edit-timein" type="time" id="edit_timein" name="edit_timein" value="" placeholder="Time in">
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="edit_timeout">Time-Out:</label>
+                            <input class="form-control edit-timeout" type="time" id="edit_timeout" name="edit_timeout" value="" placeholder="Time out">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary edit-close">Close</button>
+                        <button type="submit" class="btn btn-primary" name="submit">Submit</button>
                     </div>
                 </form>
             </div>
@@ -408,13 +461,36 @@ $activePage = 'dtr';
 
     function validateAttendanceForm() {
         const attendanceAction = document.querySelector('input[name="attendance_action"]:checked');
-        
+
         if (!attendanceAction) {
             alert("Please select either Time-In or Time-Out.");
             return false;
         }
-        
+
         return true;
     }
+</script>
+<?php include './layout/script.php'; ?>
+<script>
+    $(document).ready(function() {
+        let editButton = $('.edit-btn');
+        let editModal = $('#edit-modal')
+
+        editButton.on('click', function() {
+            let timein = $(this).data('timein');
+            let timeout = $(this).data('timeout');
+            let dtrID = $(this).data('did');
+            editModal.removeClass('fade').css('display', 'block');
+            $('.edit-id').val(dtrID);
+            $('.edit-timein').val(timein);
+            $('.edit-timeout').val(timeout);
+        });
+        $('.edit-close').on('click', function() {
+            editModal.addClass('fade');
+            setTimeout(function() {
+                editModal.css('display', 'none');
+            }, 400);
+        });
+    });
 </script>
 <?php include './layout/footer.php'; ?>

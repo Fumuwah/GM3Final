@@ -26,7 +26,13 @@ $sql = "SELECT e.employee_id, e.firstname, e.middlename, e.lastname, e.employee_
         JOIN positions p ON e.position_id = p.position_id
         LEFT JOIN projects pr ON e.project_name = pr.project_name
         LEFT JOIN roles r ON e.role_id = r.role_id
-        WHERE e.employee_status != 'Archived'";
+        WHERE 1=1";
+
+if ($status === 'Archived') {
+    $sql .= " AND e.employee_status = 'Archived'";
+} elseif (!empty($status)) {
+    $sql .= " AND e.employee_status = '" . $status . "'";
+}
 
 if (isset($_GET['employee_number'])) {
     $employee_number = $_GET['employee_number'];
@@ -54,10 +60,12 @@ $total_sql = "SELECT COUNT(*) as total FROM employees e
             JOIN positions p ON e.position_id = p.position_id 
             LEFT JOIN projects pr ON e.project_name = pr.project_name 
             LEFT JOIN roles r ON e.role_id = r.role_id 
-            WHERE e.employee_status != 'Archived'";
+            WHERE 1=1";
 
 if ($status === 'Archived') {
-    $total_sql = str_replace("WHERE e.employee_status != 'Archived'", "WHERE e.employee_status = 'Archived'", $total_sql);
+    $total_sql .= " AND e.employee_status = 'Archived'";
+} elseif (!empty($status)) {
+    $total_sql .= " AND e.employee_status = '" . $status . "'";
 }
 
 if (!empty($search)) {
@@ -91,8 +99,8 @@ include './layout/header.php';
 <div class="d-flex">
     <?php include './layout/sidebar.php'; ?>
     <div class="main pt-3" style="max-height: calc(100vh - 80px);overflow-y:scroll">
-    <div class="container-fluid pl-5">
-            <h2>Pay slip</h2>
+        <div class="container-fluid pl-5">
+            <h2>Employees</h2>
             <div class="d-flex justify-content-between align-items-center">
                 <form class="form-inline my-3 col-10 pl-0" method="GET" action="">
                     <div class="form-group col-8 col-lg-3">
@@ -139,10 +147,11 @@ include './layout/header.php';
                     <form action="profile-change-requests.php">
                         <button type="submit" class="btn btn-success mb-2 mr-2" id="approvals">Approvals</button>
                     </form>
-
-                    <form action="">
-                        <button type="submit" class="btn btn-success mb-2" id="add-employee-btn">Add Employee</button>
-                    </form>
+                    <?php if ($_SESSION['role_name'] == 'Super Admin'): ?>
+                        <form action="">
+                            <button type="submit" class="btn btn-success mb-2" id="add-employee-btn">Add Employee</button>
+                        </form>
+                    <?php endif; ?>
                 </div>
             </div>
 
@@ -188,6 +197,7 @@ include './layout/header.php';
                                 $role_name = strtolower($row['role_name'] ?? '');
 
                                 $archiveButtonText = ($employee_status === 'Archived') ? 'Unarchive' : 'Archive';
+                                $dataStatus = ($employee_status === 'Archived') ? 'Archived' : 'Regular';
 
                                 echo "<tr>
                                         <th scope='row'>{$counter}</th>
@@ -195,9 +205,13 @@ include './layout/header.php';
                                         <td>{$employee_status}</td>
                                         <td>{$position_name2}</td> 
                                         <td>{$hire_date}</td>
-                                        <td>
-                                            <button type='button' class='btn btn-danger mb-2 delete-btn' data-id='{$employee_number}'>{$archiveButtonText}</button>
-                                            <button type='button' class='btn btn-primary mb-2 edit-employee-btn' data-employee-id='{$employee_id}' 
+                                        <td>";
+
+                                if ($_SESSION['role_name'] == 'Super Admin') {
+                                    echo "<button type='button' class='btn btn-danger mb-2 delete-btn' data-id='{$employee_number}'>{$archiveButtonText}</button>";
+                                }
+
+                                echo "          <button type='button' class='btn btn-primary mb-2 edit-employee-btn' data-employee-id='{$employee_id}' 
                                             data-employee-number='{$employee_number}' 
                                             data-lastname='{$lastname}' 
                                             data-firstname='{$firstname}' 
@@ -922,6 +936,33 @@ include './layout/header.php';
                 });
         });
 
+        document.querySelectorAll('.delete-btn').forEach(function(button) {
+        button.addEventListener('click', function() {
+            const employeeId = this.getAttribute('data-employee-id');
+            const currentStatus = this.getAttribute('data-employee-status');
+            
+            if (currentStatus === 'Archived') {
+                fetch('unarchive_employee.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: new URLSearchParams({
+                        'employee_id': employeeId
+                    })
+                })
+                .then(response => response.text())
+                .then(data => {
+                    alert(data);
+                    location.reload();
+                });
+            } else {
+                const deleteModal = new bootstrap.Modal(document.getElementById('delete-modal'));
+                deleteModal.show();
+            }
+        });
+    });
+
         var addEmployeeBtn = document.querySelector('#add-employee-btn');
         var addEmployeeModal = document.querySelector('#add-employee-modal');
         var editEmployeeBtns = document.querySelectorAll('.edit-employee-btn')
@@ -1050,4 +1091,5 @@ include './layout/header.php';
         }
     }
 </script>
+<?php include './layout/script.php'; ?>
 <?php include './layout/footer.php'; ?>
