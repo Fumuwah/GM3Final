@@ -17,15 +17,15 @@ $position_name = isset($_GET['position_name']) ? mysqli_real_escape_string($conn
 // die($position_name);
 $role_name = strtolower($user['role_name'] ?? '');
 
-$sql = "SELECT e.employee_id, e.firstname, e.middlename, e.lastname, e.employee_number, 
-            e.contactno, e.address, e.birthdate, e.civil_status, e.religion, 
-            e.basic_salary, e.hire_date, e.employee_status, e.sss_no, e.philhealth_no, 
-            e.hdmf_no, e.tin_no, e.email, e.password, e.emergency_contactno, 
-            p.position_name, pr.project_name, r.role_name 
+$sql = "SELECT e.employee_id, e.firstname, e.lastname, e.middlename, e.employee_number, e.contactno, e.address, e.birthdate, 
+            e.civil_status, e.religion, e.basic_salary, e.hire_date, e.employee_status, e.sss_no, e.philhealth_no, 
+            e.hdmf_no, e.tin_no, e.email, e.emergency_contactno, p.position_name, pr.project_name, r.role_name, r.role_id,
+            l.sick_leave, l.vacation_leave, l.used_leave, l.leave_without_pay 
         FROM employees e
         JOIN positions p ON e.position_id = p.position_id
         LEFT JOIN projects pr ON e.project_name = pr.project_name
         LEFT JOIN roles r ON e.role_id = r.role_id
+        LEFT JOIN leaves l ON e.employee_id = l.employee_id 
         WHERE 1=1";
 
 if ($status === 'Archived') {
@@ -193,7 +193,12 @@ include './layout/header.php';
                                 $email = htmlspecialchars($row['email'] ?? '');
                                 $password = htmlspecialchars($row['password'] ?? '');
                                 $emergency_contactno = htmlspecialchars($row['emergency_contactno'] ?? '');
-                                $role_name = strtolower($row['role_name'] ?? '');
+                                $role_id = strtolower($row['role_id'] ?? '');
+                                $sick_leave = htmlspecialchars($row['sick_leave'] ?? 'N/A');
+                                $vacation_leave = htmlspecialchars($row['vacation_leave'] ?? 'N/A');
+                                $used_leave = htmlspecialchars($row['used_leave'] ?? 'N/A');
+                                $leave_without_pay = htmlspecialchars($row['leave_without_pay'] ?? 'N/A');
+
 
                                 $archiveButtonText = ($employee_status === 'Archived') ? 'Unarchive' : 'Archive';
                                 $archiveClass = ($employee_status === 'Archived') ? 'unarchive-btn' : 'archive-btn';
@@ -223,7 +228,7 @@ include './layout/header.php';
                                             data-religion='{$religion}'
                                             data-basic-salary='{$basic_salary}' 
                                             data-project-name='{$project_name}'
-                                            data-position-name='{$position_name}' 
+                                            data-position-name='{$position_name2}' 
                                             data-hire-date='{$hire_date}' 
                                             data-employee-status='{$employee_status}' 
                                             data-sss-no='{$sss_no}' 
@@ -233,7 +238,7 @@ include './layout/header.php';
                                             data-email='{$email}' 
                                             data-password='{$password}' 
                                             data-emergency-contactno='{$emergency_contactno}' 
-                                            data-role-name='{$role_name}'>Edit</button>
+                                            data-role-id='{$role_id}'>Edit</button>
                                             <button type='button' class='btn btn-secondary mb-2 leaves-btn' data-id='{$employee_number}'>Leaves</button>
                                         </td>
                                     </tr>";
@@ -368,7 +373,7 @@ include './layout/header.php';
                         </div>
                         <div class="col-3">
                             <label for="middlename">Middle Name</label>
-                            <input type="text" class="form-control" name="middlename" id="edit_middlename" required pattern="^[A-Za-zÀ-ÖØ-ÿ\s]+$" title="Please enter a valid middle name (only letters and spaces are allowed).">
+                            <input type="text" class="form-control" name="middlename" id="edit_middlename" pattern="^[A-Za-zÀ-ÖØ-ÿ\s]+$" title="Please enter a valid middle name (only letters and spaces are allowed).">
                             <?php
                             if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                 $middlename = $_POST['middlename'];
@@ -641,7 +646,7 @@ include './layout/header.php';
                         </div>
                         <div class="col-3">
                             <label for="middlename">Middle Name</label>
-                            <input type="text" class="form-control" name="middlename" id="middlename" required pattern="^[A-Za-zÀ-ÖØ-ÿ\s]+$" title="Please enter a valid middle name (only letters and spaces are allowed).">
+                            <input type="text" class="form-control" name="middlename" id="middlename" pattern="^[A-Za-zÀ-ÖØ-ÿ\s]+$" title="Please enter a valid middle name (only letters and spaces are allowed).">
                             <?php
                             if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                 $middlename = $_POST['middlename'];
@@ -884,7 +889,7 @@ include './layout/header.php';
                                 <th scope="col">Vacation Leave</th>
                                 <th scope="col">Sick Leave</th>
                                 <th scope="col">Leave without Pay</th>
-                                <th scope="col">Leave without Pay</th>
+                                <th scope="col">Used Leave</th>
                                 <th scope="col">Total Leave</th>
                             </tr>
                         </thead>
@@ -972,7 +977,7 @@ include './layout/header.php';
                 const emergencyContactNo = button.getAttribute('data-emergency-contactno');
                 const position = button.getAttribute('data-position-name');
                 const employeeStatus = button.getAttribute('data-employee-status');
-                const role = button.getAttribute('data-role-name');
+                const role = button.getAttribute('data-role-id');
 
                 document.querySelector('#edit_employee_id').value = employeeId;
                 document.querySelector('#edit_employee_number').value = employeeNumber;
@@ -1034,8 +1039,39 @@ include './layout/header.php';
             });
         })
 
+        document.querySelectorAll('.leaves-btn').forEach(button => {
+            button.addEventListener('click', function () {
+                const employeeNumber = this.getAttribute('data-id');
+                $('#leave-modal').modal('show');
 
-
+                // Fetch leave details via AJAX
+                fetch('get_leave_details.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ employee_number: employeeNumber }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Populate leave data in the modal table
+                        document.querySelector('#leave-modal tbody').innerHTML = `
+                            <tr>
+                                <td>${data.vacation_leave}</td>
+                                <td>${data.sick_leave}</td>
+                                <td>${data.leave_without_pay}</td>
+                                <td>${data.used_leave}</td>
+                                <td>${data.total_leave}</td>
+                            </tr>
+                        `;
+                    } else {
+                        alert('Failed to fetch leave details.');
+                    }
+                })
+                .catch(error => console.error('Error fetching leave data:', error));
+            });
+        });
     });
 
     function toggleProjectField() {

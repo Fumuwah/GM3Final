@@ -18,10 +18,10 @@ $requests = [];
 if (!empty($password) && $password === $confirm_password) {
     $requests['password'] = password_hash($password, PASSWORD_DEFAULT); // Hash the password
 }
-if (!empty($contactno) && $contactno != $employee['contactno']) {
+if (!empty($contactno) && $contactno != $employee_id['contactno']) {
     $requests['contactno'] = $contactno;
 }
-if (!empty($address) && $address != $employee['address']) {
+if (!empty($address) && $address != $employee_id['address']) {
     $requests['address'] = $address;
 }
 
