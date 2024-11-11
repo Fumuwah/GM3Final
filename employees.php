@@ -91,7 +91,7 @@ include './layout/header.php';
 <div class="d-flex">
     <?php include './layout/sidebar.php'; ?>
     <div class="main pt-3" style="max-height: calc(100vh - 80px);overflow-y:scroll">
-    <div class="container-fluid pl-5">
+        <div class="container-fluid pl-5">
             <h2>Pay slip</h2>
             <div class="d-flex justify-content-between align-items-center">
                 <form class="form-inline my-3 col-10 pl-0" method="GET" action="">
@@ -139,10 +139,11 @@ include './layout/header.php';
                     <form action="profile-change-requests.php">
                         <button type="submit" class="btn btn-success mb-2 mr-2" id="approvals">Approvals</button>
                     </form>
-
-                    <form action="">
-                        <button type="submit" class="btn btn-success mb-2" id="add-employee-btn">Add Employee</button>
-                    </form>
+                    <?php if ($_SESSION['role_name'] == 'Super Admin'): ?>
+                        <form action="">
+                            <button type="submit" class="btn btn-success mb-2" id="add-employee-btn">Add Employee</button>
+                        </form>
+                    <?php endif; ?>
                 </div>
             </div>
 
@@ -195,9 +196,13 @@ include './layout/header.php';
                                         <td>{$employee_status}</td>
                                         <td>{$position_name2}</td> 
                                         <td>{$hire_date}</td>
-                                        <td>
-                                            <button type='button' class='btn btn-danger mb-2 delete-btn' data-id='{$employee_number}'>{$archiveButtonText}</button>
-                                            <button type='button' class='btn btn-primary mb-2 edit-employee-btn' data-employee-id='{$employee_id}' 
+                                        <td>";
+
+                                if ($_SESSION['role_name'] == 'Super Admin') {
+                                    echo "<button type='button' class='btn btn-danger mb-2 delete-btn' data-id='{$employee_number}'>{$archiveButtonText}</button>";
+                                }
+
+                                echo "          <button type='button' class='btn btn-primary mb-2 edit-employee-btn' data-employee-id='{$employee_id}' 
                                             data-employee-number='{$employee_number}' 
                                             data-lastname='{$lastname}' 
                                             data-firstname='{$firstname}' 
