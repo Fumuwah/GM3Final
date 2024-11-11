@@ -269,7 +269,7 @@ $activePage = 'dtr';
                                     echo "<td>$time_out_display</td>";
                                     echo "<td>" . number_format($cumulative_ot, 2) . "</td>";
                                     echo "<td>" . number_format($cumulative_hrs, 2) . "</td>";
-                                    echo "<td><button type='button' class='btn btn-success edit-btn' data-timein='$time_in_display' data-timeout='$time_out_display' data-did='" . $row['dtr_id'] . "'>Edit</button></td>";
+                                    echo "<td><button type='button' class='btn btn-success edit-btn' data-timein='{$row['time_in']}' data-timeout='{$row['time_out']}' data-did='{$row['dtr_id']}'>Edit</button></td>";
                                     echo "</tr>";
 
                                     $i++;
@@ -358,11 +358,11 @@ $activePage = 'dtr';
                         <input type="hidden" class="form-control edit-id" name="edit_id">
                         <div class="form-group mb-3">
                             <label for="edit_timein">Time-In:</label>
-                            <input class="form-control edit-timein" type="text" id="edit_timein" name="edit_timein" value="" placeholder="Time in">
+                            <input class="form-control edit-timein" type="time" id="edit_timein" name="edit_timein" value="" placeholder="Time in">
                         </div>
                         <div class="form-group mb-3">
                             <label for="edit_timeout">Time-Out:</label>
-                            <input class="form-control edit-timeout" type="text" id="edit_timeout" name="edit_timeout" value="" placeholder="Time out">
+                            <input class="form-control edit-timeout" type="time" id="edit_timeout" name="edit_timeout" value="" placeholder="Time out">
                         </div>
                     </div>
                     <div class="modal-footer">
