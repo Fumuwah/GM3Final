@@ -6,17 +6,20 @@ if (!isset($_SESSION['role_name']) || !isset($_SESSION['employee_id'])) {
 }
 
 require_once "database.php";
-
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['employee_id'])) {
-    $employee_id = mysqli_real_escape_string($conn, $_POST['employee_id']);
-
-    $sql = "UPDATE employees SET employee_status = 'Regular' WHERE employee_id = ?";
+if (isset($_POST['submit'])) {
+    $id = $_POST['unarchive_id'];
+    $sql = "UPDATE employees SET employee_status = 'Regular' WHERE employee_number = ?";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("i", $employee_id);
+    $stmt->bind_param("i", $id);
+
     if ($stmt->execute()) {
-        echo "Employee successfully unarchived.";
+        header("Location: employees.php");
+        exit();
     } else {
-        echo "Error unarchiving employee: " . $stmt->error;
+        echo "Error updating record: " . $conn->error;
     }
+
+
+    $stmt->close();
+    $conn->close();
 }
-?>

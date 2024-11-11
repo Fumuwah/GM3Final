@@ -197,6 +197,7 @@ include './layout/header.php';
                                 $role_name = strtolower($row['role_name'] ?? '');
 
                                 $archiveButtonText = ($employee_status === 'Archived') ? 'Unarchive' : 'Archive';
+                                $archiveClass = ($employee_status === 'Archived') ? 'unarchive-btn' : 'archive-btn';
                                 $dataStatus = ($employee_status === 'Archived') ? 'Archived' : 'Regular';
 
                                 echo "<tr>
@@ -208,7 +209,7 @@ include './layout/header.php';
                                         <td>";
 
                                 if ($_SESSION['role_name'] == 'Super Admin') {
-                                    echo "<button type='button' class='btn btn-danger mb-2 delete-btn' data-id='{$employee_number}'>{$archiveButtonText}</button>";
+                                    echo "<button type='button' class='btn btn-danger mb-2 {$archiveClass}' data-id='{$employee_id}'>{$archiveButtonText}</button>";
                                 }
 
                                 echo "          <button type='button' class='btn btn-primary mb-2 edit-employee-btn' data-employee-id='{$employee_id}' 
@@ -273,20 +274,42 @@ include './layout/header.php';
     </div>
 </div>
 
-<div class="modal fade" id="delete-modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade" id="archive-modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="exampleModalLabel">Archive Employee</h5>
             </div>
-            <div class="modal-body">
-                Are you sure you want to archive this employee?
-                <input type="hidden" id="employee-id" value="">
+            <form action="archive_employee.php" method="post">
+                <div class="modal-body">
+                    Are you sure you want to archive this employee?
+                    <input type="hidden" id="archive-employee-id" name="archive_id" value="">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success close-modal" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-danger" id="confirm-archive" name="submit">Archive Employee</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="unarchive-modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Unarchive Employee</h5>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-success close-modal" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-danger" id="confirm-archive">Archive Employee</button>
-            </div>
+            <form action="unarchive_employee.php" method="post">
+                <div class="modal-body">
+                    Are you sure you want to unarchive this employee?
+                    <input type="hidden" id="unarchive-employee-id" name="unarchive_id" value="">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger close-modal" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-success" id="confirm-unarchive" name="submit">Unarchive Employee</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
@@ -901,68 +924,6 @@ include './layout/header.php';
             });
         });
 
-        deleteBtn.forEach((d) => {
-            d.addEventListener('click', function() {
-                deleteModal.classList.remove('fade');
-                deleteModal.style.display = 'block';
-            });
-        })
-
-        document.querySelectorAll('.delete-btn').forEach(function(button) {
-            button.addEventListener('click', function() {
-                const employeeId = this.getAttribute('data-id');
-                document.getElementById('employee-id').value = employeeId;
-                const deleteModal = new bootstrap.Modal(document.getElementById('delete-modal'));
-                deleteModal.show();
-            });
-        });
-
-        document.getElementById('confirm-archive').addEventListener('click', function() {
-            const employeeId = document.getElementById('employee-id').value;
-
-            fetch('archive_employee.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded'
-                    },
-                    body: new URLSearchParams({
-                        'id': employeeId
-                    })
-                })
-                .then(response => response.text())
-                .then(data => {
-                    alert(data);
-                    location.reload();
-                });
-        });
-
-        document.querySelectorAll('.delete-btn').forEach(function(button) {
-        button.addEventListener('click', function() {
-            const employeeId = this.getAttribute('data-employee-id');
-            const currentStatus = this.getAttribute('data-employee-status');
-            
-            if (currentStatus === 'Archived') {
-                fetch('unarchive_employee.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded'
-                    },
-                    body: new URLSearchParams({
-                        'employee_id': employeeId
-                    })
-                })
-                .then(response => response.text())
-                .then(data => {
-                    alert(data);
-                    location.reload();
-                });
-            } else {
-                const deleteModal = new bootstrap.Modal(document.getElementById('delete-modal'));
-                deleteModal.show();
-            }
-        });
-    });
-
         var addEmployeeBtn = document.querySelector('#add-employee-btn');
         var addEmployeeModal = document.querySelector('#add-employee-modal');
         var editEmployeeBtns = document.querySelectorAll('.edit-employee-btn')
@@ -1092,4 +1053,37 @@ include './layout/header.php';
     }
 </script>
 <?php include './layout/script.php'; ?>
+<script>
+    $(document).ready(function() {
+        let archiveBtn = $('.archive-btn');
+        let archiveModal = $('#archive-modal')
+
+        archiveBtn.on('click', function() {
+            let employeeID = $(this).data('id');
+            archiveModal.removeClass('fade').css('display', 'block');
+            $('#archive-employee-id').val(employeeID);
+        });
+        $('.close-modal').on('click', function() {
+            archiveModal.addClass('fade');
+            setTimeout(function() {
+                archiveModal.css('display', 'none');
+            }, 400);
+        });
+
+        let unArchiveBtn = $('.unarchive-btn');
+        let unArchiveModal = $('#unarchive-modal')
+
+        unArchiveBtn.on('click', function() {
+            let employeeID = $(this).data('id');
+            unArchiveModal.removeClass('fade').css('display', 'block');
+            $('#unarchive-employee-id').val(employeeID);
+        });
+        $('.close-modal').on('click', function() {
+            unArchiveModal.addClass('fade');
+            setTimeout(function() {
+                unArchiveModal.css('display', 'none');
+            }, 400);
+        });
+    });
+</script>
 <?php include './layout/footer.php'; ?>
