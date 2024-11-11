@@ -1,3 +1,14 @@
+<?php
+require './database.php';
+$notification = "SELECT * FROM notification ORDER BY id DESC LIMIT 3";
+$notification_prep = mysqli_prepare($conn, $notification);
+mysqli_stmt_execute($notification_prep);
+$result = mysqli_stmt_get_result($notification_prep);
+$notifs = mysqli_fetch_all($result, MYSQLI_ASSOC);
+
+
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -51,24 +62,23 @@
             </li>
             <li class="pos-relative" id="notification-dropdown">
                 <div class="custom-dropdown-right" aria-labelledby="navbarDropdownMenuLink">
-                    <div class="d-flex p-3 border-bottom dropdown-list">
-                        <div class="pr-3" style="flex:0 0 91%;">
-                            <p class="font-weight-bold p-0 m-0">Christian Jake Francisco requests leave approval ayo</p>
-                            <p class="p-0 m-0">Sept 29, 8:44 AM</p>
-                        </div>
-                        <div style="flex:0 0 30px;">
-                            <img src="assets/images/green-check.svg" style="width:30px; cursor:pointer;" alt="">
-                        </div>
-                    </div>
-                    <div class="d-flex p-3 border-bottom dropdown-list">
-                        <div class="pr-3" style="flex:0 0 91%;">
-                            <p class="font-weight-bold p-0 m-0">Christian Jake Francisco requests leave approval</p>
-                            <p class="p-0 m-0">Sept 29, 8:44 AM</p>
-                        </div>
-                        <div style="flex:0 0 30px;">
-                            <img src="assets/images/red-cross.svg" style="width:30px; cursor:pointer;" alt="">
-                        </div>
-                    </div>
+                    <?php
+                    foreach ($notifs as $notif) {
+                        $redirect =  $notif['request_type'] == "leave_request" ? 'hr-leaves-page.php' : 'profile-change-requests.php?';
+
+                        echo '<div class="d-flex p-3 border-bottom dropdown-list">';
+                        echo '<div class="pr-3" style="flex:0 0 91%;">';
+                        echo '<p class="font-weight-bold p-0 m-0">' . $notif['message'] . '</p>';
+                        echo '<p class="p-0 m-0">' . $notif['timestamp'] . '</p>';
+                        echo '</div>';
+                        echo '<div style="flex:0 0 30px;">';
+                        echo '<a href="' . $redirect . '">';
+                        echo '<img src="assets/images/arrow-right.svg" style="width:30px; cursor:pointer;" alt="">';
+                        echo '</a>';
+                        echo '</div>';
+                        echo '</div>';
+                    }
+                    ?>
 
                 </div>
             </li>
