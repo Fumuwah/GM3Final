@@ -862,7 +862,7 @@ include './layout/header.php';
                                 <th scope="col">Vacation Leave</th>
                                 <th scope="col">Sick Leave</th>
                                 <th scope="col">Leave without Pay</th>
-                                <th scope="col">Leave without Pay</th>
+                                <th scope="col">Used Leave</th>
                                 <th scope="col">Total Leave</th>
                             </tr>
                         </thead>
@@ -1077,6 +1077,34 @@ include './layout/header.php';
 
 
     });
+
+        document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.leaves-btn').forEach(button => {
+            button.addEventListener('click', function () {
+                const employeeNumber = this.getAttribute('data-id');
+
+                // Send AJAX request to fetch leave data
+                fetch(`get_leave_details.php?employee_number=${employeeNumber}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        // Populate the modal with data
+                        document.querySelector('#leave-modal tbody').innerHTML = `
+                            <tr>
+                                <td>${data.vacation_leave}</td>
+                                <td>${data.sick_leave}</td>
+                                <td>${data.leave_without_pay}</td>
+                                <td>${data.used_leave}</td>
+                                <td>${data.total_leave}</td>
+                            </tr>
+                        `;
+                        // Show the modal
+                        new bootstrap.Modal(document.getElementById('leave-modal')).show();
+                    })
+                    .catch(error => console.error('Error fetching leave details:', error));
+            });
+        });
+    });
+
 
     function toggleProjectField() {
         var projectDropdown = document.getElementById('project_name');
