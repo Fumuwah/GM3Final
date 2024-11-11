@@ -485,9 +485,6 @@ $activePage = 'dtr';
 
         return true;
     }
-</script>
-<?php include './layout/script.php'; ?>
-<script>
     $(document).ready(function() {
         let editButton = $('.edit-btn');
         let editModal = $('#edit-modal')
