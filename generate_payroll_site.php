@@ -19,7 +19,7 @@ $totalRow = $totalStmt->fetch(PDO::FETCH_ASSOC);
 $totalRecords = $totalRow['total'] != null ? $totalRow['total'] : 0;
 $total_pages = ceil($totalRecords / $recordsPerPage);
 
-$query = "SELECT e.employee_id AS employee_id, e.firstname, e.middlename, e.lastname, 
+$query = "SELECT e.employee_id AS employee_id, employee_number, e.firstname, e.middlename, e.lastname, 
         pr.monthly, pr.allowance, pr.total_hrs, pr.other_ot, pr.special_holiday, 
         pr.gross, pr.cash_adv, pr.total_deduc, pr.netpay
         FROM payroll pr 
@@ -55,25 +55,16 @@ include './layout/header.php';
                 <div class="form-group col-md-2 mb-2">
                     <select name="" id="" class="form-control">
                         <option value="">Select Project</option>
-                        <option value="IT Office">IT Office</option>
-                        <option value="Accounting Office">Accounting Office</option>
-                        <option value="Budget Office">Budget Office</option>
                     </select>
                 </div>
                 <div class="form-group col-md-2 mb-2">
                     <select name="" id="" class="form-control">
                         <option value="">Role</option>
-                        <option value="Site 1">Site 1</option>
-                        <option value="Site 2">Site 2</option>
                     </select>
                 </div>
                 <div class="form-group col-md-2 mb-2">
                     <select name="" id="" class="form-control">
                         <option value="">Payroll Period</option>
-                        <option value="January">January</option>
-                        <option value="February">February</option>
-                        <option value="March">March</option>
-                        <option value="April">April</option>
                     </select>
                 </div>
                 <div class="form-group col-md-1 mb-2">
@@ -107,7 +98,7 @@ include './layout/header.php';
                         </thead>
                         <tbody><?php foreach ($payrolls as $payroll): ?>
                                 <tr>
-                                    <td><?php echo htmlspecialchars($payroll['employee_id']); ?></td>
+                                    <td><?php echo htmlspecialchars($payroll['employee_number']); ?></td>
                                     <td><?php echo htmlspecialchars($payroll['firstname'] . ' ' . $payroll['middlename'] . ' ' . $payroll['lastname']); ?></td>
                                     <td><?php echo number_format($payroll['monthly'], 2); ?></td>
                                     <td><?php echo number_format($payroll['allowance'], 2); ?></td>
