@@ -8,6 +8,8 @@ if (!isset($_SESSION['role_name']) || !isset($_SESSION['employee_id'])) {
     exit();
 }
 
+date_default_timezone_set('Asia/Manila');
+
 $activePage = "dashboard";
 
 $role = $_SESSION['role_name'];
@@ -74,7 +76,12 @@ $dash_onleave_query_run = mysqli_query($conn, $dash_onleave_query);
 $dash_onapproval_query = "SELECT * FROM leave_requests WHERE status != 'Archived' AND status = 'Pending'";
 $dash_onapproval_query_run = mysqli_query($conn, $dash_onapproval_query);
 
-// Fetch employee's name
+$dash_onleave_query = "SELECT * FROM leave_requests WHERE status != 'Archived' AND status = 'Approved'";
+$dash_onleave_query_run = mysqli_query($conn, $dash_onleave_query);
+
+$dash_onapproval_query = "SELECT * FROM leave_requests WHERE status != 'Archived' AND status = 'Pending'";
+$dash_onapproval_query_run = mysqli_query($conn, $dash_onapproval_query);
+
 $query = "SELECT lastname FROM employees WHERE employee_id = ?";
 $stmt = $conn->prepare($query);
 $stmt->bind_param("i", $employee_id);
@@ -88,7 +95,7 @@ $attendance_query = "
     SELECT e.employee_id, e.employee_number, e.firstname, e.lastname, d.time_in, p.project_name
     FROM dtr d
     JOIN employees e ON d.employee_id = e.employee_id
-    JOIN projects p ON e.project_name = p.project_name
+    LEFT JOIN projects p ON e.project_name = p.project_name
     WHERE d.date = ?";
 
 $attendance_stmt = $conn->prepare($attendance_query);
@@ -96,7 +103,6 @@ $attendance_stmt->bind_param("s", $today_date);
 $attendance_stmt->execute();
 $attendance_result = $attendance_stmt->get_result();
 
-// Prepare attendance data with status
 $attendance_data = [];
 while ($row = $attendance_result->fetch_assoc()) {
     $status = "On-Time";
@@ -113,6 +119,7 @@ while ($row = $attendance_result->fetch_assoc()) {
         'status' => $status
     ];
 }
+
 $attendance_stmt->close();
 $conn->close();
 include 'layout/header.php';

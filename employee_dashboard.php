@@ -10,6 +10,18 @@ if (!isset($_SESSION['role_name']) || !isset($_SESSION['employee_id'])) {
 $role_name = $_SESSION['role_name'];
 $employee_id = $_SESSION['employee_id'];
 
+$name = '';
+$query = "SELECT lastname FROM employees WHERE employee_id = ?";
+if ($stmt = $conn->prepare($query)) {
+    $stmt->bind_param("i", $employee_id);
+    $stmt->execute();
+    $stmt->bind_result($name);
+    $stmt->fetch();
+    $stmt->close();
+} else {
+    echo "Error preparing the query.";
+}
+
 $conn->close();
 include 'layout/header.php';
 ?>
@@ -17,7 +29,7 @@ include 'layout/header.php';
     <?php include 'layout/sidebar.php'; ?>
     <div class="main-content" style="max-height: calc(100vh - 70px);overflow-y:scroll">
         <div class="container-fluid">
-            <h2>Hello <?php echo htmlspecialchars($role_name); ?></h2>
+            <h2>Hello <?php echo htmlspecialchars($name); ?></h2>
             <div class="row">
                 <div class="col-12 col-lg-8 pt-3 pt-md-0">
                     <div class="row numbers-of">

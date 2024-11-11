@@ -11,7 +11,7 @@ $month_filter = isset($_GET['month']) ? (int)$_GET['month'] : '';
 $year_filter = isset($_GET['year']) ? (int)$_GET['year'] : '';
 $payroll_period_filter = isset($_GET['payroll_period']) ? $_GET['payroll_period'] : '';
 
-$recordsPerPage = 1;
+$recordsPerPage = 5;
 $current_page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $offset = ($current_page - 1) * $recordsPerPage;
 
