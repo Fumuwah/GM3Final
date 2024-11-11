@@ -159,7 +159,14 @@ include './layout/header.php';
 
                     <div class="form-group mb-2 col-4 col-lg-2">
                         <label for="year" class="sr-only">Year</label>
-                        <input type="number" name="year" id="year" class="form-control w-100" placeholder="Year" value="<?= htmlspecialchars($_GET['year'] ?? '') ?>" min="1">
+                        <select name="year" id="year" class="form-control">
+                            <option value="">Year</option>
+                            <?php for ($y = 2021; $y <= 2024; $y++) {
+                                $selected = ($y == $_GET['year']) ? 'selected' : '';
+                                echo "<option value='$y' $selected>$y</option>";
+                            } ?>
+                        </select>
+                        <!-- <input type="number" name="year" id="year" class="form-control w-100" placeholder="Year" value="<?= htmlspecialchars($_GET['year'] ?? '') ?>"> -->
                     </div>
                     <button type="submit" class="btn btn-primary mb-2">Search</button>
                 </form>

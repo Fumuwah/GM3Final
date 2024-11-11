@@ -6,6 +6,7 @@ if (!isset($_SESSION['role_name']) || !isset($_SESSION['employee_id'])) {
     header("Location: login.php");
     exit();
 }
+
 $recordsPerPage = 1;
 $current_page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $offset = ($current_page - 1) * $recordsPerPage;
@@ -44,13 +45,8 @@ include './layout/header.php';
             <h2>Payroll Summary</h2>
             <form class="form-row align-items-center">
                 <div class="form-group col-md-3 mb-2">
-                    <div class="input-group">
-                        <input type="text" class="form-control" id="search-user" name="search" placeholder="Search User"
-                            value="">
-                        <div class="input-group-append">
-                            <button type="submit" class="btn btn-primary ml-2">Search</button> <!-- Updated margin-left to ml-2 -->
-                        </div>
-                    </div>
+                    <input type="text" class="form-control" id="search-user" name="search" placeholder="Search User"
+                        value="">
                 </div>
                 <div class="form-group col-md-2 mb-2">
                     <select name="" id="" class="form-control">
@@ -68,7 +64,7 @@ include './layout/header.php';
                     </select>
                 </div>
                 <div class="form-group col-md-1 mb-2">
-                    <button type="submit" class="btn btn-primary ml-2" value="Generate">Generate</button>
+                    <button type="submit" class="btn btn-primary ml-2">Filter</button>
                 </div>
             </form>
 
