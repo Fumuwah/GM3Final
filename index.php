@@ -68,6 +68,12 @@ if ($stmt = $conn->prepare($permissions_query)) {
 $dash_employee_query = "SELECT * FROM employees WHERE employee_status != 'Archived'";
 $dash_employee_query_run =  mysqli_query($conn, $dash_employee_query);
 
+$dash_onleave_query = "SELECT * FROM leave_requests WHERE status != 'Archived' AND status = 'Approved'";
+$dash_onleave_query_run = mysqli_query($conn, $dash_onleave_query);
+
+$dash_onapproval_query = "SELECT * FROM leave_requests WHERE status != 'Archived' AND status = 'Pending'";
+$dash_onapproval_query_run = mysqli_query($conn, $dash_onapproval_query);
+
 // Fetch employee's name
 $query = "SELECT lastname FROM employees WHERE employee_id = ?";
 $stmt = $conn->prepare($query);
@@ -142,7 +148,14 @@ include 'layout/header.php';
                             <div class="card">
                                 <div class="card-body text-center">
                                     <div class="m-0">On Leave</div>
-                                    <p class="card-text font-weight-bold mt-3" style="font-size:2.2em;">120</p>
+                                    <?php
+
+                                    if ($onleave_total = mysqli_num_rows($dash_onleave_query_run)) {
+                                        echo ' <p class="card-text font-weight-bold mt-3" style="font-size:2.2em;">' . $onleave_total . '</p>';
+                                    } else {
+                                        echo ' <p class="card-text font-weight-bold mt-3" style="font-size:2.2em;">No Data</p>';
+                                    }
+                                    ?>
                                     <div class="m-0">This month</div>
                                 </div>
                             </div>
@@ -151,7 +164,14 @@ include 'layout/header.php';
                             <div class="card">
                                 <div class="card-body text-center">
                                     <div class="m-0">Pending Approvals</div>
-                                    <p class="card-text font-weight-bold mt-3" style="font-size:2.2em;">10</p>
+                                    <?php
+
+                                    if ($onapproval_total = mysqli_num_rows($dash_onapproval_query_run)) {
+                                        echo ' <p class="card-text font-weight-bold mt-3" style="font-size:2.2em;">' . $onapproval_total . '</p>';
+                                    } else {
+                                        echo ' <p class="card-text font-weight-bold mt-3" style="font-size:2.2em;">0</p>';
+                                    }
+                                    ?>
                                     <div class="m-0">For leaves</div>
                                 </div>
                             </div>
