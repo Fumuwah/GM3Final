@@ -10,32 +10,7 @@ if (!isset($_SESSION['role_name']) || !isset($_SESSION['employee_id'])) {
 }
 
 $role_name = strtolower($_SESSION['role_name']);
-
-function createNotification($employee_id, $message, $request_type, $request_id, $db)
-{
-    $stmt = $db->prepare("INSERT INTO notifications (employee_id, message, request_type, request_id) VALUES (?, ?, ?, ?)");
-    $stmt->bind_param("issi", $employee_id, $message, $request_type, $request_id);
-    $stmt->execute();
-    $stmt->close();
-}
-
-function notifyLeaveRequest($leave_request_id, $employee_id, $project_name, $db)
-{
-    $message = "An employee has requested leave approval.";
-
-    $stmt = $db->prepare("SELECT employee_id FROM employees 
-                          JOIN roles ON employees.role_id = roles.role_id 
-                          WHERE (roles.role_name = 'Admin' OR roles.role_name = 'Super Admin') 
-                          AND employees.project_name = ?");
-    $stmt->bind_param("s", $project_name);
-    $stmt->execute();
-    $stmt->bind_result($admin_id);
-
-    while ($stmt->fetch()) {
-        createNotification($admin_id, $message, 'leave_request', $leave_request_id, $db);
-    }
-    $stmt->close();
-}
+$project_name = $_SESSION['project_name'] ?? null;
 
 $recordsPerPage = 10;
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
@@ -43,10 +18,15 @@ $offset = ($page - 1) * $recordsPerPage;
 
 $selectedLeaveType = isset($_GET['leave_type']) ? $_GET['leave_type'] : '';
 
-$countQuery = "SELECT COUNT(*) AS total FROM leave_requests";
+$countQuery = "SELECT COUNT(*) AS total FROM leave_requests lr
+               JOIN employees e ON lr.employee_id = e.employee_id
+               JOIN roles r ON e.role_id = r.role_id 
+               WHERE r.role_name != 'Super Admin'";
+
 if ($selectedLeaveType) {
-    $countQuery .= " WHERE leave_type = ?";
+    $countQuery .= " AND lr.leave_type = ?";
 }
+
 $countStmt = $conn->prepare($countQuery);
 if ($selectedLeaveType) {
     $countStmt->bind_param("s", $selectedLeaveType);
@@ -59,13 +39,14 @@ $totalPages = ceil($totalRecords / $recordsPerPage);
 
 $query = "
     SELECT lr.request_id, e.employee_id, e.firstname, e.lastname, lr.leave_type, lr.start_date, lr.end_date, lr.reason,
-    (DATEDIFF(lr.end_date, lr.start_date) + 1) AS days_requested,
-    (COALESCE(l.sick_leave, 0) + COALESCE(l.vacation_leave, 0)) AS total_leaves,
-    lr.status
+           (DATEDIFF(lr.end_date, lr.start_date) + 1) AS days_requested,
+           (COALESCE(l.sick_leave, 0) + COALESCE(l.vacation_leave, 0)) AS total_leaves,
+           lr.status, e.project_name
     FROM leave_requests lr
     JOIN employees e ON lr.employee_id = e.employee_id
+    JOIN roles r ON e.role_id = r.role_id
     LEFT JOIN leaves l ON e.employee_id = l.employee_id
-";
+    WHERE r.role_name != 'Super Admin'";
 
 $conditions = [];
 $params = [];
@@ -95,8 +76,14 @@ if ($selectedLeaveType) {
     $types .= "s";
 }
 
+if ($role_name === 'admin') {
+    $conditions[] = "e.project_name = ?";
+    $params[] = $project_name;
+    $types .= "s";
+}
+
 if ($conditions) {
-    $query .= " WHERE " . implode(" AND ", $conditions);
+    $query .= " AND " . implode(" AND ", $conditions);
 }
 
 $query .= " ORDER BY
@@ -108,11 +95,10 @@ $query .= " ORDER BY
             lr.start_date DESC
         LIMIT ? OFFSET ?";
 
-$stmt = $conn->prepare($query);
-
 $params[] = $recordsPerPage;
 $params[] = $offset;
 $types .= "ii";
+$stmt = $conn->prepare($query);
 $stmt->bind_param($types, ...$params);
 
 $stmt->execute();
@@ -122,6 +108,7 @@ $activePage = 'hr-leaves-page';
 
 include './layout/header.php';
 ?>
+
 <div class="d-flex">
     <?php include './layout/sidebar.php'; ?>
     <div class="main pt-3" style="max-height: calc(100vh - 80px);overflow-y:scroll">
@@ -187,37 +174,52 @@ include './layout/header.php';
                         </tr>
                     </thead>
                     <tbody>
+                    <?php if ($requests->num_rows > 0): ?>
                         <?php while ($row = $requests->fetch_assoc()): ?>
-                            <tr>
-                                <td><?= $row['request_id'] ?></td>
-                                <td><?= $row['firstname'] . ' ' . $row['lastname'] ?></td>
-                                <td><?= $row['leave_type'] ?></td>
-                                <td><?= $row['reason'] ?></td>
-                                <td><?= $row['days_requested'] ?></td>
-                                <td><?= $row['start_date'] ?></td>
-                                <td><?= $row['end_date'] ?></td>
-                                <td>
-                                    <?php if ($row['employee_id'] == $_SESSION['employee_id']): ?>
-                                        <?php if ($row['status'] === 'Approved'): ?>
-                                            <span class="badge badge-success">Approved</span>
-                                        <?php elseif ($row['status'] === 'Declined'): ?>
-                                            <span class="badge badge-danger">Declined</span>
+                            <?php
+                                $canViewRequest = true;
+                                if ($role_name === 'admin' && $row['project_name'] !== $project_name) {
+                                    $canViewRequest = false;
+                                }                                
+                            ?>
+                            <?php if ($canViewRequest): ?>
+                                <tr>
+                                    <td><?= $row['request_id'] ?></td>
+                                    <td><?= $row['firstname'] . ' ' . $row['lastname'] ?></td>
+                                    <td><?= $row['leave_type'] ?></td>
+                                    <td><?= $row['reason'] ?></td>
+                                    <td><?= $row['days_requested'] ?></td>
+                                    <td><?= $row['start_date'] ?></td>
+                                    <td><?= $row['end_date'] ?></td>
+                                    <td>
+                                        <?php if ($row['employee_id'] == $_SESSION['employee_id']): ?>
+                                            <?php if ($row['status'] === 'Approved'): ?>
+                                                <span class="badge badge-success">Approved</span>
+                                            <?php elseif ($row['status'] === 'Declined'): ?>
+                                                <span class="badge badge-danger">Declined</span>
+                                            <?php else: ?>
+                                                <span class="badge badge-warning">Pending</span>
+                                            <?php endif; ?>
                                         <?php else: ?>
-                                            <span class="badge badge-warning">Pending</span>
+                                            <?php if ($row['status'] === 'Pending'): ?>
+                                                <a href="approve_leave.php?request_id=<?= $row['request_id'] ?>" class="btn btn-success" onclick="return confirm('Are you sure you want to approve this leave request?');">Approve</a>
+                                                <a href="decline_leave.php?request_id=<?= $row['request_id'] ?>" class="btn btn-danger" onclick="return confirm('Are you sure you want to decline this leave request?');">Decline</a>
+                                            <?php elseif ($row['status'] === 'Approved'): ?>
+                                                <span class="badge badge-success">Approved</span>
+                                            <?php elseif ($row['status'] === 'Declined'): ?>
+                                                <span class="badge badge-danger">Declined</span>
+                                            <?php endif; ?>
                                         <?php endif; ?>
-                                    <?php else: ?>
-                                        <?php if ($row['status'] === 'Pending'): ?>
-                                            <a href="approve_leave.php?request_id=<?= $row['request_id'] ?>" class="btn btn-success" onclick="return confirm('Are you sure you want to approve this leave request?');">Approve</a>
-                                            <a href="decline_leave.php?request_id=<?= $row['request_id'] ?>" class="btn btn-danger" onclick="return confirm('Are you sure you want to decline this leave request?');">Decline</a>
-                                        <?php elseif ($row['status'] === 'Approved'): ?>
-                                            <span class="badge badge-success">Approved</span>
-                                        <?php elseif ($row['status'] === 'Declined'): ?>
-                                            <span class="badge badge-danger">Declined</span>
-                                        <?php endif; ?>
-                                    <?php endif; ?>
-                                </td>
-                            </tr>
+                                    </td>
+                                </tr>
+                            <?php endif; ?>
                         <?php endwhile; ?>
+                    <?php else: ?>
+                        <tr>
+                            <td colspan="8" class="text-center">No records found</td>
+                        </tr>
+                    <?php endif; ?>
+
                     </tbody>
                 </table>
             </div>

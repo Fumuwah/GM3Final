@@ -40,7 +40,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $tin_no = $_POST['tin_no'];
     $email = $_POST['email'];
     $emergency_contactno = $_POST['emergency_contactno'];
-    $role_name = $_POST['role_name'];
+    $role_id = $_POST['role_id'];
     $project_name = $_POST['project_name'];
 
     $password = !empty($_POST['password']) ? password_hash($_POST['password'], PASSWORD_DEFAULT) : $current_password;
