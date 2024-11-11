@@ -278,6 +278,43 @@ include './layout/header.php';
     </div>
 </div>
 
+<div class="modal fade" id="leave-modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Employee Leave Details</h5>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Vacation Leave</th>
+                                <th scope="col">Sick Leave</th>
+                                <th scope="col">Leave Without Pay</th>
+                                <th scope="col">Used Leave</th>
+                                <th scope="col">Leave With Pay</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>1</td>
+                                <td>4</td>
+                                <td>5</td>
+                                <td>6</td>
+                                <td>13</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success close-modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="modal fade" id="archive-modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -873,44 +910,6 @@ include './layout/header.php';
     </div>
 </div>
 
-
-
-<div class="modal fade" id="leave-modal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Employee Leave Details</h5>
-            </div>
-            <div class="modal-body">
-                <div class="table-responsive">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th scope="col">Vacation Leave</th>
-                                <th scope="col">Sick Leave</th>
-                                <th scope="col">Leave without Pay</th>
-                                <th scope="col">Used Leave</th>
-                                <th scope="col">Total Leave</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>1</td>
-                                <td>4</td>
-                                <td>5</td>
-                                <td>6</td>
-                                <td>13</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-success close-modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
 
@@ -1038,41 +1037,33 @@ include './layout/header.php';
                 leaveModal.style.display = 'block';
             });
         })
+    });
 
-        document.querySelectorAll('.leaves-btn').forEach(button => {
+     document.querySelectorAll('.leaves-btn').forEach(button => {
             button.addEventListener('click', function () {
-                const employeeNumber = this.getAttribute('data-id');
-                $('#leave-modal').modal('show');
-
-                // Fetch leave details via AJAX
-                fetch('get_leave_details.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ employee_number: employeeNumber }),
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Populate leave data in the modal table
-                        document.querySelector('#leave-modal tbody').innerHTML = `
-                            <tr>
-                                <td>${data.vacation_leave}</td>
-                                <td>${data.sick_leave}</td>
-                                <td>${data.leave_without_pay}</td>
-                                <td>${data.used_leave}</td>
-                                <td>${data.total_leave}</td>
-                            </tr>
-                        `;
-                    } else {
-                        alert('Failed to fetch leave details.');
-                    }
-                })
-                .catch(error => console.error('Error fetching leave data:', error));
+                const employeeId = this.getAttribute('data-id');
+                
+                fetch(`get_leave_details.php?employee_id=${employeeId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data) {
+                            document.querySelector('#leave-modal tbody').innerHTML = `
+                                <tr>
+                                    <td>${data.vacation_leave}</td>
+                                    <td>${data.sick_leave}</td>
+                                    <td>${data.leave_without_pay}</td>
+                                    <td>${data.used_leave}</td>
+                                    <td>${data.total_leave}</td>
+                                </tr>
+                            `;
+                            $('#leave-modal').modal('show');
+                        } else {
+                            alert("No leave data found for this employee.");
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
             });
         });
-    });
 
     function toggleProjectField() {
         var projectDropdown = document.getElementById('project_name');
