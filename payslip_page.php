@@ -27,7 +27,7 @@ $totalRow = $totalStmt->fetch(PDO::FETCH_ASSOC);
 $totalRecords = $totalRow['total'] != null ? $totalRow['total'] : 0;
 $total_pages = ceil($totalRecords / $recordsPerPage);
 
-$query = "SELECT e.firstname, e.middlename, e.lastname, 
+$query = "SELECT pr.payroll_id, e.firstname, e.middlename, e.lastname, 
         pr.payroll_period, ps.position_name, pr.netpay
         FROM payroll pr 
         LEFT JOIN employees e ON e.employee_id = pr.employee_id
@@ -52,7 +52,7 @@ include './layout/header.php';
 <div class="d-flex">
     <?php include './layout/sidebar.php'; ?>
     <div class="main p-3" style="max-height: calc(100vh - 80px);overflow-y:scroll">
-        <h2>Admin Logs</h2>
+        <h2>Payslips</h2>
         <form action="" method="get">
             <div class="row">
                 <div class="col-3">
@@ -111,7 +111,7 @@ include './layout/header.php';
                                 <td><?php echo htmlspecialchars($payslip['payroll_period']) ?></td>
                                 <td><?php echo htmlspecialchars($payslip['position_name']) ?></td>
                                 <td><?php echo htmlspecialchars($payslip['netpay']) ?></td>
-                                <td><a class="btn btn-primary text-light">Overview</a></td>
+                                <td><a class="btn btn-primary text-light" href="payslip_overview?pid=<?php echo $payslip['payroll_id'] ?>">Overview</a></td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>
@@ -123,19 +123,19 @@ include './layout/header.php';
                 <ul class="pagination">
                     <?php if ($current_page > 1): ?>
                         <li class="page-item">
-                            <a class="page-link" href="?page=<?php echo $current_page - 1; ?>">Previous</a>
+                            <a class="page-link" href="?page=<?php echo $current_page - 1; ?>&month=<?php $pmonth_filter ?>&year=<?php $year_filter ?>&payroll_period=<?php $payroll_period_filter ?>">Previous</a>
                         </li>
                     <?php endif; ?>
 
                     <?php for ($i = 1; $i <= $total_pages; $i++): ?>
                         <li class="page-item <?php if ($current_page == $i) echo 'active'; ?>">
-                            <a class="page-link" href="?page=<?php echo $i; ?>"><?php echo $i; ?></a>
+                            <a class="page-link" href="?page=<?php echo $i; ?>&month=<?php $pmonth_filter ?>&year=<?php $year_filter ?>&payroll_period=<?php $payroll_period_filter ?>"><?php echo $i; ?></a>
                         </li>
                     <?php endfor; ?>
 
                     <?php if ($current_page < $total_pages): ?>
                         <li class="page-item">
-                            <a class="page-link" href="?page=<?php echo $current_page + 1; ?>">Next</a>
+                            <a class="page-link" href="?page=<?php echo $current_page + 1; ?>&month=<?php $pmonth_filter ?>&year=<?php $year_filter ?>&payroll_period=<?php $payroll_period_filter ?>">Next</a>
                         </li>
                     <?php endif; ?>
                 </ul>

@@ -9,6 +9,7 @@ if (!isset($_SESSION['role_name']) || !isset($_SESSION['employee_id'])) {
 }
 
 
+$activePage = 'payslip';
 include './layout/header.php';
 ?>
 <style>
@@ -121,7 +122,7 @@ include './layout/header.php';
 </style>
 <div class="d-flex">
     <?php include './layout/sidebar.php'; ?>
-    <div class="main" style="max-height: calc(100vh - 70px);overflow-y:scroll">
+    <div class="main" style="max-height: calc(100vh - 80px);overflow-y:scroll">
         <article>
             <div class="title">
                 <img src="./assets/images/gm3template.jpg" alt="">
