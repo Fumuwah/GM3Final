@@ -74,7 +74,7 @@ $activePage = $activePage ?? '';
                 </a>
             </li>
         <?php endif; ?>
-        <?php if ($role_name === 'super admin' || $role_name === 'admin'): ?>
+        <?php if ($role_name === 'super admin' || $role_name === 'admin' || $role_name === 'employee'): ?>
             <li class="sidebar-item" style="">
                 <a class="sidebar-link" href="dtr.php" style="<?= ($activePage === 'dtr') ? 'background-color:rgba(0, 123, 255, 0.5);border-left: 3px solid #3b7ddd;' : ''; ?>">
                     <span>Daily Time Record</span>
