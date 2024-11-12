@@ -40,11 +40,6 @@
         });
     });
 
-    var resigBtn = document.getElementById('rform');
-    resigBtn.addEventListener('click', function() {
-    window.open("assets/files/resignation.pdf", '_blank').focus();
- });
-
 
     var accountIcon = document.querySelector('#account-icon');
     var logoutDD = document.querySelector('#logout-dropdown');
