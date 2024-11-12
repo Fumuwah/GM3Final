@@ -1,54 +1,41 @@
 <?php
-
 session_start();
 if (!isset($_SESSION['role_name']) || !isset($_SESSION['employee_id'])) {
     header("Location: login.php");
     exit();
-  }
-  include 'database.php';
-  
-  if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['request_id'], $_POST['action'])) {
+}
+include 'database.php';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['request_id'], $_POST['action'])) {
     $requestId = $_POST['request_id'];
     $action = $_POST['action'];
     
+    // Fetch request details
     $stmt = $conn->prepare("SELECT employee_id, request_type, new_data FROM profile_change_requests WHERE request_id = ?");
     $stmt->bind_param("i", $requestId);
     $stmt->execute();
     $result = $stmt->get_result();
     $request = $result->fetch_assoc();
+    $stmt->close();
     
-    if ($action === 'approve') {
-        $column = $request['request_type'];
-        $stmt = $conn->prepare("UPDATE employees SET $column = ? WHERE employee_id = ?");
-        $stmt->bind_param("si", $request['new_data'], $request['employee_id']);
+    if ($request) {
+        if ($action === 'approve') {
+            $column = $request['request_type'];
+            
+            // Update the employee data based on the approved change request
+            $stmt = $conn->prepare("UPDATE employees SET $column = ? WHERE employee_id = ?");
+            $stmt->bind_param("si", $request['new_data'], $request['employee_id']);
+            $stmt->execute();
+            $stmt->close();
+        }
+        
+        // Update the status of the change request
+        $status = ($action === 'approve') ? 'approved' : 'declined';
+        $stmt = $conn->prepare("UPDATE profile_change_requests SET status = ? WHERE request_id = ?");
+        $stmt->bind_param("si", $status, $requestId);
         $stmt->execute();
+        $stmt->close();
     }
-    
-    $stmt = $conn->prepare("UPDATE profile_change_requests SET status = ? WHERE request_id = ?");
-    $stmt->bind_param("si", $action, $requestId);
-    $stmt->execute();
-}
-
-function createNotification($employee_id, $message, $request_type, $request_id, $db) {
-    $stmt = $db->prepare("INSERT INTO notifications (employee_id, message, request_type, request_id) VALUES (?, ?, ?, ?)");
-    $stmt->bind_param("issi", $employee_id, $message, $request_type, $request_id);
-    $stmt->execute();
-    $stmt->close();
-}
-
-function notifyProfileChangeRequest($profile_change_request_id, $db) {
-    $message = "An employee has requested a profile change.";
-
-    $stmt = $db->prepare("SELECT employee_id FROM employees 
-                          JOIN roles ON employees.role_id = roles.role_id 
-                          WHERE roles.role_name = 'Super Admin'");
-    $stmt->execute();
-    $stmt->bind_result($super_admin_id);
-
-    while ($stmt->fetch()) {
-        createNotification($super_admin_id, $message, 'profile_change', $profile_change_request_id, $db);
-    }
-    $stmt->close();
 }
 
 $role_name = $_SESSION['role_name'];

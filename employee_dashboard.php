@@ -164,7 +164,6 @@ include 'layout/header.php';
                     </div>
                 </div>
 
-                <!-- Birthday List -->
                 <div class="col-12 col-lg-4 pt-3 pt-md-0">
                     <?php include 'database.php'; ?>
 
@@ -225,7 +224,6 @@ include 'layout/header.php';
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    // Additional chart script if needed
 </script>
 
 <?php include 'layout/script.php'; ?>
