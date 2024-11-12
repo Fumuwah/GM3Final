@@ -73,6 +73,10 @@ $query .= " LIMIT :limit OFFSET :offset";
 $stmt = $pdo->prepare($query);
 
 // Bind parameters for filtering
+if ($role_name === "Super Admin") {
+    $stmt->bindParam(':employee_id', $employee_id, PDO::PARAM_INT);
+}
+
 if ($role_name === "Employee") {
     $stmt->bindParam(':employee_id', $employee_id, PDO::PARAM_INT);
 } elseif ($role_name === "Admin") {
@@ -111,6 +115,9 @@ if (!empty($conditions)) {
 $totalStmt = $pdo->prepare($totalQuery);
 
 // Bind parameters for total count
+if ($role_name === "Super Admin") {
+    $totalStmt->bindParam(':employee_id', $employee_id, PDO::PARAM_INT);
+}
 if ($role_name === "Employee") {
     $totalStmt->bindParam(':employee_id', $employee_id, PDO::PARAM_INT);
 } elseif ($role_name === "Admin") {
