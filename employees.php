@@ -26,13 +26,23 @@ $sql = "SELECT e.employee_id, e.firstname, e.lastname, e.middlename, e.employee_
         LEFT JOIN projects pr ON e.project_name = pr.project_name
         LEFT JOIN roles r ON e.role_id = r.role_id
         LEFT JOIN leaves l ON e.employee_id = l.employee_id 
-        WHERE 1=1";
-
-if ($status === 'Archived') {
-    $sql .= " AND e.employee_status = 'Archived'";
-} elseif (!empty($status)) {
-    $sql .= " AND e.employee_status = '" . $status . "'";
+        ";
+if (empty($status)) {
+    $sql .= "WHERE e.employee_status != 'Archived'";
 }
+if ($status == 'Probationary') {
+    $sql .= "WHERE e.employee_status = 'Probationary'";
+}
+if ($status == 'Regular') {
+    $sql .= "WHERE e.employee_status = 'Regular'";
+}
+if ($status == 'Archived') {
+    $sql .= "WHERE e.employee_status = 'Archived'";
+}
+if (!empty($position_name)) {
+    $sql .= " AND p.position_name = '$position_name'";
+}
+
 
 if (isset($_GET['employee_number'])) {
     $employee_number = $_GET['employee_number'];
@@ -60,12 +70,19 @@ $total_sql = "SELECT COUNT(*) as total FROM employees e
             JOIN positions p ON e.position_id = p.position_id 
             LEFT JOIN projects pr ON e.project_name = pr.project_name 
             LEFT JOIN roles r ON e.role_id = r.role_id 
-            WHERE 1=1";
+            ";
 
-if ($status === 'Archived') {
-    $total_sql .= " AND e.employee_status = 'Archived'";
-} elseif (!empty($status)) {
-    $total_sql .= " AND e.employee_status = '" . $status . "'";
+if (empty($status)) {
+    $total_sql .= "WHERE e.employee_status != 'Archived'";
+}
+if ($status == 'Probationary') {
+    $total_sql .= "WHERE e.employee_status = 'Probationary'";
+}
+if ($status == 'Regular') {
+    $total_sql .= "WHERE e.employee_status = 'Regular'";
+}
+if ($status == 'Archived') {
+    $total_sql .= "WHERE e.employee_status = 'Archived'";
 }
 
 if (!empty($search)) {

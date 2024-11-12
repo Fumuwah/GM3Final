@@ -227,7 +227,7 @@ include './layout/header.php';
             </div>
             <div class="d-flex justify-content-center align-items-center">
                 <div class="text-center">
-                    <h3 style="padding-top: 10px; border-top: 2px solid black; margin-top:70px;">Justin Kyle Caragan</h3>
+                    <h3 style="padding-top: 10px; border-top: 2px solid black; margin-top:70px;"><?php echo strtoupper($payslip['firstname'] . ' ' . $payslip['middlename'] . ' ' . $payslip['lastname']) ?></h3>
                     <p class="m-0 p-0">Signature Over Printed Name / Date</p>
                 </div>
             </div>
