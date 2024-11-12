@@ -122,18 +122,18 @@ $age = date_diff(date_create($employee['birthdate']), date_create('today'))->y;
                             <h2>Resignation Form</h2>
                             <div class="table-responsive">
                                 <table class="table">
-                                <tbody>
-                                <tr>
-                                    <td>1</td>
-                                    <td>Resignation</td>
-                                    <td style="text-align: right;">
-                                    <a id="rform" href="assets/files/resignation.pdf" target="_blank"
-                                    style="display: inline-block; padding: 8px 16px; color: #fff; background-color: red; border-radius: 5px; text-decoration: none; font-weight: bold; cursor: pointer;">
-                                        Download
-                                    </a>
-                                    </td>
-                                </tr>
-                            </tbody>
+                                    <tbody>
+                                        <tr>
+                                            <td>1</td>
+                                            <td>Resignation</td>
+                                            <td style="text-align: right;">
+                                                <a id="rform" href="assets/files/resignation.pdf" target="_blank"
+                                                    style="display: inline-block; padding: 8px 16px; color: #fff; background-color: red; border-radius: 5px; text-decoration: none; font-weight: bold; cursor: pointer;">
+                                                    Download
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </tbody>
                                 </table>
                             </div>
                         </div>
@@ -225,21 +225,30 @@ $age = date_diff(date_create($employee['birthdate']), date_create('today'))->y;
             </div>
         </div>
 
-        <script>
-            let addPicture = document.querySelector('#add-picture');
-            let inputTypeFile = document.querySelector('#file');
-            addPicture.addEventListener('click', function(e) {
-                e.preventDefault();
-                inputTypeFile.click();
-            });
-            inputTypeFile.addEventListener('change', function(e) {
-                let form = document.querySelector('#form');
-                form.submit();
-                console.log(this.files[0].name);
-            });
-        </script>
+
     </div>
 </div>
+
+<script>
+    let addPicture = document.querySelector('#add-picture');
+    let inputTypeFile = document.querySelector('#file');
+    addPicture.addEventListener('click', function(e) {
+        e.preventDefault();
+        inputTypeFile.click();
+    });
+    inputTypeFile.addEventListener('change', function(e) {
+        let form = document.querySelector('#form');
+        form.submit();
+        console.log(this.files[0].name);
+    });
+</script>
+
+<script>
+    var resigBtn = document.getElementById('rform');
+    resigBtn.addEventListener('click', function() {
+        window.open("assets/files/resignation.pdf", '_blank').focus();
+    });
+</script>
 <?php include './layout/script.php'; ?>
 <?php
 include './layout/footer.php';

@@ -18,19 +18,35 @@ $offset = ($page - 1) * $recordsPerPage;
 
 $selectedLeaveType = isset($_GET['leave_type']) ? $_GET['leave_type'] : '';
 
+$excludeCurrentUserCondition = ($role_name === 'super admin') ? "AND lr.employee_id != ?" : "";
+
+$types = "";
+$conditions = [];
+$params = [];
+
 $countQuery = "SELECT COUNT(*) AS total FROM leave_requests lr
                JOIN employees e ON lr.employee_id = e.employee_id
-               JOIN roles r ON e.role_id = r.role_id 
-               WHERE r.role_name != 'Super Admin'";
+               JOIN roles r ON e.role_id = r.role_id
+               WHERE (r.role_name != 'Super Admin' OR (r.role_name = 'Super Admin' $excludeCurrentUserCondition))";
 
 if ($selectedLeaveType) {
     $countQuery .= " AND lr.leave_type = ?";
+    $types .= "s";
+    $params[] = $selectedLeaveType;
+}
+
+if ($role_name === 'super admin') {
+    $types .= "i";
+    $params[] = $_SESSION['employee_id'];
 }
 
 $countStmt = $conn->prepare($countQuery);
-if ($selectedLeaveType) {
-    $countStmt->bind_param("s", $selectedLeaveType);
+if (strlen($types) !== count($params)) {
+    die("Count Query Mismatch: Types length does not match params count.");
 }
+
+$countStmt = $conn->prepare($countQuery);
+$countStmt->bind_param($types, ...$params);
 $countStmt->execute();
 $countResult = $countStmt->get_result();
 $totalRow = $countResult->fetch_assoc();
@@ -46,60 +62,62 @@ $query = "
     JOIN employees e ON lr.employee_id = e.employee_id
     JOIN roles r ON e.role_id = r.role_id
     LEFT JOIN leaves l ON e.employee_id = l.employee_id
-    WHERE r.role_name != 'Super Admin'";
+    WHERE (r.role_name != 'Super Admin' OR (r.role_name = 'Super Admin' $excludeCurrentUserCondition))";
+    
+    if (!empty($_GET['employee_name'])) {
+        $conditions[] = "CONCAT(e.firstname, ' ', e.lastname, ' ', e.middlename) LIKE ?";
+        $params[] = '%' . $_GET['employee_name'] . '%';
+        $types .= "s";
+    }
+    
+    if (!empty($_GET['month'])) {
+        $conditions[] = "MONTH(lr.start_date) = ?";
+        $params[] = $_GET['month'];
+        $types .= "i";
+    }
+    
+    if (!empty($_GET['year']) && (int)$_GET['year'] > 0) {
+        $conditions[] = "YEAR(lr.start_date) = ?";
+        $params[] = $_GET['year'];
+        $types .= "i";
+    }
+    
+    if ($selectedLeaveType) {
+        $conditions[] = "lr.leave_type = ?";
+        $params[] = $selectedLeaveType;
+        $types .= "s";
+    }
+    
+    if ($role_name === 'admin') {
+        $conditions[] = "e.project_name = ?";
+        $params[] = $project_name;
+        $types .= "s";
+    }
+    
+    if ($conditions) {
+        $query .= " AND " . implode(" AND ", $conditions);
+    }
 
-$conditions = [];
-$params = [];
-$types = "";
+    $query .= " ORDER BY
+    CASE
+        WHEN lr.status = 'PENDING' THEN 1
+        WHEN lr.status = 'APPROVED' THEN 2
+        ELSE 3
+    END,
+    lr.start_date DESC
+LIMIT ? OFFSET ?";
 
-if (!empty($_GET['employee_name'])) {
-    $conditions[] = "CONCAT(e.firstname, ' ', e.lastname, ' ', e.middlename) LIKE ?";
-    $params[] = '%' . $_GET['employee_name'] . '%';
-    $types .= "s";
-}
-
-if (!empty($_GET['month'])) {
-    $conditions[] = "MONTH(lr.start_date) = ?";
-    $params[] = $_GET['month'];
-    $types .= "i";
-}
-
-if (!empty($_GET['year']) && (int)$_GET['year'] > 0) {
-    $conditions[] = "YEAR(lr.start_date) = ?";
-    $params[] = $_GET['year'];
-    $types .= "i";
-}
-
-if ($selectedLeaveType) {
-    $conditions[] = "lr.leave_type = ?";
-    $params[] = $selectedLeaveType;
-    $types .= "s";
-}
-
-if ($role_name === 'admin') {
-    $conditions[] = "e.project_name = ?";
-    $params[] = $project_name;
-    $types .= "s";
-}
-
-if ($conditions) {
-    $query .= " AND " . implode(" AND ", $conditions);
-}
-
-$query .= " ORDER BY
-            CASE
-                WHEN lr.status = 'PENDING' THEN 1
-                WHEN lr.status = 'APPROVED' THEN 2
-                ELSE 3
-            END,
-            lr.start_date DESC
-        LIMIT ? OFFSET ?";
-
+$types .= "ii";
 $params[] = $recordsPerPage;
 $params[] = $offset;
-$types .= "ii";
+
 $stmt = $conn->prepare($query);
-$stmt->bind_param($types, ...$params);
+
+if (count($params) === strlen($types)) {
+    $stmt->bind_param($types, ...$params);
+} else {
+    die("Parameter count does not match the placeholders in the query.");
+}
 
 $stmt->execute();
 $requests = $stmt->get_result();
