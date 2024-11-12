@@ -106,9 +106,9 @@ $attendance_result = $attendance_stmt->get_result();
 $attendance_data = [];
 while ($row = $attendance_result->fetch_assoc()) {
     $status = "On-Time";
-    if (strtotime($row['time_in']) < strtotime('08:00:00')) {
+    if (strtotime($row['time_in']) < strtotime('07:00:00')) {
         $status = "Early";
-    } elseif (strtotime($row['time_in']) > strtotime('08:00:00')) {
+    } elseif (strtotime($row['time_in']) > strtotime('07:00:00')) {
         $status = "Late";
     }
     $attendance_data[] = [

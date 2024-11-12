@@ -34,7 +34,6 @@ include 'layout/header.php';
                 <div class="col-12 col-lg-8 pt-3 pt-md-0">
                     <div class="row numbers-of">
 
-                        <!-- DTR Summary -->
                         <div class="col-12 my-3">
                             <h4>DTR Summary</h4>
                             <div class="overflow-x-auto">
@@ -55,11 +54,10 @@ include 'layout/header.php';
                                         $stmt->execute();
                                         $stmt->bind_result($date, $time_in, $time_out);
                                         while ($stmt->fetch()) {
-                                            // Determine status based on time_in
                                             $time_in_status = strtotime($time_in);
-                                            if ($time_in_status < strtotime("08:00:00")) {
+                                            if ($time_in_status < strtotime("07:00:00")) {
                                                 $status = "Early";
-                                            } elseif ($time_in_status == strtotime("08:00:00")) {
+                                            } elseif ($time_in_status == strtotime("07:00:00")) {
                                                 $status = "On Time";
                                             } else {
                                                 $status = "Late";
