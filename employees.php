@@ -12,10 +12,11 @@ $page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int)$_GET['page'] :
 $offset = ($page - 1) * $results_per_page;
 
 $search = isset($_GET['search']) ? mysqli_real_escape_string($conn, $_GET['search']) : '';
-$status = isset($_GET['status']) ? mysqli_real_escape_string($conn, $_GET['status']) : '';
+$status = isset($_GET['employee_status']) ? mysqli_real_escape_string($conn, $_GET['employee_status']) : '';
 $position_name = isset($_GET['position_name']) ? mysqli_real_escape_string($conn, $_GET['position_name']) : '';
 $role_name = strtolower($user['role_name'] ?? '');
 $employee_id = $_SESSION['employee_id'];
+$project_name = $_SESSION['project_name'] ?? null;
 
 $project_name_query = "SELECT pr.project_name FROM employees e 
                        JOIN projects pr ON e.project_name = pr.project_name

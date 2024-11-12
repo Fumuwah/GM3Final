@@ -78,9 +78,12 @@ if (!empty($today_filter)) $query_today .= " AND d.date = ?";
 $query_today .= " LIMIT ? OFFSET ?";
 
 $stmt = $conn->prepare($query_today);
-if ($role_name !== 'super admin') {
+if ($role_name === 'admin') {
+    $params[] = $project_name;  // Add the project_name for admin role filtering
+} else if ($role_name !== 'super admin') {
     $params[] = $employee_id;
 }
+
 if (!empty($search_user)) {
     $params[] = "%{$search_user}%";
     $params[] = "%{$search_user}%";
