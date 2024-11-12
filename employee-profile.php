@@ -107,127 +107,161 @@ $age = date_diff(date_create($employee['birthdate']), date_create('today'))->y;
                 </div>
             </div>
             <div class="row mt-3">
-                <div class="col-12">
-                    <button class="btn accordion-btn" data-accordion="information-update" type="button">
-                        Information Update
-                    </button>
-                    <button class="btn accordion-btn" data-accordion="resignation-form" type="button">
-                        Resignation Form
-                    </button>
-                    <button class="btn accordion-btn" data-accordion="more-details" type="button">
-                        More Details
-                    </button>
-                    <div class="card accordion" id="resignation-form">
-                        <div class="card-body">
-                            <h2>Resignation Form</h2>
-                            <div class="table-responsive">
-                                <table class="table">
-                                    <tbody>
-                                        <tr>
-                                            <td>1</td>
-                                            <td>Resignation</td>
-                                            <td style="text-align: right;">
-                                                <a id="rform" href="assets/files/resignation.pdf" target="_blank"
-                                                    style="display: inline-block; padding: 8px 16px; color: #fff; background-color: red; border-radius: 5px; text-decoration: none; font-weight: bold; cursor: pointer;">
-                                                    Download
-                                                </a>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card accordion" id="information-update">
-                        <div class="card-body">
-                            <h2>Edit Information</h2>
-                            <form action="profile-change-request.php" method="POST">
-                                <div class="form-group form-row">
-                                    <div class="col-6">
-                                        <label for="">Password</label>
-                                        <input class="form-control" type="password" name="password" placeholder="New Password">
-                                    </div>
-                                    <div class="col-6">
-                                        <label for="">Confirm Password</label>
-                                        <input class="form-control" type="password" name="confirm_password" placeholder="Confirm Password">
-                                    </div>
-                                </div>
-                                <div class="form-group form-row">
-                                    <div class="col-6">
-                                        <label for="">Contact No.</label>
-                                        <input class="form-control" type="text" name="contactno" placeholder="New Contact Number" value="<?php echo $employee['contactno']; ?>">
-                                    </div>
-                                    <div class="col-6">
-                                        <label for="">Address</label>
-                                        <textarea class="form-control" name="address" placeholder="New Address"><?php echo $employee['address']; ?></textarea>
-                                    </div>
-                                </div>
-                                <div class="text-right d-flex align-items-center justify-content-end">
-                                    <button type="submit" class="btn btn-success">Submit Request</button>
-                                    <a href="#" class="btn btn-danger ml-3">Reset</a>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                    <div class="card accordion" id="more-details">
-                        <div class="card-body">
-                            <h2>More Details</h2>
-                            <hr class="mb-4">
-                            <div class="d-flex flex-wrap align-items-center">
-                                <div class="col-12 col-sm-6 col-lg-3 mt-2">
-                                    <h5>Address:</h5>
-                                    <p><?php echo $employee['address']; ?></p>
-                                </div>
-                                <div class="col-12 col-sm-6 col-lg-3 mt-2">
-                                    <h5>Birthdate:</h5>
-                                    <p><?php echo $birthdate; ?></p>
-                                </div>
-                                <div class="col-12 col-sm-6 col-lg-3 mt-2">
-                                    <h5>Age:</h5>
-                                    <p><?php echo $age; ?></p>
-                                </div>
-                                <div class="col-12 col-sm-6 col-lg-3 mt-2">
-                                    <h5>Civil Status:</h5>
-                                    <p><?php echo $employee['civil_status']; ?></p>
-                                </div>
-                                <div class="col-12 col-sm-6 col-lg-3 mt-2">
-                                    <h5>Religion:</h5>
-                                    <p><?php echo $employee['religion']; ?></p>
-                                </div>
-                                <div class="col-12 col-sm-6 col-lg-3 mt-2">
-                                    <h5>Basic Salary:</h5>
-                                    <p>Php <?php echo number_format($employee['basic_salary'], 2); ?></p>
-                                </div>
-                                <div class="col-12 col-sm-6 col-lg-3 mt-2">
-                                    <h5>SSS Number:</h5>
-                                    <p><?php echo $employee['sss_no']; ?></p>
-                                </div>
-                                <div class="col-12 col-sm-6 col-lg-3 mt-2">
-                                    <h5>Philhealth Number:</h5>
-                                    <p><?php echo $employee['philhealth_no']; ?></p>
-                                </div>
-                                <div class="col-12 col-sm-6 col-lg-3 mt-2">
-                                    <h5>HDMF Number:</h5>
-                                    <p><?php echo $employee['hdmf_no']; ?></p>
-                                </div>
-                                <div class="col-12 col-sm-6 col-lg-3 mt-2">
-                                    <h5>TIN Number:</h5>
-                                    <p><?php echo $employee['tin_no']; ?></p>
-                                </div>
-                                <div class="col-12 col-sm-6 col-lg-3 mt-2">
-                                    <h5>Emergency Contact:</h5>
-                                    <p><?php echo $employee['emergency_contactno']; ?></p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+    <div class="col-12">
+        <button class="btn accordion-btn" data-accordion="information-update" type="button">
+            Information Update
+        </button>
+        <button class="btn accordion-btn" data-accordion="resignation-form" type="button">
+            Resignation Form
+        </button>
+        <button class="btn accordion-btn" data-accordion="more-details" type="button">
+            More Details
+        </button>
+        
+        <!-- Resignation Form Accordion -->
+        <div class="card accordion" id="resignation-form">
+            <div class="card-body">
+                <h2>Resignation Form</h2>
+                <div class="table-responsive">
+                    <table class="table">
+                        <tbody>
+                            <tr>
+                                <td>1</td>
+                                <td>Resignation</td>
+                                <td style="text-align: right;">
+                                    <a id="rform" href="assets/files/resignation.pdf" target="_blank"
+                                        style="display: inline-block; padding: 8px 16px; color: #fff; background-color: red; border-radius: 5px; text-decoration: none; font-weight: bold; cursor: pointer;">
+                                        Download
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
 
+        <!-- Information Update Accordion -->
+        <div class="card accordion" id="information-update">
+            <div class="card-body">
+                <h2>Edit Information</h2>
+                <form action="profile-change-request.php" method="POST">
+                    <div class="form-group form-row">
+                        <div class="col-6">
+                            <label for="">Password</label>
+                            <input class="form-control" type="password" name="password" placeholder="New Password">
+                        </div>
+                        <div class="col-6">
+                            <label for="">Confirm Password</label>
+                            <input class="form-control" type="password" name="confirm_password" placeholder="Confirm Password">
+                        </div>
+                    </div>
+                    <div class="form-group form-row">
+                    <div class="col-6">
+                    <label for="">Contact No.</label>
+                    <input class="form-control" type="text" name="contactno" placeholder="New Contact Number" 
+                        value="<?php echo $employee['contactno']; ?>" 
+                        pattern="^\d{11}$" 
+                        maxlength="11" 
+                        title="Please enter exactly 11 digits." 
+                        required>
+                        </div>
+                        <div class="col-6">
+                            <label for="">Address</label>
+                            <textarea class="form-control" name="address" placeholder="New Address"><?php echo $employee['address']; ?></textarea>
+                        </div>
+                    </div>
+                    <div class="text-right d-flex align-items-center justify-content-end">
+                        <button type="submit" class="btn btn-success">Submit Request</button>
+                        <a href="#" class="btn btn-danger ml-3">Reset</a>
+                    </div>
+                </form>
+            </div>
+        </div>
 
+        <!-- More Details Accordion (default open) -->
+        <div class="card accordion" id="more-details" style="display: block;">
+            <div class="card-body">
+                <h2>More Details</h2>
+                <hr class="mb-4">
+                <div class="d-flex flex-wrap align-items-center">
+                    <div class="col-12 col-sm-6 col-lg-3 mt-2">
+                        <h5>Address:</h5>
+                        <p><?php echo $employee['address']; ?></p>
+                    </div>
+                    <div class="col-12 col-sm-6 col-lg-3 mt-2">
+                        <h5>Birthdate:</h5>
+                        <p><?php echo $birthdate; ?></p>
+                    </div>
+                    <div class="col-12 col-sm-6 col-lg-3 mt-2">
+                        <h5>Age:</h5>
+                        <p><?php echo $age; ?></p>
+                    </div>
+                    <div class="col-12 col-sm-6 col-lg-3 mt-2">
+                        <h5>Civil Status:</h5>
+                        <p><?php echo $employee['civil_status']; ?></p>
+                    </div>
+                    <div class="col-12 col-sm-6 col-lg-3 mt-2">
+                        <h5>Religion:</h5>
+                        <p><?php echo $employee['religion']; ?></p>
+                    </div>
+                    <div class="col-12 col-sm-6 col-lg-3 mt-2">
+                        <h5>Basic Salary:</h5>
+                        <p>Php <?php echo number_format($employee['basic_salary'], 2); ?></p>
+                    </div>
+                    <div class="col-12 col-sm-6 col-lg-3 mt-2">
+                        <h5>SSS Number:</h5>
+                        <p><?php echo $employee['sss_no']; ?></p>
+                    </div>
+                    <div class="col-12 col-sm-6 col-lg-3 mt-2">
+                        <h5>Philhealth Number:</h5>
+                        <p><?php echo $employee['philhealth_no']; ?></p>
+                    </div>
+                    <div class="col-12 col-sm-6 col-lg-3 mt-2">
+                        <h5>HDMF Number:</h5>
+                        <p><?php echo $employee['hdmf_no']; ?></p>
+                    </div>
+                    <div class="col-12 col-sm-6 col-lg-3 mt-2">
+                        <h5>TIN Number:</h5>
+                        <p><?php echo $employee['tin_no']; ?></p>
+                    </div>
+                    <div class="col-12 col-sm-6 col-lg-3 mt-2">
+                        <h5>Emergency Contact:</h5>
+                        <p><?php echo $employee['emergency_contactno']; ?></p>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
+
+<script>
+    // JavaScript to handle the accordion toggle
+    document.addEventListener('DOMContentLoaded', function () {
+        var buttons = document.querySelectorAll('.accordion-btn');
+        buttons.forEach(function (button) {
+            button.addEventListener('click', function () {
+                var target = document.getElementById(button.getAttribute('data-accordion'));
+                var allAccordions = document.querySelectorAll('.accordion');
+                allAccordions.forEach(function (accordion) {
+                    if (accordion !== target) {
+                        accordion.style.display = 'none';
+                    }
+                });
+
+                // Toggle the display of the selected accordion
+                if (target.style.display === 'none' || target.style.display === '') {
+                    target.style.display = 'block';
+                } else {
+                    target.style.display = 'none';
+                }
+            });
+        });
+
+        // Show the "More Details" accordion by default when the page loads
+        document.getElementById('more-details').style.display = 'block';
+    });
+</script>
 
 <script>
     let addPicture = document.querySelector('#add-picture');

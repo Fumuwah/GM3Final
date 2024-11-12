@@ -14,13 +14,12 @@ $activePage = "logging";
 include './layout/header.php';
 include 'database.php';
 
-
 $reports = "SELECT l.*, e.firstname, e.lastname 
             FROM logs l
-            LEFT JOIN employees e ON e.employee_id = l.employee_id;
+            LEFT JOIN employees e ON e.employee_id = l.employee_id
+            ORDER BY l.timestamp DESC;
           ";
 $reports_results = mysqli_query($conn, $reports) or die("Error");
-
 
 ?>
 
