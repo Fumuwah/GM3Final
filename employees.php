@@ -11,6 +11,7 @@ $results_per_page = 10;
 $page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int)$_GET['page'] : 1;
 $offset = ($page - 1) * $results_per_page;
 
+
 $search = isset($_GET['search']) ? mysqli_real_escape_string($conn, $_GET['search']) : '';
 $status = isset($_GET['status']) ? mysqli_real_escape_string($conn, $_GET['status']) : '';
 $position_name = isset($_GET['position_name']) ? mysqli_real_escape_string($conn, $_GET['position_name']) : '';
@@ -236,7 +237,7 @@ include './layout/header.php';
                                 if ($_SESSION['role_name'] == 'Super Admin') {
                                     echo "<button type='button' class='btn btn-danger mb-2 {$archiveClass}' data-id='{$employee_id}'>{$archiveButtonText}</button>";
                                 }
-                                
+
 
                                 echo "          <button type='button' class='btn btn-primary mb-2 edit-employee-btn' data-employee-id='{$employee_id}' 
                                             data-employee-number='{$employee_number}' 
@@ -941,6 +942,7 @@ include './layout/header.php';
     </div>
 </div>
 
+
 <script>
     document.addEventListener('DOMContentLoaded', function() {
 
@@ -958,17 +960,13 @@ include './layout/header.php';
             });
         });
 
-        var addEmployeeBtn = document.querySelector('#add-employee-btn');
-        var addEmployeeModal = document.querySelector('#add-employee-modal');
+
+
         var editEmployeeBtns = document.querySelectorAll('.edit-employee-btn')
         var editEmployeeModal = document.querySelector('#edit-modal');
         var closeModalwForm = document.querySelectorAll('.close-modalwForm');
 
-        addEmployeeBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            addEmployeeModal.classList.remove('fade');
-            addEmployeeModal.style.display = 'block';
-        });
+
 
         function setSelectedValue(selector, value) {
             console.log(`Setting value ${value} for selector ${selector}`);
@@ -1145,4 +1143,19 @@ include './layout/header.php';
         });
     });
 </script>
+
+<?php if ($_SESSION['role_name'] == "Super Admin") { ?>
+
+    <script>
+        var addEmployeeModal = document.querySelector('#add-employee-modal');
+        var addEmployeeBtn = document.querySelector('#add-employee-btn');
+        addEmployeeBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            addEmployeeModal.classList.remove('fade');
+            addEmployeeModal.style.display = 'block';
+        });
+    </script>
+
+<?php } ?>
+
 <?php include './layout/footer.php'; ?>

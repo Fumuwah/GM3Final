@@ -90,10 +90,10 @@
         });
     });
 
-    var resigBtn = document.getElementById('rform');
-    resigBtn.addEventListener('click', function() {
-        window.open("assets/files/resignation.pdf", '_blank').focus();
-    });
+    // var resigBtn = document.getElementById('rform');
+    // resigBtn.addEventListener('click', function() {
+    //     window.open("assets/files/resignation.pdf", '_blank').focus();
+    // });
 </script>
 </body>
 

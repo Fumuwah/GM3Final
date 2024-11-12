@@ -2,6 +2,7 @@
 session_start();
 include 'database.php';
 
+// Redirect if not logged in
 if (!isset($_SESSION['role_name']) || !isset($_SESSION['employee_id'])) {
     header("Location: login.php");
     exit();
@@ -10,20 +11,28 @@ if (!isset($_SESSION['role_name']) || !isset($_SESSION['employee_id'])) {
 $role_name = $_SESSION['role_name'];
 $employee_id = $_SESSION['employee_id'];
 
+// Get filter parameters
 $month_filter = isset($_GET['month']) ? (int)$_GET['month'] : '';
 $year_filter = isset($_GET['year']) ? (int)$_GET['year'] : '';
-$payroll_period_filter = isset($_GET['payroll_period']) ? $_GET['payroll_period'] : '';
+$days_filter = isset($_GET['days']) ? $_GET['days'] : '';
+
+// Pagination settings
+$recordsPerPage = isset($_GET['recordsPerPage']) ? (int)$_GET['recordsPerPage'] : 5; // Default to 5 records per page
+$current_page = isset($_GET['page']) ? (int)$_GET['page'] : 1;  // Default to page 1
+$offset = ($current_page - 1) * $recordsPerPage;
 
 // Base query
 $query = "SELECT pr.payroll_id, e.firstname, e.middlename, e.lastname, 
-              pr.payroll_period, ps.position_name, pr.netpay
+              pr.days, ps.position_name, pr.netpay, pr.payroll_period
           FROM payroll pr 
           LEFT JOIN employees e ON e.employee_id = pr.employee_id
           LEFT JOIN positions ps ON ps.position_id = e.position_id";
 
 // Apply role-based restrictions
+$conditions = [];  // Array to store conditions
+
 if ($role_name === "Employee") {
-    $query .= " WHERE pr.employee_id = :employee_id";
+    $conditions[] = "pr.employee_id = :employee_id";
 } elseif ($role_name === "Admin") {
     // Get Admin's project_name
     $projectQuery = "SELECT project_name FROM employees WHERE employee_id = :employee_id";
@@ -32,36 +41,32 @@ if ($role_name === "Employee") {
     $projectStmt->execute();
     $project = $projectStmt->fetchColumn();
 
-    $query .= " WHERE (e.project_name = :project_name OR pr.employee_id = :employee_id)";
+    $conditions[] = "(e.project_name = :project_name OR pr.employee_id = :employee_id)";
 }
 
-// Additional filtering for month, year, and payroll period
-$filters = [];
+// Add conditions for month, year, and days filters if set
 if (!empty($month_filter)) {
-    $filters[] = "MONTH(pr.payroll_period) = :month";
+    $conditions[] = "pr.month = :month";
 }
 if (!empty($year_filter)) {
-    $filters[] = "YEAR(pr.payroll_period) = :year";
+    $conditions[] = "pr.year = :year";
 }
-if (!empty($payroll_period_filter)) {
-    $filters[] = "pr.payroll_period = :payroll_period";
-}
-
-// Append filters if any
-if (!empty($filters)) {
-    $query .= ' AND ' . implode(' AND ', $filters);
+if (!empty($days_filter)) {
+    $conditions[] = "pr.days = :days";
 }
 
-// Pagination parameters
-$recordsPerPage = 5;
-$current_page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-$offset = ($current_page - 1) * $recordsPerPage;
+// Append conditions to the query if any exist
+if (!empty($conditions)) {
+    $query .= ' WHERE ' . implode(' AND ', $conditions);
+}
+
+// Add pagination
 $query .= " LIMIT :limit OFFSET :offset";
 
 // Prepare statement
 $stmt = $pdo->prepare($query);
 
-// Bind parameters for filtering and pagination
+// Bind parameters for filtering
 if ($role_name === "Employee") {
     $stmt->bindParam(':employee_id', $employee_id, PDO::PARAM_INT);
 } elseif ($role_name === "Admin") {
@@ -75,8 +80,8 @@ if (!empty($month_filter)) {
 if (!empty($year_filter)) {
     $stmt->bindParam(':year', $year_filter, PDO::PARAM_INT);
 }
-if (!empty($payroll_period_filter)) {
-    $stmt->bindParam(':payroll_period', $payroll_period_filter, PDO::PARAM_STR);
+if (!empty($days_filter)) {
+    $stmt->bindParam(':days', $days_filter, PDO::PARAM_STR);
 }
 
 $stmt->bindParam(':limit', $recordsPerPage, PDO::PARAM_INT);
@@ -86,42 +91,45 @@ $stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
 $stmt->execute();
 $payslips = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Fetch payroll periods for the dropdown
-$payrollPeriodQuery = "SELECT DISTINCT payroll_period FROM payroll";
-$payrollPeriodStmt = $pdo->prepare($payrollPeriodQuery);
-$payrollPeriodStmt->execute();
-$payrollPeriods = $payrollPeriodStmt->fetchAll(PDO::FETCH_ASSOC);
+// Fetch days values for the dropdown
+$daysQuery = "SELECT DISTINCT days FROM payroll";
+$daysStmt = $pdo->prepare($daysQuery);
+$daysStmt->execute();
+$payrollPeriods = $daysStmt->fetchAll(PDO::FETCH_ASSOC);
 
-$totalQuery = "SELECT COUNT(*) as total FROM payroll pr
-        WHERE pr.employee_id = $employee_id";
+// Pagination total calculation
+$totalQuery = "SELECT COUNT(*) as total FROM payroll pr";
+if (!empty($conditions)) {
+    $totalQuery .= ' WHERE ' . implode(' AND ', $conditions);
+}
 $totalStmt = $pdo->prepare($totalQuery);
+
+// Bind parameters for total count
+if ($role_name === "Employee") {
+    $totalStmt->bindParam(':employee_id', $employee_id, PDO::PARAM_INT);
+} elseif ($role_name === "Admin") {
+    $totalStmt->bindParam(':project_name', $project, PDO::PARAM_STR);
+    $totalStmt->bindParam(':employee_id', $employee_id, PDO::PARAM_INT);
+}
+
+if (!empty($month_filter)) {
+    $totalStmt->bindParam(':month', $month_filter, PDO::PARAM_INT);
+}
+if (!empty($year_filter)) {
+    $totalStmt->bindParam(':year', $year_filter, PDO::PARAM_INT);
+}
+if (!empty($days_filter)) {
+    $totalStmt->bindParam(':days', $days_filter, PDO::PARAM_STR);
+}
+
 $totalStmt->execute();
 $totalRow = $totalStmt->fetch(PDO::FETCH_ASSOC);
-$totalRecords = $totalRow['total'] != null ? $totalRow['total'] : 0;
+$totalRecords = $totalRow['total'] ?? 0;
 $total_pages = ceil($totalRecords / $recordsPerPage);
 
-$query = "SELECT pr.payroll_id, e.firstname, e.middlename, e.lastname, 
-        pr.payroll_period, ps.position_name, pr.netpay
-        FROM payroll pr 
-        LEFT JOIN employees e ON e.employee_id = pr.employee_id
-        LEFT JOIN positions ps ON ps.position_id = e.employee_id
-        WHERE pr.employee_id = :employeeid
-        LIMIT :limit 
-        OFFSET :offset
-";
-$stmt = $pdo->prepare($query);
-$stmt->bindParam(':employeeid', $employee_id, PDO::PARAM_INT);
-$stmt->bindParam(':limit', $recordsPerPage, PDO::PARAM_INT);
-$stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
-$stmt->execute();
-$payslips = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-
-
-
 $activePage = 'payslip';
-
 include './layout/header.php';
+
 ?>
 
 <div class="d-flex">
@@ -156,8 +164,8 @@ include './layout/header.php';
                     <select name="payroll_period" class="form-control">
                         <option value="">Payroll Period</option>
                         <?php foreach ($payrollPeriods as $period): ?>
-                            <option value="<?php echo htmlspecialchars($period['payroll_period']); ?>">
-                                <?php echo htmlspecialchars($period['payroll_period']); ?>
+                            <option value="<?php echo htmlspecialchars($period['days']); ?>">
+                                <?php echo htmlspecialchars($period['days']); ?>
                             </option>
                         <?php endforeach; ?>
                     </select>
@@ -198,19 +206,19 @@ include './layout/header.php';
                 <ul class="pagination">
                     <?php if ($current_page > 1): ?>
                         <li class="page-item">
-                            <a class="page-link" href="?page=<?php echo $current_page - 1; ?>&month=<?php echo $month_filter; ?>&year=<?php echo $year_filter; ?>&payroll_period=<?php echo $payroll_period_filter; ?>">Previous</a>
+                            <a class="page-link" href="?page=<?php echo $current_page - 1; ?>&month=<?php echo $month_filter; ?>&year=<?php echo $year_filter; ?>&days=<?php echo $days_filter; ?>">Previous</a>
                         </li>
                     <?php endif; ?>
 
                     <?php for ($i = 1; $i <= $total_pages; $i++): ?>
                         <li class="page-item <?php if ($current_page == $i) echo 'active'; ?>">
-                            <a class="page-link" href="?page=<?php echo $i; ?>&month=<?php echo $month_filter; ?>&year=<?php echo $year_filter; ?>&payroll_period=<?php echo $payroll_period_filter; ?>"><?php echo $i; ?></a>
+                            <a class="page-link" href="?page=<?php echo $i; ?>&month=<?php echo $month_filter; ?>&year=<?php echo $year_filter; ?>&days=<?php echo $days_filter; ?>"><?php echo $i; ?></a>
                         </li>
                     <?php endfor; ?>
 
                     <?php if ($current_page < $total_pages): ?>
                         <li class="page-item">
-                            <a class="page-link" href="?page=<?php echo $current_page + 1; ?>&month=<?php echo $month_filter; ?>&year=<?php echo $year_filter; ?>&payroll_period=<?php echo $payroll_period_filter; ?>">Next</a>
+                            <a class="page-link" href="?page=<?php echo $current_page + 1; ?>&month=<?php echo $month_filter; ?>&year=<?php echo $year_filter; ?>&days=<?php echo $days_filter; ?>">Next</a>
                         </li>
                     <?php endif; ?>
                 </ul>
