@@ -152,16 +152,22 @@ $activePage = 'dtr';
                         <input class="form-control" type="text" name="search_user" id="search_user" placeholder="Search User...">
                     </div>
                     <div class="col-sm-3">
-                    <?php if ($role_name === 'super admin'): ?>
-                        <select name="project_name" id="project_name" class="form-control">
-                            <option value="">Select Project</option>
-                            <?php
-                            while ($row_project = mysqli_fetch_assoc($result_projects)) {
-                                $selected = ($row_project['project_name'] === $project_filter) ? 'selected' : '';
-                                echo "<option value='{$row_project['project_name']}' $selected>{$row_project['project_name']}</option>";
-                            }
-                            ?>
-                        </select>
+
+
+                        <?php if ($role_name === 'super admin'): ?>
+
+
+                            <select name="project_name" id="project_name" class="form-control">
+                                <option value="">Select Project</option>
+                                <?php
+                                while ($row_project = mysqli_fetch_assoc($result_projects)) {
+                                    $selected = ($row_project['project_name'] === $project_filter) ? 'selected' : '';
+                                    echo "<option value='{$row_project['project_name']}' $selected>{$row_project['project_name']}</option>";
+                                }
+                                ?>
+                            </select>
+                        <?php endif; ?>
+
                     </div>
                     <div class="col-sm-4 d-flex">
                         <select name="month" id="month" class="form-control">
@@ -185,12 +191,12 @@ $activePage = 'dtr';
                                 echo "<option value='$d' $selected>$d</option>";
                             } ?>
                         </select>
-                        <?php endif; ?>
+
                     </div>
                     <div class="d-flex col-sm-2">
                         <button type="submit" class="btn btn-primary">Filter</button>
                         <?php if ($role_name === 'super admin' || $role_name === 'admin'): ?>
-                        <button type="button" class="btn btn-secondary" id="attendance-btn">Attendance</button>
+                            <button type="button" class="btn btn-secondary" id="attendance-btn">Attendance</button>
                         <?php endif; ?>
                     </div>
                 </div>
