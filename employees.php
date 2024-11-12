@@ -236,6 +236,7 @@ include './layout/header.php';
                                 if ($_SESSION['role_name'] == 'Super Admin') {
                                     echo "<button type='button' class='btn btn-danger mb-2 {$archiveClass}' data-id='{$employee_id}'>{$archiveButtonText}</button>";
                                 }
+                                
 
                                 echo "          <button type='button' class='btn btn-primary mb-2 edit-employee-btn' data-employee-id='{$employee_id}' 
                                             data-employee-number='{$employee_number}' 
@@ -984,6 +985,7 @@ include './layout/header.php';
 
         editBtns.forEach((button) => {
             button.addEventListener('click', function() {
+                console.log('Edit button clicked for Admin');
                 const employeeId = button.getAttribute('data-employee-id');
                 const employeeNumber = button.getAttribute('data-employee-number');
                 const lastname = button.getAttribute('data-lastname');
@@ -1071,6 +1073,7 @@ include './layout/header.php';
 
     document.querySelectorAll('.leaves-btn').forEach(button => {
         button.addEventListener('click', function() {
+            console.log('Leaves button clicked');
             const employeeId = this.getAttribute('data-id');
 
             fetch(`get_leave_details.php?employee_id=${employeeId}`)
