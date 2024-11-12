@@ -26,7 +26,7 @@ if (isset($_POST['forgot_password'])) {
         }
         if ($user['role_id'] == 2) {
             send_email_to_masteradmin($user);
-            $display = "<div class='alert alert-danger'>Change Password Request has been sent to Master Admin.</div>";
+            $display = "<div class='alert alert-danger'>Change Password Request has been sent to Super Admin/HR.</div>";
         }
         if ($user['role_id'] == 1) {
             $display = "<div class='alert alert-danger'>Contact Tech Support.</div>";
