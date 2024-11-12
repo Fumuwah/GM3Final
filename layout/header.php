@@ -6,7 +6,6 @@ mysqli_stmt_execute($notification_prep);
 $resultnotification = mysqli_stmt_get_result($notification_prep);
 $notifs = mysqli_fetch_all($resultnotification, MYSQLI_ASSOC);
 
-
 ?>
 
 <!DOCTYPE html>

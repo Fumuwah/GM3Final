@@ -8,6 +8,8 @@ if (!isset($_SESSION['role_name']) || !isset($_SESSION['employee_id'])) {
     exit();
 }
 
+date_default_timezone_set('Asia/Manila');
+
 $activePage = "dashboard";
 
 $role = $_SESSION['role_name'];
@@ -68,8 +70,57 @@ if ($stmt = $conn->prepare($permissions_query)) {
 $dash_employee_query = "SELECT * FROM employees WHERE employee_status != 'Archived'";
 $dash_employee_query_run =  mysqli_query($conn, $dash_employee_query);
 
-$activePage = 'dashboard';
+$dash_onleave_query = "SELECT * FROM leave_requests WHERE status != 'Archived' AND status = 'Approved'";
+$dash_onleave_query_run = mysqli_query($conn, $dash_onleave_query);
 
+$dash_onapproval_query = "SELECT * FROM leave_requests WHERE status != 'Archived' AND status = 'Pending'";
+$dash_onapproval_query_run = mysqli_query($conn, $dash_onapproval_query);
+
+$dash_onleave_query = "SELECT * FROM leave_requests WHERE status != 'Archived' AND status = 'Approved'";
+$dash_onleave_query_run = mysqli_query($conn, $dash_onleave_query);
+
+$dash_onapproval_query = "SELECT * FROM leave_requests WHERE status != 'Archived' AND status = 'Pending'";
+$dash_onapproval_query_run = mysqli_query($conn, $dash_onapproval_query);
+
+$query = "SELECT lastname FROM employees WHERE employee_id = ?";
+$stmt = $conn->prepare($query);
+$stmt->bind_param("i", $employee_id);
+$stmt->execute();
+$stmt->bind_result($name);
+$stmt->fetch();
+$stmt->close();
+
+$today_date = date("Y-m-d");
+$attendance_query = "
+    SELECT e.employee_id, e.employee_number, e.firstname, e.lastname, d.time_in, p.project_name
+    FROM dtr d
+    JOIN employees e ON d.employee_id = e.employee_id
+    LEFT JOIN projects p ON e.project_name = p.project_name
+    WHERE d.date = ?";
+
+$attendance_stmt = $conn->prepare($attendance_query);
+$attendance_stmt->bind_param("s", $today_date);
+$attendance_stmt->execute();
+$attendance_result = $attendance_stmt->get_result();
+
+$attendance_data = [];
+while ($row = $attendance_result->fetch_assoc()) {
+    $status = "On-Time";
+    if (strtotime($row['time_in']) < strtotime('08:00:00')) {
+        $status = "Early";
+    } elseif (strtotime($row['time_in']) > strtotime('08:00:00')) {
+        $status = "Late";
+    }
+    $attendance_data[] = [
+        'employee_number' => $row['employee_number'],
+        'name' => $row['firstname'] . ' ' . $row['lastname'],
+        'time_in' => $row['time_in'],
+        'project_name' => $row['project_name'],
+        'status' => $status
+    ];
+}
+
+$attendance_stmt->close();
 $conn->close();
 include 'layout/header.php';
 ?>
@@ -104,7 +155,14 @@ include 'layout/header.php';
                             <div class="card">
                                 <div class="card-body text-center">
                                     <div class="m-0">On Leave</div>
-                                    <p class="card-text font-weight-bold mt-3" style="font-size:2.2em;">120</p>
+                                    <?php
+
+                                    if ($onleave_total = mysqli_num_rows($dash_onleave_query_run)) {
+                                        echo ' <p class="card-text font-weight-bold mt-3" style="font-size:2.2em;">' . $onleave_total . '</p>';
+                                    } else {
+                                        echo ' <p class="card-text font-weight-bold mt-3" style="font-size:2.2em;">No Data</p>';
+                                    }
+                                    ?>
                                     <div class="m-0">This month</div>
                                 </div>
                             </div>
@@ -113,7 +171,14 @@ include 'layout/header.php';
                             <div class="card">
                                 <div class="card-body text-center">
                                     <div class="m-0">Pending Approvals</div>
-                                    <p class="card-text font-weight-bold mt-3" style="font-size:2.2em;">10</p>
+                                    <?php
+
+                                    if ($onapproval_total = mysqli_num_rows($dash_onapproval_query_run)) {
+                                        echo ' <p class="card-text font-weight-bold mt-3" style="font-size:2.2em;">' . $onapproval_total . '</p>';
+                                    } else {
+                                        echo ' <p class="card-text font-weight-bold mt-3" style="font-size:2.2em;">0</p>';
+                                    }
+                                    ?>
                                     <div class="m-0">For leaves</div>
                                 </div>
                             </div>
@@ -141,48 +206,21 @@ include 'layout/header.php';
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr>
-                                        <td>#001</td>
-                                        <td>Justin Caragan</td>
-                                        <td>6:30 AM</td>
-                                        <td>Coron</td>
-                                        <td><span class="badge badge-warning">Early</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>#345</td>
-                                        <td>Harry Potter</td>
-                                        <td>7:00 AM</td>
-                                        <td>Coron</td>
-                                        <td><span class="badge badge-success">On-Time</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>#122</td>
-                                        <td>Christian Jake Francisco</td>
-                                        <td>7:00 AM</td>
-                                        <td>Dunkin</td>
-                                        <td><span class="badge badge-success">On-Time</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>#94</td>
-                                        <td>Juan Dela Cruz</td>
-                                        <td>8:50 AM</td>
-                                        <td>Kenny Rogers</td>
-                                        <td><span class="badge badge-danger">Late</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>#89</td>
-                                        <td>Daniel Martinez</td>
-                                        <td>8:50 AM</td>
-                                        <td>Dunkin</td>
-                                        <td><span class="badge badge-danger">Late</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>#35</td>
-                                        <td>Robert Dela Torre</td>
-                                        <td>8:50 AM</td>
-                                        <td>Coron</td>
-                                        <td><span class="badge badge-danger">Late</span></td>
-                                    </tr>
+                                    <?php foreach ($attendance_data as $attendance): ?>
+                                        <tr>
+                                            <td><?php echo htmlspecialchars($attendance['employee_number']); ?></td>
+                                            <td><?php echo htmlspecialchars($attendance['name']); ?></td>
+                                            <td><?php echo htmlspecialchars($attendance['time_in']); ?></td>
+                                            <td><?php echo htmlspecialchars($attendance['project_name']); ?></td>
+                                            <td>
+                                                <?php 
+                                                    $badge_class = ($attendance['status'] === 'Early') ? 'badge-warning' : 
+                                                                (($attendance['status'] === 'On-Time') ? 'badge-success' : 'badge-danger');
+                                                ?>
+                                                <span class="badge <?php echo $badge_class; ?>"><?php echo $attendance['status']; ?></span>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
                                 </tbody>
                             </table>
                         </div>
