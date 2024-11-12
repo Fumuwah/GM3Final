@@ -5,6 +5,7 @@ if (!isset($_SESSION['role_name']) || !isset($_SESSION['employee_id'])) {
     header("Location: login.php");
     exit();
   }
+  include 'database.php';
   
   if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['request_id'], $_POST['action'])) {
     $requestId = $_POST['request_id'];
