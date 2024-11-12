@@ -36,7 +36,10 @@ if (empty($day_filter)) {
 $query_projects = "SELECT project_name FROM projects";
 $result_projects = mysqli_query($conn, $query_projects) or die("Error fetching projects: " . mysqli_error($conn));
 
-function getRoleBasedQuery($role_name, $employee_id)
+$project_name = $_SESSION['project_name'] ?? null;
+$query_today = getRoleBasedQuery($role_name, $employee_id, $project_name);
+
+function getRoleBasedQuery($role_name, $employee_id, $project_name = null)
 {
     if ($role_name === 'super admin') {
         $query = "
@@ -51,7 +54,7 @@ function getRoleBasedQuery($role_name, $employee_id)
             FROM dtr d
             JOIN employees e ON d.employee_id = e.employee_id
             LEFT JOIN projects p ON e.project_name = p.project_name
-            WHERE e.employee_id = ?";
+            WHERE p.project_name = ?";
     } else {
         $query = "
             SELECT d.*, e.lastname, e.firstname, p.project_name
@@ -75,8 +78,6 @@ if (!empty($today_filter)) $query_today .= " AND d.date = ?";
 $query_today .= " LIMIT ? OFFSET ?";
 
 $stmt = $conn->prepare($query_today);
-// die($query_today);
-$params = [];
 if ($role_name !== 'super admin') {
     $params[] = $employee_id;
 }
@@ -92,7 +93,6 @@ if (!empty($day_filter)) $params[] = $day_filter;
 if (!empty($today_filter)) $params[] = $today_filter;
 $params[] = $records_per_page;
 $params[] = $offset;
-// die(json_encode($params));
 if ($params) {
     $stmt->bind_param(str_repeat('s', count($params)), ...$params);
 }

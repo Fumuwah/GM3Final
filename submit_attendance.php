@@ -1,20 +1,18 @@
 <?php
-include 'database.php'; // Include your database connection
+include 'database.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $employee_number = $_POST['employee_number'];
-    $date = $_POST['date'];  // 'YYYY-MM-DD' format
+    $date = $_POST['date'];
     $time = $_POST['time'];
-    $action = $_POST['attendance_action']; // 'time_in' or 'time_out'
+    $action = $_POST['attendance_action'];
 
-    $response = array(); // Array to store response messages
+    $response = array();
 
-    // Extract day, month, and year from the given date
     $day = date('d', strtotime($date));
     $month = date('m', strtotime($date));
     $year = date('Y', strtotime($date));
 
-    // Step 1: Fetch employee_id using employee_number
     $employee_query = "SELECT employee_id FROM employees WHERE employee_number = ?";
     $stmt = $conn->prepare($employee_query);
     $stmt->bind_param('s', $employee_number);
@@ -25,7 +23,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $employee = $employee_result->fetch_assoc();
         $employee_id = $employee['employee_id'];
 
-        // Step 2: Check if there's already a DTR record for this employee and date
         $check_query = "SELECT * FROM dtr WHERE employee_id = ? AND date = ?";
         $stmt = $conn->prepare($check_query);
         $stmt->bind_param('ss', $employee_id, $date);
@@ -36,7 +33,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $row = $result->fetch_assoc();
 
             if ($action == 'time_in' && empty($row['time_in'])) {
-                // Record time-in if not already set
                 $update_query = "UPDATE dtr SET time_in = ? WHERE employee_id = ? AND date = ?";
                 $stmt = $conn->prepare($update_query);
                 $stmt->bind_param('sss', $time, $employee_id, $date);
@@ -49,20 +45,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $response['message'] = 'Failed to record time-in: ' . $stmt->error;
                 }
             } elseif ($action == 'time_out' && empty($row['time_out'])) {
-                // Update time-out and calculate total hours
-                $update_query = "
+                $time_in = $row['time_in'];
+                $time_out = $time;
+
+                // Calculate total hours worked, excluding 12 PM to 1 PM
+                $total_hours_query = "
                     UPDATE dtr 
                     SET time_out = ?, 
-                        total_hrs = ROUND(TIMESTAMPDIFF(MINUTE, time_in, ?) / 60, 2) 
+                        total_hrs = ROUND(
+                            TIMESTAMPDIFF(MINUTE, time_in, ?) / 60 
+                            - (CASE 
+                                WHEN time_in <= '12:00:00' AND ? >= '13:00:00' THEN 1 
+                                ELSE 0 
+                            END), 2) 
                     WHERE employee_id = ? AND date = ?";
-                $stmt = $conn->prepare($update_query);
-                $stmt->bind_param('ssss', $time, $time, $employee_id, $date);
+                $stmt = $conn->prepare($total_hours_query);
+                $stmt->bind_param('sssss', $time_out, $time_out, $time_out, $employee_id, $date);
 
                 if ($stmt->execute()) {
-                    // Calculate overtime hours (if more than 8 hours)
                     $ot_query = "
                         UPDATE dtr 
-                        SET other_ot = GREATEST(0, ROUND(TIMESTAMPDIFF(MINUTE, time_in, time_out) / 60 - 8, 2)) 
+                        SET other_ot = GREATEST(0, ROUND(total_hrs - 8, 2)) 
                         WHERE employee_id = ? AND date = ?";
                     $stmt = $conn->prepare($ot_query);
                     $stmt->bind_param('ss', $employee_id, $date);
@@ -79,7 +82,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $response['message'] = 'Attendance already recorded.';
             }
         } else {
-            // No existing record, insert a new one
             if ($action == 'time_in') {
                 $insert_query = "
                     INSERT INTO dtr (employee_id, date, day, month, year, time_in) 
@@ -104,7 +106,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $response['message'] = 'Employee number not found.';
     }
 
-    // Return the response as JSON
     echo json_encode($response);
     header('location:dtr.php');
 }

@@ -21,8 +21,8 @@ $selectedLeaveType = isset($_GET['leave_type']) ? $_GET['leave_type'] : '';
 $excludeCurrentUserCondition = ($role_name === 'super admin') ? "AND lr.employee_id != ?" : "";
 
 $types = "";
-$conditions = [];
 $params = [];
+$totalPages = 1; 
 
 $countQuery = "SELECT COUNT(*) AS total FROM leave_requests lr
                JOIN employees e ON lr.employee_id = e.employee_id
@@ -41,17 +41,25 @@ if ($role_name === 'super admin') {
 }
 
 $countStmt = $conn->prepare($countQuery);
+
 if (strlen($types) !== count($params)) {
     die("Count Query Mismatch: Types length does not match params count.");
 }
 
-$countStmt = $conn->prepare($countQuery);
-$countStmt->bind_param($types, ...$params);
-$countStmt->execute();
-$countResult = $countStmt->get_result();
-$totalRow = $countResult->fetch_assoc();
-$totalRecords = $totalRow['total'];
-$totalPages = ceil($totalRecords / $recordsPerPage);
+if (!empty($types)) {
+    $countStmt->bind_param($types, ...$params);
+} else {
+    echo "Error: No types defined for count query.";
+    $countStmt->execute();
+    $countResult = $countStmt->get_result();
+    $totalRow = $countResult->fetch_assoc();
+    $totalRecords = $totalRow['total'];
+    $totalPages = ceil($totalRecords / $recordsPerPage);
+}
+
+if (!isset($totalPages)) {
+    $totalPages = 1;
+}
 
 $query = "
     SELECT lr.request_id, e.employee_id, e.firstname, e.lastname, lr.leave_type, lr.start_date, lr.end_date, lr.reason,
@@ -63,7 +71,9 @@ $query = "
     JOIN roles r ON e.role_id = r.role_id
     LEFT JOIN leaves l ON e.employee_id = l.employee_id
     WHERE (r.role_name != 'Super Admin' OR (r.role_name = 'Super Admin' $excludeCurrentUserCondition))";
-    
+
+    $conditions = [];
+
     if (!empty($_GET['employee_name'])) {
         $conditions[] = "CONCAT(e.firstname, ' ', e.lastname, ' ', e.middlename) LIKE ?";
         $params[] = '%' . $_GET['employee_name'] . '%';
@@ -89,9 +99,13 @@ $query = "
     }
     
     if ($role_name === 'admin') {
-        $conditions[] = "e.project_name = ?";
-        $params[] = $project_name;
-        $types .= "s";
+        if ($project_name) {
+            $conditions[] = "e.project_name = ?";
+            $params[] = $project_name;
+            $types .= "s";
+        } else {
+            echo "Error: Project name is not set for Admin.<br>";
+        }
     }
     
     if ($conditions) {
@@ -114,11 +128,14 @@ $params[] = $offset;
 $stmt = $conn->prepare($query);
 
 if (count($params) === strlen($types)) {
-    $stmt->bind_param($types, ...$params);
+    if ($types) {
+        $stmt->bind_param($types, ...$params);  // Bind params only if types are present
+    } else {
+        $stmt->bind_param("");  // No parameters to bind
+    }
 } else {
     die("Parameter count does not match the placeholders in the query.");
 }
-
 $stmt->execute();
 $requests = $stmt->get_result();
 
