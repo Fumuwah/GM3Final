@@ -134,6 +134,17 @@ $activePage = $activePage ?? '';
                 </a>
             </li>
         <?php endif; ?>
+        <?php if ($role_name === 'super admin' || $role_name === 'admin' || $role_name === 'employee'): ?>
+            <li class="sidebar-item" id="sidebar-notif" hidden>
+                <a class="sidebar-link" href="notification_page.php">
+                    <span>Notification</span>
+                </a>
+            </li>
+            <li class="sidebar-item" id="sidebar-logout" hidden>
+                <a class="sidebar-link" href="logout.php" style="<?= ($activePage === 'logging') ? 'background-color:rgba(0, 123, 255, 0.5);border-left: 3px solid #3b7ddd;' : ''; ?>">
+                    <span>Logout</span>
+                </a>
+            </li>
+        <?php endif; ?>
     </ul>
 </aside>
-
