@@ -23,17 +23,18 @@ $offset = ($current_page - 1) * $recordsPerPage;
 
 // Base query
 $query = "SELECT pr.payroll_id, e.firstname, e.middlename, e.lastname, 
-              pr.days, ps.position_name, pr.netpay, pr.payroll_period
-          FROM payroll pr 
-          LEFT JOIN employees e ON e.employee_id = pr.employee_id
-          LEFT JOIN positions ps ON ps.position_id = e.position_id";
+              pr.days, ps.position_name, pr.netpay, pr.payroll_period, e.*
+            FROM payroll pr 
+             JOIN employees e ON e.employee_id = pr.employee_id
+           JOIN positions ps ON ps.position_id = e.position_id";
 
 // Apply role-based restrictions
 $conditions = [];  // Array to store conditions
 
 if ($role_name === "Employee") {
     $conditions[] = "pr.employee_id = :employee_id";
-} elseif ($role_name === "Admin") {
+}
+if ($role_name === "Admin") {
     // Get Admin's project_name
     $projectQuery = "SELECT project_name FROM employees WHERE employee_id = :employee_id";
     $projectStmt = $pdo->prepare($projectQuery);
@@ -41,7 +42,8 @@ if ($role_name === "Employee") {
     $projectStmt->execute();
     $project = $projectStmt->fetchColumn();
 
-    $conditions[] = "(e.project_name = :project_name OR pr.employee_id = :employee_id)";
+    $conditions[] = "( pr.employee_id = :employee_id )";
+    // $conditions[] = "(pr.employee_id = :employee_id)";
 }
 
 // Add conditions for month, year, and days filters if set
@@ -63,6 +65,8 @@ if (!empty($conditions)) {
 // Add pagination
 $query .= " LIMIT :limit OFFSET :offset";
 
+// echo "<pre>" . $query . "</pre>";
+
 // Prepare statement
 $stmt = $pdo->prepare($query);
 
@@ -70,7 +74,7 @@ $stmt = $pdo->prepare($query);
 if ($role_name === "Employee") {
     $stmt->bindParam(':employee_id', $employee_id, PDO::PARAM_INT);
 } elseif ($role_name === "Admin") {
-    $stmt->bindParam(':project_name', $project, PDO::PARAM_STR);
+    // $stmt->bindParam(':project_name', $project, PDO::PARAM_STR);
     $stmt->bindParam(':employee_id', $employee_id, PDO::PARAM_INT);
 }
 
@@ -108,7 +112,7 @@ $totalStmt = $pdo->prepare($totalQuery);
 if ($role_name === "Employee") {
     $totalStmt->bindParam(':employee_id', $employee_id, PDO::PARAM_INT);
 } elseif ($role_name === "Admin") {
-    $totalStmt->bindParam(':project_name', $project, PDO::PARAM_STR);
+    // $totalStmt->bindParam(':project_name', $project, PDO::PARAM_STR);
     $totalStmt->bindParam(':employee_id', $employee_id, PDO::PARAM_INT);
 }
 
