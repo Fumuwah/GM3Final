@@ -39,14 +39,9 @@ $sql = "SELECT e.employee_id, e.firstname, e.lastname, e.middlename, e.employee_
 
        
 if ($role_name == 'admin') {
-    $project_query = "SELECT project_name FROM employees WHERE employee_id = '$employee_id'";
-    $project_result = mysqli_query($conn, $project_query);
-    $project_data = mysqli_fetch_assoc($project_result);
-    $user_project_name = $project_data['project_name'] ?? '';
-
-    if (!empty($user_project_name)) {
-        $sql .= " AND pr.project_name = '$user_project_name'";
-    }
+    $sql .= " WHERE pr.project_name = '$user_project_name'";
+} elseif ($role_name == 'super admin') {
+    $sql .= " WHERE 1";
 }
 
 if (empty($status)) {
@@ -186,10 +181,13 @@ include './layout/header.php';
                     <form action="profile-change-requests.php">
                         <button type="submit" class="btn btn-success mb-2 mr-2" id="approvals">Approvals</button>
                     </form>
-
+                    
                     <form action="">
+                    <?php if ($role_name === 'super admin'): ?>
                         <button type="submit" class="btn btn-success mb-2" id="add-employee-btn">Add Employee</button>
+                        <?php endif; ?>
                     </form>
+                    
                 </div>
             </div>
 
