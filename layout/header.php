@@ -6,6 +6,34 @@ mysqli_stmt_execute($notification_prep);
 $resultnotification = mysqli_stmt_get_result($notification_prep);
 $notifs = mysqli_fetch_all($resultnotification, MYSQLI_ASSOC);
 
+$employee_id = $_SESSION['employee_id'] ?? null;
+
+if (!$employee_id) {
+    die('User is not logged in.');
+}
+
+$query = "SELECT r.role_name, 
+                p.can_view_own_data, p.can_view_team_data, 
+                p.can_edit_data, p.can_manage_roles 
+        FROM employees e 
+        JOIN roles r ON e.role_id = r.role_id 
+        LEFT JOIN permissions p ON r.role_id = p.permission_id 
+        WHERE e.employee_id = ?";
+
+$stmt = $pdo->prepare($query);
+$stmt->execute([$employee_id]);
+$user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+if (!$user) {
+    die('User data not found.');
+}
+
+$role_name = strtolower($user['role_name'] ?? '');
+$can_view_own_data = $user['can_view_own_data'] ?? false;
+$can_view_team_data = $user['can_view_team_data'] ?? false;
+$can_edit_data = $user['can_edit_data'] ?? false;
+$can_manage_roles = $user['can_manage_roles'] ?? false;
+
 ?>
 
 <!DOCTYPE html>
@@ -36,10 +64,18 @@ $notifs = mysqli_fetch_all($resultnotification, MYSQLI_ASSOC);
 <body>
     <nav class="navbar navbar-light bg-light flex-column flex-lg-row align-items-start">
         <div class="d-flex align-items-center nav-phone justify-content-between">
-            <a class="navbar-brand font-weight-bold bg-blue" href="index.php">
-                <img src="assets/images/gm3-logo-small.png" width="30" height="30" class="d-inline-block align-top" alt="">
-                GM3 Builders
-            </a>
+            <?php if ($role_name === 'super admin' || $role_name === 'admin'): ?>
+                <a class="navbar-brand font-weight-bold bg-blue" href="index.php">
+                    <img src="assets/images/gm3-logo-small.png" width="30" height="30" class="d-inline-block align-top" alt="">
+                    GM3 Builders
+                </a>
+            <?php endif; ?>
+            <?php if ($role_name === 'employee'): ?>
+                <a class="navbar-brand font-weight-bold bg-blue" href="employee_dashboard.php">
+                    <img src="assets/images/gm3-logo-small.png" width="30" height="30" class="d-inline-block align-top" alt="">
+                    GM3 Builders
+                </a>
+            <?php endif; ?>
         </div>
         <ul class="navbar-nav flex-row flex-column flex-lg-row">
             <li class="nav-item active mx-3 d-flex align-items-center">
