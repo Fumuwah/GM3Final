@@ -1,12 +1,26 @@
 <?php
 
 session_start();
+include 'database.php';
 
 // Ensure session contains role_name and employee_id
 if (!isset($_SESSION['role_name']) || !isset($_SESSION['employee_id'])) {
     header("Location: login.php");
     exit();
 }
+$payslipID = $_GET['pid'];
+$query = "SELECT pr.payroll_id, e.firstname, e.middlename, e.lastname, 
+        pr.payroll_period, e.project_name, e.employee_number,  ps.position_name, 
+         pr.netpay
+        FROM payroll pr 
+        LEFT JOIN employees e ON e.employee_id = pr.employee_id
+        LEFT JOIN positions ps ON ps.position_id = e.employee_id
+        WHERE pr.payroll_id = :payslipID
+";
+$stmt = $pdo->prepare($query);
+$stmt->bindParam(':payslipID', $payslipID, PDO::PARAM_INT);
+$stmt->execute();
+$payslip = $stmt->fetch(PDO::FETCH_ASSOC);
 
 
 $activePage = 'payslip';
@@ -123,7 +137,10 @@ include './layout/header.php';
 <div class="d-flex">
     <?php include './layout/sidebar.php'; ?>
     <div class="main" style="max-height: calc(100vh - 80px);overflow-y:scroll">
-        <article>
+        <div class="d-flex justify-content-end">
+            <button class="btn btn-primary text-light p-2" id="print_payslip">Print Payslip</button>
+        </div>
+        <article id="payslip_overview">
             <div class="title">
                 <img src="./assets/images/gm3template.jpg" alt="">
             </div>
@@ -227,4 +244,32 @@ include './layout/header.php';
 
 
 <?php include './layout/script.php'; ?>
+<script>
+    $(function() {
+        $('#print_payslip').click(function() {
+            const payslipContent = $('#payslip_overview').html();
+
+            // Create a new window
+            const printWindow = window.open('', '', 'height=800,width=1000');
+            printWindow.document.write('<html><head><title>Payslip Overview</title>');
+            printWindow.document.write(`
+                <link rel="preconnect" href="https://fonts.googleapis.com">
+                <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+                <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">
+                <link rel="stylesheet" href="assets/css/style.css">
+                <link rel="stylesheet" href="assets/css/main.css">
+                <link rel="stylesheet" href="assets/css/print_payslip.css">
+                <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+            `);
+            printWindow.document.write('</head><body>');
+
+            printWindow.document.write(payslipContent);
+            printWindow.document.write('</body></html>');
+
+            // Print the content
+            printWindow.document.close();
+            printWindow.print();
+        })
+    })
+</script>
 <?php include './layout/footer.php'; ?>

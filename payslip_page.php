@@ -10,7 +10,6 @@ if (!isset($_SESSION['role_name']) || !isset($_SESSION['employee_id'])) {
 $role_name = $_SESSION['role_name'];
 $employee_id = $_SESSION['employee_id'];
 
-// Filtering
 $month_filter = isset($_GET['month']) ? (int)$_GET['month'] : '';
 $year_filter = isset($_GET['year']) ? (int)$_GET['year'] : '';
 $payroll_period_filter = isset($_GET['payroll_period']) ? $_GET['payroll_period'] : '';
@@ -93,13 +92,32 @@ $payrollPeriodStmt = $pdo->prepare($payrollPeriodQuery);
 $payrollPeriodStmt->execute();
 $payrollPeriods = $payrollPeriodStmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Pagination total records count
-$totalQuery = "SELECT COUNT(*) as total FROM payroll";
+$totalQuery = "SELECT COUNT(*) as total FROM payroll pr
+        WHERE pr.employee_id = $employee_id";
 $totalStmt = $pdo->prepare($totalQuery);
 $totalStmt->execute();
 $totalRow = $totalStmt->fetch(PDO::FETCH_ASSOC);
 $totalRecords = $totalRow['total'] != null ? $totalRow['total'] : 0;
 $total_pages = ceil($totalRecords / $recordsPerPage);
+
+$query = "SELECT pr.payroll_id, e.firstname, e.middlename, e.lastname, 
+        pr.payroll_period, ps.position_name, pr.netpay
+        FROM payroll pr 
+        LEFT JOIN employees e ON e.employee_id = pr.employee_id
+        LEFT JOIN positions ps ON ps.position_id = e.employee_id
+        WHERE pr.employee_id = :employeeid
+        LIMIT :limit 
+        OFFSET :offset
+";
+$stmt = $pdo->prepare($query);
+$stmt->bindParam(':employeeid', $employee_id, PDO::PARAM_INT);
+$stmt->bindParam(':limit', $recordsPerPage, PDO::PARAM_INT);
+$stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
+$stmt->execute();
+$payslips = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+
+
 
 $activePage = 'payslip';
 

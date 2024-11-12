@@ -105,7 +105,7 @@ include './layout/header.php';
                 <form class="form-inline my-3 col-10 pl-0" method="GET" action="">
                     <div class="form-group col-8 col-lg-3">
                         <label for="search-user" class="sr-only">Search User</label>
-                        <input type="text" class="form-control w-100" id="search-user" name="search" placeholder="Search User" value="<?php echo isset($_GET['search']) ? htmlspecialchars($_GET['search']) : ''; ?>">
+                        <input type="text" class="form-control w-100" id="search-user" name="search" placeholder="Search User" value="">
                     </div>
 
                     <div class="form-group">
@@ -147,10 +147,11 @@ include './layout/header.php';
                     <form action="profile-change-requests.php">
                         <button type="submit" class="btn btn-success mb-2 mr-2" id="approvals">Approvals</button>
                     </form>
-
-                    <form action="">
-                        <button type="submit" class="btn btn-success mb-2" id="add-employee-btn">Add Employee</button>
-                    </form>
+                    <?php if ($_SESSION['role_name'] == 'Super Admin'): ?>
+                        <form action="">
+                            <button type="submit" class="btn btn-success mb-2" id="add-employee-btn">Add Employee</button>
+                        </form>
+                    <?php endif; ?>
                 </div>
             </div>
 
@@ -309,7 +310,7 @@ include './layout/header.php';
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-success close-modal">Close</button>
+                <button type="button" class="btn btn-success close-modal close-modalwForm">Close</button>
             </div>
         </div>
     </div>
@@ -916,17 +917,6 @@ include './layout/header.php';
         var deleteBtn = document.querySelectorAll('.delete-btn');
         var deleteModal = document.querySelector('#delete-modal');
         var closeModal = document.querySelectorAll('.close-modal');
-
-        closeModal.forEach((d) => {
-            d.addEventListener('click', function(i) {
-                var modalParent = d.parentNode.parentNode.parentNode.parentNode;
-                modalParent.classList.add('fade');
-                setTimeout(function() {
-                    modalParent.style.display = 'none';
-                }, 400)
-            });
-        });
-
         var addEmployeeBtn = document.querySelector('#add-employee-btn');
         var addEmployeeModal = document.querySelector('#add-employee-modal');
         var editEmployeeBtns = document.querySelectorAll('.edit-employee-btn')
@@ -1039,15 +1029,15 @@ include './layout/header.php';
         })
     });
 
-     document.querySelectorAll('.leaves-btn').forEach(button => {
-            button.addEventListener('click', function () {
-                const employeeId = this.getAttribute('data-id');
-                
-                fetch(`get_leave_details.php?employee_id=${employeeId}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data) {
-                            document.querySelector('#leave-modal tbody').innerHTML = `
+    document.querySelectorAll('.leaves-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const employeeId = this.getAttribute('data-id');
+
+            fetch(`get_leave_details.php?employee_id=${employeeId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data) {
+                        document.querySelector('#leave-modal tbody').innerHTML = `
                                 <tr>
                                     <td>${data.vacation_leave}</td>
                                     <td>${data.sick_leave}</td>
@@ -1056,14 +1046,14 @@ include './layout/header.php';
                                     <td>${data.total_leave}</td>
                                 </tr>
                             `;
-                            $('#leave-modal').modal('show');
-                        } else {
-                            alert("No leave data found for this employee.");
-                        }
-                    })
-                    .catch(error => console.error('Error:', error));
-            });
+                        $('#leave-modal').modal('show');
+                    } else {
+                        alert("No leave data found for this employee.");
+                    }
+                })
+                .catch(error => console.error('Error:', error));
         });
+    });
 
     function toggleProjectField() {
         var projectDropdown = document.getElementById('project_name');
@@ -1092,7 +1082,7 @@ include './layout/header.php';
         $('.close-modal').on('click', function() {
             archiveModal.addClass('fade');
             setTimeout(function() {
-                archiveModal.css('display', 'none');
+                archiveModal.css('display', 'none').removeClass('fade');
             }, 400);
         });
 
@@ -1107,7 +1097,7 @@ include './layout/header.php';
         $('.close-modal').on('click', function() {
             unArchiveModal.addClass('fade');
             setTimeout(function() {
-                unArchiveModal.css('display', 'none');
+                unArchiveModal.css('display', 'none').removeClass('fade');
             }, 400);
         });
     });

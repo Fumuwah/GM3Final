@@ -1,0 +1,120 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Main container padding for print */
+.main {
+    padding: 20px;
+    color: #000;
+    font-family: 'Roboto', sans-serif;
+}
+
+/* Hide non-essential elements */
+.main header,
+.main footer,
+.main aside,
+.main nav,
+.main iframe,
+.main .menu,
+.main .hero,
+.main .adslot {
+    display: none;
+}
+
+/* Title Section */
+.main .title {
+    display: flex;
+    align-items: baseline;
+    gap: 1em;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+}
+
+.main .title img {
+    width: 80px;
+    height: auto;
+}
+
+/* Colors for Print */
+.bg-blue {
+    background-color: #1f4d88 !important;
+    color: white !important;
+    -webkit-print-color-adjust: exact; /* Ensures color in print */
+    print-color-adjust: exact;
+    padding: 5px;
+    font-weight: bold;
+}
+
+.bg-gray {
+    background: #f1f1f1 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+/* Typography and Layout */
+.d-flex {
+    display: flex;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.text-right {
+    text-align: right;
+}
+
+.justify-content-center {
+    justify-content: center;
+}
+
+.justify-content-between {
+    justify-content: space-between;
+}
+
+.align-items-center {
+    align-items: center;
+}
+
+/* Margin and Padding */
+.my-10 {
+    margin: 10px 0;
+}
+
+.py-10 {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.p-10 {
+    padding: 10px;
+}
+
+.mt-20 {
+    margin-top: 20px;
+}
+
+/* Flex Layout */
+.flex-grow {
+    flex-grow: 1;
+}
+
+/* Print-Specific Styles */
+.personal-info-container,
+.deductions-container,
+.gross-pay-container,
+.net-pay-container {
+    margin-top: 15px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    background-color: #f9f9f9;
+    -webkit-print-color-adjust: exact;
+}
+
+.signature-section {
+    margin-top: 40px;
+    text-align: center;
+    font-style: italic;
+}
