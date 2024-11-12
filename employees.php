@@ -165,9 +165,11 @@ include './layout/header.php';
                         <button type="submit" class="btn btn-success mb-2 mr-2" id="approvals">Approvals</button>
                     </form>
 
-                    <form action="">
-                        <button type="submit" class="btn btn-success mb-2" id="add-employee-btn">Add Employee</button>
-                    </form>
+                    <?php if ($_SESSION['role_name'] == 'Super Admin'): ?>
+                        <form action="">
+                            <button type="submit" class="btn btn-success mb-2" id="add-employee-btn">Add Employee</button>
+                        </form>
+                    <?php endif; ?>
                 </div>
             </div>
 
@@ -398,21 +400,21 @@ include './layout/header.php';
                             ?>
                         </div>
                         <div class="col-3">
-                        <label for="lastname">Last Name</label>
-                        <input type="text" class="form-control" name="lastname" id="edit_lastname" 
-                            required pattern="^[A-Za-zÀ-ÖØ-ÿ\s]+$" 
-                            title="Please enter a valid last name (only letters and spaces are allowed).">
-                        <?php
-                        if ($_SERVER["REQUEST_METHOD"] == "POST") {
-                            $lastname = $_POST['lastname'];
-                            if (!preg_match("/^[A-Za-zÀ-ÖØ-ÿ\s]+$/", $lastname)) {
-                                echo "<p style='color:red;'>Last Name must contain only letters and spaces, and cannot include numbers or special characters.</p>";
-                            } else {
-                                echo "<p style='color:green;'>Last Name is valid.</p>";
+                            <label for="lastname">Last Name</label>
+                            <input type="text" class="form-control" name="lastname" id="edit_lastname"
+                                required pattern="^[A-Za-zÀ-ÖØ-ÿ\s]+$"
+                                title="Please enter a valid last name (only letters and spaces are allowed).">
+                            <?php
+                            if ($_SERVER["REQUEST_METHOD"] == "POST") {
+                                $lastname = $_POST['lastname'];
+                                if (!preg_match("/^[A-Za-zÀ-ÖØ-ÿ\s]+$/", $lastname)) {
+                                    echo "<p style='color:red;'>Last Name must contain only letters and spaces, and cannot include numbers or special characters.</p>";
+                                } else {
+                                    echo "<p style='color:green;'>Last Name is valid.</p>";
+                                }
                             }
-                        }
-                        ?>
-                    </div>
+                            ?>
+                        </div>
                         <div class="col-3">
                             <label for="firstname">First Name</label>
                             <input type="text" class="form-control" name="firstname" id="edit_firstname" required pattern="^[A-Za-zÀ-ÖØ-ÿ\s]+$" title="Please enter a valid first name (only letters and spaces are allowed).">
@@ -673,56 +675,56 @@ include './layout/header.php';
                             ?>
                         </div>
                         <div class="col-3">
-                        <label for="lastname">Last Name</label>
-                        <input type="text" class="form-control" name="lastname" id="lastname" 
-                            required pattern="^[A-Za-zÀ-ÖØ-ÿ\s]+$" 
-                            title="Please enter a valid last name (only letters and spaces are allowed).">
-                        <?php
-                        if ($_SERVER["REQUEST_METHOD"] == "POST") {
-                            $lastname = $_POST['lastname'];
-                            if (!preg_match("/^[A-Za-zÀ-ÖØ-ÿ\s]+$/", $lastname)) {
-                                echo "<p style='color:red;'>Last Name must contain only letters and spaces, and cannot include numbers or special characters.</p>";
-                            } else {
-                                echo "<p style='color:green;'>Last Name is valid.</p>";
+                            <label for="lastname">Last Name</label>
+                            <input type="text" class="form-control" name="lastname" id="lastname"
+                                required pattern="^[A-Za-zÀ-ÖØ-ÿ\s]+$"
+                                title="Please enter a valid last name (only letters and spaces are allowed).">
+                            <?php
+                            if ($_SERVER["REQUEST_METHOD"] == "POST") {
+                                $lastname = $_POST['lastname'];
+                                if (!preg_match("/^[A-Za-zÀ-ÖØ-ÿ\s]+$/", $lastname)) {
+                                    echo "<p style='color:red;'>Last Name must contain only letters and spaces, and cannot include numbers or special characters.</p>";
+                                } else {
+                                    echo "<p style='color:green;'>Last Name is valid.</p>";
+                                }
                             }
-                        }
-                        ?>
-                    </div>
+                            ?>
+                        </div>
 
-                    <div class="col-3">
-                    <label for="firstname">First Name</label>
-                    <input type="text" class="form-control" name="firstname" id="firstname" 
-                        required pattern="^[A-Za-zÀ-ÖØ-ÿ\s]+$" 
-                        title="Please enter a valid first name (only letters and spaces are allowed).">
-                    <?php
-                    if ($_SERVER["REQUEST_METHOD"] == "POST") {
-                        $firstname = $_POST['firstname'];
-                        if (!preg_match("/^[A-Za-zÀ-ÖØ-ÿ\s]+$/", $firstname)) {
-                            echo "<p style='color:red;'>First Name must contain only letters and spaces, and cannot include numbers or special characters.</p>";
-                        } else {
-                            echo "<p style='color:green;'>First Name is valid.</p>";
-                        }
-                    }
-                    ?>
-                </div>
-                    <div class="col-3">
-                    <label for="middlename">Middle Name</label>
-                    <input type="text" class="form-control" name="middlename" id="middlename" 
-                        required pattern="^[A-Za-zÀ-ÖØ-ÿ\s]+$" 
-                        title="Please enter a valid middle name (only letters and spaces are allowed).">
-                    <?php
-                    if ($_SERVER["REQUEST_METHOD"] == "POST") {
-                        $middlename = $_POST['middlename'];
-                        if (!preg_match("/^[A-Za-zÀ-ÖØ-ÿ\s]+$/", $middlename)) {
-                            echo "<p style='color:red;'>Middle Name must contain only letters and spaces, and cannot include numbers or special characters.</p>";
-                        } else {
-                            echo "<p style='color:green;'>Middle Name is valid.</p>";
-                        }
-                    }
-                    ?>
-                </div>
-                </div>
-                                <div class="form-row form-group">
+                        <div class="col-3">
+                            <label for="firstname">First Name</label>
+                            <input type="text" class="form-control" name="firstname" id="firstname"
+                                required pattern="^[A-Za-zÀ-ÖØ-ÿ\s]+$"
+                                title="Please enter a valid first name (only letters and spaces are allowed).">
+                            <?php
+                            if ($_SERVER["REQUEST_METHOD"] == "POST") {
+                                $firstname = $_POST['firstname'];
+                                if (!preg_match("/^[A-Za-zÀ-ÖØ-ÿ\s]+$/", $firstname)) {
+                                    echo "<p style='color:red;'>First Name must contain only letters and spaces, and cannot include numbers or special characters.</p>";
+                                } else {
+                                    echo "<p style='color:green;'>First Name is valid.</p>";
+                                }
+                            }
+                            ?>
+                        </div>
+                        <div class="col-3">
+                            <label for="middlename">Middle Name</label>
+                            <input type="text" class="form-control" name="middlename" id="middlename"
+                                required pattern="^[A-Za-zÀ-ÖØ-ÿ\s]+$"
+                                title="Please enter a valid middle name (only letters and spaces are allowed).">
+                            <?php
+                            if ($_SERVER["REQUEST_METHOD"] == "POST") {
+                                $middlename = $_POST['middlename'];
+                                if (!preg_match("/^[A-Za-zÀ-ÖØ-ÿ\s]+$/", $middlename)) {
+                                    echo "<p style='color:red;'>Middle Name must contain only letters and spaces, and cannot include numbers or special characters.</p>";
+                                } else {
+                                    echo "<p style='color:green;'>Middle Name is valid.</p>";
+                                }
+                            }
+                            ?>
+                        </div>
+                    </div>
+                    <div class="form-row form-group">
                         <div class="col-3">
                             <label for="contactno">Contact No.</label>
                             <input type="text" class="form-control" name="contactno" id="contactno" required pattern="\d{11}" title="Please enter a valid contact number (11 digits are required)." maxlength="11">
@@ -1065,15 +1067,15 @@ include './layout/header.php';
         })
     });
 
-     document.querySelectorAll('.leaves-btn').forEach(button => {
-            button.addEventListener('click', function () {
-                const employeeId = this.getAttribute('data-id');
-                
-                fetch(`get_leave_details.php?employee_id=${employeeId}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data) {
-                            document.querySelector('#leave-modal tbody').innerHTML = `
+    document.querySelectorAll('.leaves-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const employeeId = this.getAttribute('data-id');
+
+            fetch(`get_leave_details.php?employee_id=${employeeId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data) {
+                        document.querySelector('#leave-modal tbody').innerHTML = `
                                 <tr>
                                     <td>${data.vacation_leave}</td>
                                     <td>${data.sick_leave}</td>
@@ -1082,14 +1084,14 @@ include './layout/header.php';
                                     <td>${data.total_leave}</td>
                                 </tr>
                             `;
-                            $('#leave-modal').modal('show');
-                        } else {
-                            alert("No leave data found for this employee.");
-                        }
-                    })
-                    .catch(error => console.error('Error:', error));
-            });
+                        $('#leave-modal').modal('show');
+                    } else {
+                        alert("No leave data found for this employee.");
+                    }
+                })
+                .catch(error => console.error('Error:', error));
         });
+    });
 
     function toggleProjectField() {
         var projectDropdown = document.getElementById('project_name');
