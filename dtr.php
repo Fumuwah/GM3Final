@@ -236,7 +236,7 @@ $activePage = 'dtr';
                                         $time_in = new DateTime($row['time_in']);
                                         $time_out = new DateTime($row['time_out']);
                                         $interval = $time_in->diff($time_out);
-                                        $today_hrs = $interval->h + ($interval->i / 60);
+                                        $today_hrs = $interval->h + ($interval->i / 60 - 1);
 
                                         $today_ot = ($today_hrs > $overtime_threshold) ? $today_hrs - $overtime_threshold : 0;
                                     } else {
@@ -245,7 +245,7 @@ $activePage = 'dtr';
                                     }
 
                                     $update_sql = "UPDATE dtr 
-                                                SET total_hrs = ?, other_ot = ? 
+                                                SET total_hrs = ? - 1, other_ot = ? 
                                                 WHERE employee_id = ? AND date = ?";
                                     $update_stmt = $conn->prepare($update_sql);
                                     $update_stmt->bind_param("ddis", $today_hrs, $today_ot, $employee_id, $row['date']);
