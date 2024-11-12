@@ -79,7 +79,12 @@ $can_manage_roles = $user['can_manage_roles'] ?? false;
         </div>
         <ul class="navbar-nav flex-row flex-column flex-lg-row">
             <li class="nav-item active mx-3 d-flex align-items-center">
-                <img src="assets/images/home.png" class="header-icons mr-2" href="index.php"> <a class="nav-link" href="index.php">Home<span class="sr-only">(current)</span></a>
+                <?php if ($role_name === 'super admin' || $role_name === 'admin'): ?>
+                    <img src="assets/images/home.png" class="header-icons mr-2" href="index.php"> <a class="nav-link" href="index.php">Home<span class="sr-only">(current)</span></a>
+                <?php endif; ?>
+                <?php if ($role_name === 'employee'): ?>
+                    <img src="assets/images/home.png" class="header-icons mr-2" href="employee_dashboard.php"> <a class="nav-link" href="index.php">Home<span class="sr-only">(current)</span></a>
+                <?php endif; ?>
             </li>
             <li class="nav-item mx-3 d-flex align-items-center">
                 <img src="assets/images/about.png" class="header-icons mr-1"> <a class="nav-link" href="about.php">About</a>
@@ -114,7 +119,6 @@ $can_manage_roles = $user['can_manage_roles'] ?? false;
                         echo '</div>';
                     }
                     ?>
-
                 </div>
             </li>
 
