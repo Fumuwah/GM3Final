@@ -105,7 +105,7 @@ include './layout/header.php';
                 <form class="form-inline my-3 col-10 pl-0" method="GET" action="">
                     <div class="form-group col-8 col-lg-3">
                         <label for="search-user" class="sr-only">Search User</label>
-                        <input type="text" class="form-control w-100" id="search-user" name="search" placeholder="Search User" value="<?php echo isset($_GET['search']) ? htmlspecialchars($_GET['search']) : ''; ?>">
+                        <input type="text" class="form-control w-100" id="search-user" name="search" placeholder="Search User" value="">
                     </div>
 
                     <div class="form-group">
