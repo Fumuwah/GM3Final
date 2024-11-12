@@ -4,8 +4,10 @@
             let width = $(window).width();
             if (width < 992) {
                 $('#sidebar').attr('class', '');
+                $('#sidebar-notif, #sidebar-logout').removeAttr('hidden');
             } else {
                 $('#sidebar').attr('class', 'expand');
+                $('#sidebar-notif, #sidebar-logout').attr('hidden', 'hidden');
             }
         });
         $(window).resize();
@@ -36,6 +38,16 @@
                 $('#notification-dropdown').show();
             } else {
                 $('#notification-dropdown').hide();
+            }
+        });
+
+        let notificationSidebar = false;
+        $('#notification-toggler').on('click', function() {
+            notificationSidebar = !notificationSidebar;
+            if (notificationSidebar) {
+                $('#notification-sidebar').show();
+            } else {
+                $('#notification-sidebar').hide();
             }
         });
 
@@ -82,7 +94,6 @@
     resigBtn.addEventListener('click', function() {
         window.open("assets/files/resignation.pdf", '_blank').focus();
     });
-
 </script>
 </body>
 
