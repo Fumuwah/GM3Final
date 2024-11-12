@@ -50,6 +50,11 @@ $query = "
 
 $params = [':search' => '%' . $search . '%'];
 
+if ($_SESSION['role_name'] === 'Admin' && isset($_SESSION['project_name'])) {
+    $query .= " AND e.project_name = :userProjectName";
+    $params[':userProjectName'] = $_SESSION['project_name'];
+}
+
 if (!empty($projectName)) {
     $query .= " AND e.project_name = :projectName";
     $params[':projectName'] = $projectName;
