@@ -7,15 +7,24 @@ if (!isset($_SESSION['role_name']) || !isset($_SESSION['employee_id'])) {
 }
 require_once "database.php";
 
-$results_per_page = 5;
+$results_per_page = 10;
 $page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int)$_GET['page'] : 1;
 $offset = ($page - 1) * $results_per_page;
 
 $search = isset($_GET['search']) ? mysqli_real_escape_string($conn, $_GET['search']) : '';
 $status = isset($_GET['status']) ? mysqli_real_escape_string($conn, $_GET['status']) : '';
 $position_name = isset($_GET['position_name']) ? mysqli_real_escape_string($conn, $_GET['position_name']) : '';
-// die($position_name);
 $role_name = strtolower($user['role_name'] ?? '');
+$employee_id = $_SESSION['employee_id'];
+
+$project_name_query = "SELECT pr.project_name FROM employees e 
+                       JOIN projects pr ON e.project_name = pr.project_name
+                       WHERE e.employee_id = ?";
+$stmt = $conn->prepare($project_name_query);
+$stmt->bind_param("i", $employee_id);
+$stmt->execute();
+$project_result = $stmt->get_result();
+$user_project_name = ($project_result->num_rows > 0) ? $project_result->fetch_assoc()['project_name'] : '';
 
 $sql = "SELECT e.employee_id, e.firstname, e.lastname, e.middlename, e.employee_number, e.contactno, e.address, e.birthdate, 
             e.civil_status, e.religion, e.basic_salary, e.hire_date, e.employee_status, e.sss_no, e.philhealth_no, 
@@ -27,6 +36,19 @@ $sql = "SELECT e.employee_id, e.firstname, e.lastname, e.middlename, e.employee_
         LEFT JOIN roles r ON e.role_id = r.role_id
         LEFT JOIN leaves l ON e.employee_id = l.employee_id 
         ";
+
+       
+if ($role_name == 'admin') {
+    $project_query = "SELECT project_name FROM employees WHERE employee_id = '$employee_id'";
+    $project_result = mysqli_query($conn, $project_query);
+    $project_data = mysqli_fetch_assoc($project_result);
+    $user_project_name = $project_data['project_name'] ?? '';
+
+    if (!empty($user_project_name)) {
+        $sql .= " AND pr.project_name = '$user_project_name'";
+    }
+}
+
 if (empty($status)) {
     $sql .= "WHERE e.employee_status != 'Archived'";
 }
@@ -708,7 +730,7 @@ include './layout/header.php';
                     <div class="col-3">
                     <label for="middlename">Middle Name</label>
                     <input type="text" class="form-control" name="middlename" id="middlename" 
-                        required pattern="^[A-Za-zÀ-ÖØ-ÿ\s]+$" 
+                        pattern="^[A-Za-zÀ-ÖØ-ÿ\s]+$" 
                         title="Please enter a valid middle name (only letters and spaces are allowed).">
                     <?php
                     if ($_SERVER["REQUEST_METHOD"] == "POST") {
