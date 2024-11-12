@@ -693,42 +693,6 @@ include './layout/header.php';
                             ?>
                         </div>
 
-<<<<<<< HEAD
-                    <div class="col-3">
-                    <label for="firstname">First Name</label>
-                    <input type="text" class="form-control" name="firstname" id="firstname" 
-                        required pattern="^[A-Za-zÀ-ÖØ-ÿ\s]+$" 
-                        title="Please enter a valid first name (only letters and spaces are allowed).">
-                    <?php
-                    if ($_SERVER["REQUEST_METHOD"] == "POST") {
-                        $firstname = $_POST['firstname'];
-                        if (!preg_match("/^[A-Za-zÀ-ÖØ-ÿ\s]+$/", $firstname)) {
-                            echo "<p style='color:red;'>First Name must contain only letters and spaces, and cannot include numbers or special characters.</p>";
-                        } else {
-                            echo "<p style='color:green;'>First Name is valid.</p>";
-                        }
-                    }
-                    ?>
-                </div>
-                    <div class="col-3">
-                    <label for="middlename">Middle Name</label>
-                    <input type="text" class="form-control" name="middlename" id="middlename" 
-                        pattern="^[A-Za-zÀ-ÖØ-ÿ\s]+$" 
-                        title="Please enter a valid middle name (only letters and spaces are allowed).">
-                    <?php
-                    if ($_SERVER["REQUEST_METHOD"] == "POST") {
-                        $middlename = $_POST['middlename'];
-                        if (!preg_match("/^[A-Za-zÀ-ÖØ-ÿ\s]+$/", $middlename)) {
-                            echo "<p style='color:red;'>Middle Name must contain only letters and spaces, and cannot include numbers or special characters.</p>";
-                        } else {
-                            echo "<p style='color:green;'>Middle Name is valid.</p>";
-                        }
-                    }
-                    ?>
-                </div>
-                </div>
-                                <div class="form-row form-group">
-=======
                         <div class="col-3">
                             <label for="firstname">First Name</label>
                             <input type="text" class="form-control" name="firstname" id="firstname"
@@ -748,7 +712,7 @@ include './layout/header.php';
                         <div class="col-3">
                             <label for="middlename">Middle Name</label>
                             <input type="text" class="form-control" name="middlename" id="middlename"
-                                required pattern="^[A-Za-zÀ-ÖØ-ÿ\s]+$"
+                                pattern="^[A-Za-zÀ-ÖØ-ÿ\s]+$"
                                 title="Please enter a valid middle name (only letters and spaces are allowed).">
                             <?php
                             if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -763,7 +727,6 @@ include './layout/header.php';
                         </div>
                     </div>
                     <div class="form-row form-group">
->>>>>>> 9acf3ecdc198d94d70891dcf4283237672313956
                         <div class="col-3">
                             <label for="contactno">Contact No.</label>
                             <input type="text" class="form-control" name="contactno" id="contactno" required pattern="\d{11}" title="Please enter a valid contact number (11 digits are required)." maxlength="11">
