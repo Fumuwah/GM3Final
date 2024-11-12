@@ -186,7 +186,7 @@ include './layout/header.php';
                                 <td><?php echo htmlspecialchars($payslip['payroll_period']) ?></td>
                                 <td><?php echo htmlspecialchars($payslip['position_name']) ?></td>
                                 <td><?php echo htmlspecialchars($payslip['netpay']) ?></td>
-                                <td><a class="btn btn-primary text-light" href="payslip_overview?pid=<?php echo $payslip['payroll_id'] ?>">Overview</a></td>
+                                <td><a class="btn btn-primary text-light" href="payslip_overview.php?pid=<?php echo $payslip['payroll_id'] ?>">Overview</a></td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>
