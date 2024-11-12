@@ -10,7 +10,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['request_id'], $_POST[
     $requestId = $_POST['request_id'];
     $action = $_POST['action'];
     
-    // Fetch request details
     $stmt = $conn->prepare("SELECT employee_id, request_type, new_data FROM profile_change_requests WHERE request_id = ?");
     $stmt->bind_param("i", $requestId);
     $stmt->execute();
@@ -22,14 +21,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['request_id'], $_POST[
         if ($action === 'approve') {
             $column = $request['request_type'];
             
-            // Update the employee data based on the approved change request
             $stmt = $conn->prepare("UPDATE employees SET $column = ? WHERE employee_id = ?");
             $stmt->bind_param("si", $request['new_data'], $request['employee_id']);
             $stmt->execute();
             $stmt->close();
         }
         
-        // Update the status of the change request
         $status = ($action === 'approve') ? 'approved' : 'declined';
         $stmt = $conn->prepare("UPDATE profile_change_requests SET status = ? WHERE request_id = ?");
         $stmt->bind_param("si", $status, $requestId);

@@ -18,7 +18,7 @@ $offset = ($page - 1) * $recordsPerPage;
 
 $selectedLeaveType = isset($_GET['leave_type']) ? $_GET['leave_type'] : '';
 
-$excludeCurrentUserCondition = ($role_name === 'super admin') ? "AND lr.employee_id != ?" : "";
+$excludeSuperAdminCondition = ($role_name === 'super admin') ? "AND lr.employee_id != ?" : "";
 
 $types = "";
 $params = [];
@@ -26,7 +26,7 @@ $params = [];
 $countQuery = "SELECT COUNT(*) AS total FROM leave_requests lr
                JOIN employees e ON lr.employee_id = e.employee_id
                JOIN roles r ON e.role_id = r.role_id
-               WHERE (r.role_name != 'Super Admin' OR (r.role_name = 'Super Admin' $excludeCurrentUserCondition))";
+               WHERE (r.role_name != 'Super Admin' OR (r.role_name = 'Super Admin' $excludeSuperAdminCondition))";
 
 if ($selectedLeaveType) {
     $countQuery .= " AND lr.leave_type = ?";
@@ -64,49 +64,49 @@ $query = "
     JOIN employees e ON lr.employee_id = e.employee_id
     JOIN roles r ON e.role_id = r.role_id
     LEFT JOIN leaves l ON e.employee_id = l.employee_id
-    WHERE (r.role_name != 'Super Admin' OR (r.role_name = 'Super Admin' $excludeCurrentUserCondition))";
+    WHERE (r.role_name != 'Super Admin' OR (r.role_name = 'Super Admin' $excludeSuperAdminCondition))";
 
-    $conditions = [];
+$conditions = [];
 
-    if (!empty($_GET['employee_name'])) {
-        $conditions[] = "CONCAT(e.firstname, ' ', e.lastname, ' ', e.middlename) LIKE ?";
-        $params[] = '%' . $_GET['employee_name'] . '%';
+if (!empty($_GET['employee_name'])) {
+    $conditions[] = "CONCAT(e.firstname, ' ', e.lastname, ' ', e.middlename) LIKE ?";
+    $params[] = '%' . $_GET['employee_name'] . '%';
+    $types .= "s";
+}
+
+if (!empty($_GET['month'])) {
+    $conditions[] = "MONTH(lr.start_date) = ?";
+    $params[] = $_GET['month'];
+    $types .= "i";
+}
+
+if (!empty($_GET['year']) && (int)$_GET['year'] > 0) {
+    $conditions[] = "YEAR(lr.start_date) = ?";
+    $params[] = $_GET['year'];
+    $types .= "i";
+}
+
+if ($selectedLeaveType) {
+    $conditions[] = "lr.leave_type = ?";
+    $params[] = $selectedLeaveType;
+    $types .= "s";
+}
+
+if ($role_name === 'admin') {
+    if ($project_name) {
+        $conditions[] = "e.project_name = ?";
+        $params[] = $project_name;
         $types .= "s";
+    } else {
+        echo "Error: Project name is not set for Admin.<br>";
     }
-    
-    if (!empty($_GET['month'])) {
-        $conditions[] = "MONTH(lr.start_date) = ?";
-        $params[] = $_GET['month'];
-        $types .= "i";
-    }
-    
-    if (!empty($_GET['year']) && (int)$_GET['year'] > 0) {
-        $conditions[] = "YEAR(lr.start_date) = ?";
-        $params[] = $_GET['year'];
-        $types .= "i";
-    }
-    
-    if ($selectedLeaveType) {
-        $conditions[] = "lr.leave_type = ?";
-        $params[] = $selectedLeaveType;
-        $types .= "s";
-    }
-    
-    if ($role_name === 'admin') {
-        if ($project_name) {
-            $conditions[] = "e.project_name = ?";
-            $params[] = $project_name;
-            $types .= "s";
-        } else {
-            echo "Error: Project name is not set for Admin.<br>";
-        }
-    }
-    
-    if ($conditions) {
-        $query .= " AND " . implode(" AND ", $conditions);
-    }
+}
 
-    $query .= " ORDER BY
+if ($conditions) {
+    $query .= " AND " . implode(" AND ", $conditions);
+}
+
+$query .= " ORDER BY
     CASE
         WHEN lr.status = 'PENDING' THEN 1
         WHEN lr.status = 'APPROVED' THEN 2
@@ -132,6 +132,7 @@ if (count($params) === strlen($types)) {
 }
 $stmt->execute();
 $requests = $stmt->get_result();
+
 
 $activePage = 'hr-leaves-page';
 
@@ -207,7 +208,7 @@ include './layout/header.php';
                         <?php while ($row = $requests->fetch_assoc()): ?>
                             <?php
                                 $canViewRequest = true;
-                                if ($role_name === 'admin' && $row['project_name'] !== $project_name) {
+                                if ($role_name === 'Admin' && $row['project_name'] !== $project_name) {
                                     $canViewRequest = false;
                                 }                                
                             ?>

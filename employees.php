@@ -12,51 +12,36 @@ $page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int)$_GET['page'] :
 $offset = ($page - 1) * $results_per_page;
 
 $search = isset($_GET['search']) ? mysqli_real_escape_string($conn, $_GET['search']) : '';
-$status = isset($_GET['employee_status']) ? mysqli_real_escape_string($conn, $_GET['employee_status']) : '';
+$status = isset($_GET['status']) ? mysqli_real_escape_string($conn, $_GET['status']) : '';
 $position_name = isset($_GET['position_name']) ? mysqli_real_escape_string($conn, $_GET['position_name']) : '';
 $role_name = strtolower($user['role_name'] ?? '');
 $employee_id = $_SESSION['employee_id'];
-$project_name = $_SESSION['project_name'] ?? null;
-
-$project_name_query = "SELECT pr.project_name FROM employees e 
-                       JOIN projects pr ON e.project_name = pr.project_name
-                       WHERE e.employee_id = ?";
-$stmt = $conn->prepare($project_name_query);
-$stmt->bind_param("i", $employee_id);
-$stmt->execute();
-$project_result = $stmt->get_result();
-$user_project_name = ($project_result->num_rows > 0) ? $project_result->fetch_assoc()['project_name'] : '';
+$user_project_name = $_SESSION['project_name'] ?? '';
 
 $sql = "SELECT e.employee_id, e.firstname, e.lastname, e.middlename, e.employee_number, e.contactno, e.address, e.birthdate, 
-            e.civil_status, e.religion, e.basic_salary, e.hire_date, e.employee_status, e.sss_no, e.philhealth_no, 
-            e.hdmf_no, e.tin_no, e.email, e.emergency_contactno, p.position_name, pr.project_name, r.role_name, r.role_id,
-            l.sick_leave, l.vacation_leave, l.used_leave, l.leave_without_pay 
-        FROM employees e
-        JOIN positions p ON e.position_id = p.position_id
-        LEFT JOIN projects pr ON e.project_name = pr.project_name
-        LEFT JOIN roles r ON e.role_id = r.role_id
-        LEFT JOIN leaves l ON e.employee_id = l.employee_id 
-        ";
+e.civil_status, e.religion, e.basic_salary, e.hire_date, e.employee_status, e.sss_no, e.philhealth_no, 
+e.hdmf_no, e.tin_no, e.email, e.emergency_contactno, p.position_name, pr.project_name, r.role_name, r.role_id,
+l.sick_leave, l.vacation_leave, l.used_leave, l.leave_without_pay 
+FROM employees e
+JOIN positions p ON e.position_id = p.position_id
+LEFT JOIN projects pr ON e.project_name = pr.project_name
+LEFT JOIN roles r ON e.role_id = r.role_id
+LEFT JOIN leaves l ON e.employee_id = l.employee_id
+WHERE 1=1
+AND (pr.project_name = '" . $_SESSION['project_name'] . "' OR '" . $_SESSION['role_name'] . "' != 'admin')";
 
-       
-if ($role_name == 'admin') {
-    $sql .= " WHERE pr.project_name = '$user_project_name'";
-} elseif ($role_name == 'super admin') {
-    $sql .= " WHERE 1";
+if ($role_name === 'admin') {
+    if (!empty($_SESSION['project_name'])) {
+        $sql .= " AND e.project_name = '" . $_SESSION['project_name'] . "'";
+    }
 }
 
-if (empty($status)) {
-    $sql .= "WHERE e.employee_status != 'Archived'";
+if (!empty($status)) {
+    $sql .= " AND e.employee_status = '$status'";
+} else {
+    $sql .= " AND e.employee_status != 'Archived'";
 }
-if ($status == 'Probationary') {
-    $sql .= "WHERE e.employee_status = 'Probationary'";
-}
-if ($status == 'Regular') {
-    $sql .= "WHERE e.employee_status = 'Regular'";
-}
-if ($status == 'Archived') {
-    $sql .= "WHERE e.employee_status = 'Archived'";
-}
+
 if (!empty($position_name)) {
     $sql .= " AND p.position_name = '$position_name'";
 }
@@ -80,40 +65,9 @@ if (isset($_GET['employee_number'])) {
 
 if (!empty($search)) {
     $sql .= " AND (e.firstname LIKE '%$search%' 
-            OR e.lastname LIKE '%$search%' 
-            OR e.employee_number LIKE '%$search%')";
+                  OR e.lastname LIKE '%$search%' 
+                  OR e.employee_number LIKE '%$search%')";
 }
-
-$total_sql = "SELECT COUNT(*) as total FROM employees e 
-            JOIN positions p ON e.position_id = p.position_id 
-            LEFT JOIN projects pr ON e.project_name = pr.project_name 
-            LEFT JOIN roles r ON e.role_id = r.role_id 
-            ";
-
-if (empty($status)) {
-    $total_sql .= "WHERE e.employee_status != 'Archived'";
-}
-if ($status == 'Probationary') {
-    $total_sql .= "WHERE e.employee_status = 'Probationary'";
-}
-if ($status == 'Regular') {
-    $total_sql .= "WHERE e.employee_status = 'Regular'";
-}
-if ($status == 'Archived') {
-    $total_sql .= "WHERE e.employee_status = 'Archived'";
-}
-
-if (!empty($search)) {
-    $total_sql .= " AND (e.firstname LIKE '%$search%' OR e.lastname LIKE '%$search%' OR e.employee_number LIKE '%$search%')";
-}
-if (!empty($position_name)) {
-    $total_sql .= " AND p.position_name = '$position_name'";
-}
-
-$total_result = mysqli_query($conn, $total_sql);
-$total_row = mysqli_fetch_assoc($total_result);
-$total_records = $total_row['total'];
-$total_pages = ceil($total_records / $results_per_page);
 
 $sql .= " LIMIT $results_per_page OFFSET $offset";
 
@@ -121,12 +75,42 @@ $result = mysqli_query($conn, $sql);
 if (!$result) {
     die("Error fetching data: " . mysqli_error($conn));
 }
+
+$total_sql = "SELECT COUNT(*) as total 
+              FROM employees e
+              JOIN positions p ON e.position_id = p.position_id
+              LEFT JOIN projects pr ON e.project_name = pr.project_name
+              LEFT JOIN roles r ON e.role_id = r.role_id
+              WHERE 1=1";
+
+if ($role_name === 'admin') {
+    $total_sql .= " AND e.project_name = '$user_project_name'";
+}
+
+if (!empty($status)) {
+    $total_sql .= " AND e.employee_status = '$status'";
+} else {
+    $total_sql .= " AND e.employee_status != 'Archived'";
+}
+
+if (!empty($position_name)) {
+    $total_sql .= " AND p.position_name = '$position_name'";
+}
+
+if (!empty($search)) {
+    $total_sql .= " AND (e.firstname LIKE '%$search%' 
+                        OR e.lastname LIKE '%$search%' 
+                        OR e.employee_number LIKE '%$search%')";
+}
+
+$total_result = mysqli_query($conn, $total_sql);
+$total_row = mysqli_fetch_assoc($total_result);
+$total_records = $total_row['total'];
+$total_pages = ceil($total_records / $results_per_page);
+
 $can_manage_roles = $user['can_manage_roles'] ?? false;
 
 $activePage = 'employees';
-
-// var_dump($_GET['position_name'], $_GET['employee_status']);
-
 
 include './layout/header.php';
 ?>
@@ -709,40 +693,40 @@ include './layout/header.php';
                             ?>
                         </div>
 
-                    <div class="col-3">
-                    <label for="firstname">First Name</label>
-                    <input type="text" class="form-control" name="firstname" id="firstname" 
-                        required pattern="^[A-Za-zÀ-ÖØ-ÿ\s]+$" 
-                        title="Please enter a valid first name (only letters and spaces are allowed).">
-                    <?php
-                    if ($_SERVER["REQUEST_METHOD"] == "POST") {
-                        $firstname = $_POST['firstname'];
-                        if (!preg_match("/^[A-Za-zÀ-ÖØ-ÿ\s]+$/", $firstname)) {
-                            echo "<p style='color:red;'>First Name must contain only letters and spaces, and cannot include numbers or special characters.</p>";
-                        } else {
-                            echo "<p style='color:green;'>First Name is valid.</p>";
-                        }
-                    }
-                    ?>
-                </div>
-                    <div class="col-3">
-                    <label for="middlename">Middle Name</label>
-                    <input type="text" class="form-control" name="middlename" id="middlename" 
-                        required pattern="^[A-Za-zÀ-ÖØ-ÿ\s]+$" 
-                        title="Please enter a valid middle name (only letters and spaces are allowed).">
-                    <?php
-                    if ($_SERVER["REQUEST_METHOD"] == "POST") {
-                        $middlename = $_POST['middlename'];
-                        if (!preg_match("/^[A-Za-zÀ-ÖØ-ÿ\s]+$/", $middlename)) {
-                            echo "<p style='color:red;'>Middle Name must contain only letters and spaces, and cannot include numbers or special characters.</p>";
-                        } else {
-                            echo "<p style='color:green;'>Middle Name is valid.</p>";
-                        }
-                    }
-                    ?>
-                </div>
-                </div>
-                                <div class="form-row form-group">
+                        <div class="col-3">
+                            <label for="firstname">First Name</label>
+                            <input type="text" class="form-control" name="firstname" id="firstname"
+                                required pattern="^[A-Za-zÀ-ÖØ-ÿ\s]+$"
+                                title="Please enter a valid first name (only letters and spaces are allowed).">
+                            <?php
+                            if ($_SERVER["REQUEST_METHOD"] == "POST") {
+                                $firstname = $_POST['firstname'];
+                                if (!preg_match("/^[A-Za-zÀ-ÖØ-ÿ\s]+$/", $firstname)) {
+                                    echo "<p style='color:red;'>First Name must contain only letters and spaces, and cannot include numbers or special characters.</p>";
+                                } else {
+                                    echo "<p style='color:green;'>First Name is valid.</p>";
+                                }
+                            }
+                            ?>
+                        </div>
+                        <div class="col-3">
+                            <label for="middlename">Middle Name</label>
+                            <input type="text" class="form-control" name="middlename" id="middlename"
+                                pattern="^[A-Za-zÀ-ÖØ-ÿ\s]+$"
+                                title="Please enter a valid middle name (only letters and spaces are allowed).">
+                            <?php
+                            if ($_SERVER["REQUEST_METHOD"] == "POST") {
+                                $middlename = $_POST['middlename'];
+                                if (!preg_match("/^[A-Za-zÀ-ÖØ-ÿ\s]+$/", $middlename)) {
+                                    echo "<p style='color:red;'>Middle Name must contain only letters and spaces, and cannot include numbers or special characters.</p>";
+                                } else {
+                                    echo "<p style='color:green;'>Middle Name is valid.</p>";
+                                }
+                            }
+                            ?>
+                        </div>
+                    </div>
+                    <div class="form-row form-group">
                         <div class="col-3">
                             <label for="contactno">Contact No.</label>
                             <input type="text" class="form-control" name="contactno" id="contactno" required pattern="\d{11}" title="Please enter a valid contact number (11 digits are required)." maxlength="11">
