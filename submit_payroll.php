@@ -44,7 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 withhold_tax, sss_con, philhealth_con, pag_ibig_con, other_deduc,
                 allowance, monthly, daily, hourly,
                 total_hrs, other_ot, totalhrs, special_holiday, special_leave,
-                gross, cash_adv, total_deduc, netpay, months, days, year
+                gross, cash_adv, total_deduc, netpay, month, days, year
             ) VALUES (
                 '$payroll_period', '$employee_id',
                 '$withhold_tax', '$sss_con', '$philhealth_con', '$pag_ibig_con', '$other_deduc',
