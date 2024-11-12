@@ -12,35 +12,36 @@ $page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int)$_GET['page'] :
 $offset = ($page - 1) * $results_per_page;
 
 $search = isset($_GET['search']) ? mysqli_real_escape_string($conn, $_GET['search']) : '';
-$status = isset($_GET['employee_status']) ? mysqli_real_escape_string($conn, $_GET['employee_status']) : '';
+$status = isset($_GET['status']) ? mysqli_real_escape_string($conn, $_GET['status']) : '';
 $position_name = isset($_GET['position_name']) ? mysqli_real_escape_string($conn, $_GET['position_name']) : '';
 $role_name = strtolower($user['role_name'] ?? '');
 $employee_id = $_SESSION['employee_id'];
-$project_name = $_SESSION['project_name'];
+$user_project_name = $_SESSION['project_name'] ?? '';
 
 $sql = "SELECT e.employee_id, e.firstname, e.lastname, e.middlename, e.employee_number, e.contactno, e.address, e.birthdate, 
-            e.civil_status, e.religion, e.basic_salary, e.hire_date, e.employee_status, e.sss_no, e.philhealth_no, 
-            e.hdmf_no, e.tin_no, e.email, e.emergency_contactno, p.position_name, pr.project_name, r.role_name, r.role_id,
-            l.sick_leave, l.vacation_leave, l.used_leave, l.leave_without_pay 
-        FROM employees e
-        JOIN positions p ON e.position_id = p.position_id
-        LEFT JOIN projects pr ON e.project_name = pr.project_name
-        LEFT JOIN roles r ON e.role_id = r.role_id
-        LEFT JOIN leaves l ON e.employee_id = l.employee_id 
-        ";
+e.civil_status, e.religion, e.basic_salary, e.hire_date, e.employee_status, e.sss_no, e.philhealth_no, 
+e.hdmf_no, e.tin_no, e.email, e.emergency_contactno, p.position_name, pr.project_name, r.role_name, r.role_id,
+l.sick_leave, l.vacation_leave, l.used_leave, l.leave_without_pay 
+FROM employees e
+JOIN positions p ON e.position_id = p.position_id
+LEFT JOIN projects pr ON e.project_name = pr.project_name
+LEFT JOIN roles r ON e.role_id = r.role_id
+LEFT JOIN leaves l ON e.employee_id = l.employee_id
+WHERE 1=1
+AND (pr.project_name = '" . $_SESSION['project_name'] . "' OR '" . $_SESSION['role_name'] . "' != 'admin')";
 
-if (empty($status)) {
-    $sql .= "WHERE e.employee_status != 'Archived'";
+if ($role_name === 'admin') {
+    if (!empty($_SESSION['project_name'])) {
+        $sql .= " AND e.project_name = '" . $_SESSION['project_name'] . "'";
+    }
 }
-if ($status == 'Probationary') {
-    $sql .= "WHERE e.employee_status = 'Probationary'";
+
+if (!empty($status)) {
+    $sql .= " AND e.employee_status = '$status'";
+} else {
+    $sql .= " AND e.employee_status != 'Archived'";
 }
-if ($status == 'Regular') {
-    $sql .= "WHERE e.employee_status = 'Regular'";
-}
-if ($status == 'Archived') {
-    $sql .= "WHERE e.employee_status = 'Archived'";
-}
+
 if (!empty($position_name)) {
     $sql .= " AND p.position_name = '$position_name'";
 }
@@ -64,40 +65,9 @@ if (isset($_GET['employee_number'])) {
 
 if (!empty($search)) {
     $sql .= " AND (e.firstname LIKE '%$search%' 
-            OR e.lastname LIKE '%$search%' 
-            OR e.employee_number LIKE '%$search%')";
+                  OR e.lastname LIKE '%$search%' 
+                  OR e.employee_number LIKE '%$search%')";
 }
-
-$total_sql = "SELECT COUNT(*) as total FROM employees e 
-            JOIN positions p ON e.position_id = p.position_id 
-            LEFT JOIN projects pr ON e.project_name = pr.project_name 
-            LEFT JOIN roles r ON e.role_id = r.role_id 
-            ";
-
-if (empty($status)) {
-    $total_sql .= "WHERE e.employee_status != 'Archived'";
-}
-if ($status == 'Probationary') {
-    $total_sql .= "WHERE e.employee_status = 'Probationary'";
-}
-if ($status == 'Regular') {
-    $total_sql .= "WHERE e.employee_status = 'Regular'";
-}
-if ($status == 'Archived') {
-    $total_sql .= "WHERE e.employee_status = 'Archived'";
-}
-
-if (!empty($search)) {
-    $total_sql .= " AND (e.firstname LIKE '%$search%' OR e.lastname LIKE '%$search%' OR e.employee_number LIKE '%$search%')";
-}
-if (!empty($position_name)) {
-    $total_sql .= " AND p.position_name = '$position_name'";
-}
-
-$total_result = mysqli_query($conn, $total_sql);
-$total_row = mysqli_fetch_assoc($total_result);
-$total_records = $total_row['total'];
-$total_pages = ceil($total_records / $results_per_page);
 
 $sql .= " LIMIT $results_per_page OFFSET $offset";
 
@@ -105,12 +75,42 @@ $result = mysqli_query($conn, $sql);
 if (!$result) {
     die("Error fetching data: " . mysqli_error($conn));
 }
+
+$total_sql = "SELECT COUNT(*) as total 
+              FROM employees e
+              JOIN positions p ON e.position_id = p.position_id
+              LEFT JOIN projects pr ON e.project_name = pr.project_name
+              LEFT JOIN roles r ON e.role_id = r.role_id
+              WHERE 1=1";
+
+if ($role_name === 'admin') {
+    $total_sql .= " AND e.project_name = '$user_project_name'";
+}
+
+if (!empty($status)) {
+    $total_sql .= " AND e.employee_status = '$status'";
+} else {
+    $total_sql .= " AND e.employee_status != 'Archived'";
+}
+
+if (!empty($position_name)) {
+    $total_sql .= " AND p.position_name = '$position_name'";
+}
+
+if (!empty($search)) {
+    $total_sql .= " AND (e.firstname LIKE '%$search%' 
+                        OR e.lastname LIKE '%$search%' 
+                        OR e.employee_number LIKE '%$search%')";
+}
+
+$total_result = mysqli_query($conn, $total_sql);
+$total_row = mysqli_fetch_assoc($total_result);
+$total_records = $total_row['total'];
+$total_pages = ceil($total_records / $results_per_page);
+
 $can_manage_roles = $user['can_manage_roles'] ?? false;
 
 $activePage = 'employees';
-
-// var_dump($_GET['position_name'], $_GET['employee_status']);
-
 
 include './layout/header.php';
 ?>

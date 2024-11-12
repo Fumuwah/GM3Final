@@ -109,10 +109,23 @@ $attendance_query = "
     FROM dtr d
     JOIN employees e ON d.employee_id = e.employee_id
     LEFT JOIN projects p ON e.project_name = p.project_name
-    WHERE d.date = ? AND e.project_name = ?";
+    WHERE d.date = ?";
+
+// Add a condition to filter by project name only if the role is not Super Admin
+if ($role !== 'Super Admin') {
+    $attendance_query .= " AND e.project_name = ?";
+}
 
 $attendance_stmt = $conn->prepare($attendance_query);
-$attendance_stmt->bind_param("ss", $today_date, $project_name);    
+
+if ($role === 'Super Admin') {
+    // Super Admin sees all records, so only bind the date parameter
+    $attendance_stmt->bind_param("s", $today_date);
+} else {
+    // Admin binds both date and project name parameters
+    $attendance_stmt->bind_param("ss", $today_date, $project_name);
+}
+
 $attendance_stmt->execute();
 $attendance_result = $attendance_stmt->get_result();
 
@@ -134,7 +147,7 @@ while ($row = $attendance_result->fetch_assoc()) {
 }
 
 $attendance_stmt->close();
-$conn->close();
+
 include 'layout/header.php';
 ?>
 
