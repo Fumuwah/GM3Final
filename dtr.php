@@ -184,7 +184,9 @@ $activePage = 'dtr';
                     </div>
                     <div class="d-flex col-sm-2">
                         <button type="submit" class="btn btn-primary">Filter</button>
+                        <?php if ($role_name === 'super admin' || $role_name === 'admin'): ?>
                         <button type="button" class="btn btn-secondary" id="attendance-btn">Attendance</button>
+                        <?php endif; ?>
                     </div>
                 </div>
             </form>
@@ -231,7 +233,6 @@ $activePage = 'dtr';
                                         $interval = $time_in->diff($time_out);
                                         $today_hrs = $interval->h + ($interval->i / 60);
 
-                                        // Calculate overtime hours if total hours exceed the threshold
                                         $today_ot = ($today_hrs > $overtime_threshold) ? $today_hrs - $overtime_threshold : 0;
                                     } else {
                                         $today_hrs = 0;
