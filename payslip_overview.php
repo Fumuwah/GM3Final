@@ -11,7 +11,9 @@ if (!isset($_SESSION['role_name']) || !isset($_SESSION['employee_id'])) {
 $payslipID = $_GET['pid'];
 $query = "SELECT pr.payroll_id, e.firstname, e.middlename, e.lastname, 
         pr.payroll_period, e.project_name, e.employee_number,  ps.position_name, 
-         pr.netpay
+        pr.totalHrs, pr.allowance, pr.special_holiday, pr.special_leave, pr.gross,
+        pr.withhold_tax, pr.sss_con, pr.philhealth_con, pr.pag_ibig_con, pr.other_deduc,
+        pr.total_deduc, pr.netpay, pr.netpay
         FROM payroll pr 
         LEFT JOIN employees e ON e.employee_id = pr.employee_id
         LEFT JOIN positions ps ON ps.position_id = e.employee_id
@@ -22,6 +24,7 @@ $stmt->bindParam(':payslipID', $payslipID, PDO::PARAM_INT);
 $stmt->execute();
 $payslip = $stmt->fetch(PDO::FETCH_ASSOC);
 
+$others = $payslip['special_holiday'] + $payslip['special_leave'];
 
 $activePage = 'payslip';
 include './layout/header.php';
@@ -149,8 +152,8 @@ include './layout/header.php';
                     <h4 class="bg-blue p-10">Pay Period</h4>
                 </div>
                 <div class="d-flex gap-5">
-                    <p class="p-10 bg-gray" style="flex: 1 1 50%;">October 11-15, 2024</p>
-                    <p class="p-10 bg-gray" style="flex: 1 1 50%;">Project #75 Coron</p>
+                    <p class="p-10 bg-gray" style="flex: 1 1 50%;"><?php echo $payslip['payroll_period'] ?></p>
+                    <p class=" bg-gray" style="flex: 1 1 50%;"><?php echo $payslip['project_name'] ?></p>
                 </div>
             </div>
             <div class="personal-info-container">
@@ -158,9 +161,9 @@ include './layout/header.php';
                     <h4 class="bg-blue p-10">Personal Information</h4>
                 </div>
                 <div class="d-flex gap-5">
-                    <p class="p-10 flex-grow bg-gray">Employee #001</p>
-                    <p class="p-10 flex-grow text-center bg-gray">Justin Kyle Caragan</p>
-                    <p class="p-10 flex-grow text-right bg-gray">Mechanical Engineer</p>
+                    <p class="p-10 flex-grow bg-gray"><?php echo $payslip['employee_number'] ?></p>
+                    <p class="p-10 flex-grow text-center bg-gray"><?php echo $payslip['firstname'] . ' ' . $payslip['middlename'] . ' ' . $payslip['lastname'] ?></</p>
+                    <p class=" flex-grow text-right bg-gray"><?php echo $payslip['position_name'] ?></p>
                 </div>
             </div>
 
@@ -172,23 +175,19 @@ include './layout/header.php';
                 </div>
                 <div class="d-flex gap-5">
                     <p class="p-10 bg-gray" style="flex: 1 1 20%;">Regular Hours</p>
-                    <p class="p-10 bg-gray" style="flex: 1 1 20%;">104</p>
-                    <p class="p-10 bg-gray" style="flex: 1 1 60%;">10000</p>
+                    <p class="p-10 bg-gray" style="flex: 1 1 80%;"><?php echo $payslip['totalHrs'] ?></p>
                 </div>
                 <div class="d-flex gap-5">
-                    <p class="p-10 bg-gray" style="flex: 1 1 20%;">Allowance/Others</p>
-                    <p class="p-10 bg-gray" style="flex: 1 1 20%;">___________</p>
-                    <p class="p-10 bg-gray" style="flex: 1 1 60%;">2000</p>
+                    <p class="p-10 bg-gray" style="flex: 1 1 20%;">Allowance</p>
+                    <p class="p-10 bg-gray" style="flex: 1 1 80%;"><?php echo $payslip['allowance'] ?></p>
                 </div>
                 <div class="d-flex gap-5">
-                    <p class="p-10 bg-gray" style="flex: 1 1 20%;"></p>
-                    <p class="p-10 bg-gray" style="flex: 1 1 20%;">___________</p>
-                    <p class="p-10 bg-gray" style="flex: 1 1 60%;"></p>
+                    <p class="p-10 bg-gray" style="flex: 1 1 20%;">Others</p>
+                    <p class="p-10 bg-gray" style="flex: 1 1 80%;"><?php echo $others ?></p>
                 </div>
                 <div class="d-flex gap-5">
-                    <p class="p-10 bg-blue text-white" style="flex: 1 1 40%;"><strong>GROSS PAY</strong></p>
-                    <p class="p-10 bg-blue text-white" style="flex: 1 1 60%;"><strong>12000</strong></p>
-                </div>
+                    <p class="p-10 bg-blue text-white" style="flex: 1 1 20%;"><strong>GROSS PAY</strong></p>
+                    <p class="p-10 bg-blue text-white" style="flex: 1 1 80%;"><strong><?php echo $payslip['gross'] ?></strong></p>
             </div>
 
 
@@ -198,37 +197,32 @@ include './layout/header.php';
                 </div>
                 <div class="d-flex gap-5">
                     <p class="p-10 bg-gray" style="flex: 1 1 20%;">Withholding Tax</p>
-                    <p class="p-10 bg-gray" style="flex: 1 1 20%;">___________</p>
-                    <p class="p-10 bg-gray" style="flex: 1 1 60%;">0</p>
+                    <p class="p-10 bg-gray" style="flex: 1 1 80%;"><?php echo $payslip['withhold_tax'] ?></p>
                 </div>
                 <div class="d-flex gap-5">
                     <p class="p-10 bg-gray" style="flex: 1 1 20%;">SSS Contribution</p>
-                    <p class="p-10 bg-gray" style="flex: 1 1 20%;">___________</p>
-                    <p class="p-10 bg-gray" style="flex: 1 1 60%;">200</p>
+                    <p class="p-10 bg-gray" style="flex: 1 1 80%;"><?php echo $payslip['sss_con'] ?></p>
                 </div>
                 <div class="d-flex gap-5">
                     <p class="p-10 bg-gray" style="flex: 1 1 20%;">Philhealth</p>
-                    <p class="p-10 bg-gray" style="flex: 1 1 20%;">___________</p>
-                    <p class="p-10 bg-gray" style="flex: 1 1 60%;">50</p>
+                    <p class="p-10 bg-gray" style="flex: 1 1 80%;"><?php echo $payslip['philhealth_con'] ?></p>
                 </div>
                 <div class="d-flex gap-5">
                     <p class="p-10 bg-gray" style="flex: 1 1 20%;">Pag-Ibig</p>
-                    <p class="p-10 bg-gray" style="flex: 1 1 20%;">___________</p>
-                    <p class="p-10 bg-gray" style="flex: 1 1 60%;">0</p>
+                    <p class="p-10 bg-gray" style="flex: 1 1 80%;"><?php echo $payslip['pag_ibig_con'] ?></p>
                 </div>
                 <div class="d-flex gap-5">
                     <p class="p-10 bg-gray" style="flex: 1 1 20%;">Others</p>
-                    <p class="p-10 bg-gray" style="flex: 1 1 20%;">___________</p>
-                    <p class="p-10 bg-gray" style="flex: 1 1 60%;">0</p>
+                    <p class="p-10 bg-gray" style="flex: 1 1 80%;"><?php echo $payslip['other_deduc'] ?></p>
                 </div>
                 <div class="d-flex gap-5">
-                    <p class="p-10 bg-blue text-white" style="flex: 1 1 40%;"><strong>Total Deduction</strong></p>
-                    <p class="p-10 bg-blue text-white" style="flex: 1 1 60%;"><strong>250</strong></p>
+                    <p class="p-10 bg-blue text-white" style="flex: 1 1 20%;"><strong>Total Deduction</strong></p>
+                    <p class="p-10 bg-blue text-white" style="flex: 1 1 80%;"><strong><?php echo $payslip['total_deduc'] ?></strong></p>
                 </div>
 
                 <div class="d-flex gap-5 mt-20">
-                    <p class="p-10 bg-blue text-white" style="flex: 1 1 40%;"><strong>Net Pay</strong></p>
-                    <p class="p-10 bg-blue text-white" style="flex: 1 1 60%;"><strong>11750</strong></p>
+                    <p class="p-10 bg-blue text-white" style="flex: 1 1 20%;"><strong>Net Pay</strong></p>
+                    <p class="p-10 bg-blue text-white" style="flex: 1 1 80%;"><strong><?php echo $payslip['netpay'] ?></strong></p>
                 </div>
             </div>
             <div class="d-flex justify-content-center align-items-center">
