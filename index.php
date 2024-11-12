@@ -82,7 +82,7 @@ $dash_onleave_query_run = mysqli_query($conn, $dash_onleave_query);
 $dash_onapproval_query = "SELECT * FROM leave_requests WHERE status != 'Archived' AND status = 'Pending'";
 $dash_onapproval_query_run = mysqli_query($conn, $dash_onapproval_query);
 
-$dash_profapproval_query = "SELECT * FROM profile_change_requests WHERE status != 'Archived'";
+$dash_profapproval_query = "SELECT * FROM profile_change_requests WHERE status != 'Archived' AND status = 'pending'";
 $dash_profapproval_query_run =  mysqli_query($conn, $dash_profapproval_query);
 
 $query = "SELECT lastname FROM employees WHERE employee_id = ?";

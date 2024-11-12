@@ -78,9 +78,12 @@ if (!empty($today_filter)) $query_today .= " AND d.date = ?";
 $query_today .= " LIMIT ? OFFSET ?";
 
 $stmt = $conn->prepare($query_today);
-if ($role_name !== 'super admin') {
+if ($role_name === 'admin') {
+    $params[] = $project_name;  // Add the project_name for admin role filtering
+} else if ($role_name !== 'super admin') {
     $params[] = $employee_id;
 }
+
 if (!empty($search_user)) {
     $params[] = "%{$search_user}%";
     $params[] = "%{$search_user}%";
@@ -149,6 +152,7 @@ $activePage = 'dtr';
                         <input class="form-control" type="text" name="search_user" id="search_user" placeholder="Search User...">
                     </div>
                     <div class="col-sm-3">
+                    <?php if ($role_name === 'super admin'): ?>
                         <select name="project_name" id="project_name" class="form-control">
                             <option value="">Select Project</option>
                             <?php
@@ -181,6 +185,7 @@ $activePage = 'dtr';
                                 echo "<option value='$d' $selected>$d</option>";
                             } ?>
                         </select>
+                        <?php endif; ?>
                     </div>
                     <div class="d-flex col-sm-2">
                         <button type="submit" class="btn btn-primary">Filter</button>

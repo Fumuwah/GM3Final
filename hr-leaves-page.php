@@ -22,7 +22,6 @@ $excludeCurrentUserCondition = ($role_name === 'super admin') ? "AND lr.employee
 
 $types = "";
 $params = [];
-$totalPages = 1; 
 
 $countQuery = "SELECT COUNT(*) AS total FROM leave_requests lr
                JOIN employees e ON lr.employee_id = e.employee_id
@@ -48,18 +47,13 @@ if (strlen($types) !== count($params)) {
 
 if (!empty($types)) {
     $countStmt->bind_param($types, ...$params);
-} else {
-    echo "Error: No types defined for count query.";
-    $countStmt->execute();
-    $countResult = $countStmt->get_result();
-    $totalRow = $countResult->fetch_assoc();
-    $totalRecords = $totalRow['total'];
-    $totalPages = ceil($totalRecords / $recordsPerPage);
 }
 
-if (!isset($totalPages)) {
-    $totalPages = 1;
-}
+$countStmt->execute();
+$countResult = $countStmt->get_result();
+$totalRow = $countResult->fetch_assoc();
+$totalRecords = $totalRow['total'];
+$totalPages = ceil($totalRecords / $recordsPerPage);
 
 $query = "
     SELECT lr.request_id, e.employee_id, e.firstname, e.lastname, lr.leave_type, lr.start_date, lr.end_date, lr.reason,
@@ -129,9 +123,9 @@ $stmt = $conn->prepare($query);
 
 if (count($params) === strlen($types)) {
     if ($types) {
-        $stmt->bind_param($types, ...$params);  // Bind params only if types are present
+        $stmt->bind_param($types, ...$params);
     } else {
-        $stmt->bind_param("");  // No parameters to bind
+        $stmt->bind_param("");
     }
 } else {
     die("Parameter count does not match the placeholders in the query.");
