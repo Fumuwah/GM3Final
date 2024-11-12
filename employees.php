@@ -310,7 +310,7 @@ include './layout/header.php';
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-success close-modal">Close</button>
+                <button type="button" class="btn btn-success close-modal close-modalwForm">Close</button>
             </div>
         </div>
     </div>

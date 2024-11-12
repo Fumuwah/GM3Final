@@ -17,6 +17,44 @@
             $('#collapsetest2').slideToggle()
         })
 
+        // Toggle Logout Dropdown
+        let logoutDropdown = false;
+        $('#account-icon').on('click', function() {
+            logoutDropdown = !logoutDropdown;
+            if (logoutDropdown) {
+                $('#logout-dropdown').show();
+            } else {
+                $('#logout-dropdown').hide();
+            }
+        });
+
+        // Toggle Notification Dropdown
+        let notificationDropdown = false;
+        $('#notification-icon').on('click', function() {
+            notificationDropdown = !notificationDropdown;
+            if (notificationDropdown) {
+                $('#notification-dropdown').show();
+            } else {
+                $('#notification-dropdown').hide();
+            }
+        });
+
+        // Toggle Custom Dropdowns
+        $('.dropdown-link').on('click', function(event) {
+            let isDropdown = $(this).attr('data-display');
+            let getDropdown = $(this).siblings('.dropdown').first();
+
+            if (this !== event.target) return;
+
+            if (isDropdown === "false") {
+                getDropdown.addClass("active");
+                $(this).attr('data-display', "true");
+            } else {
+                getDropdown.removeClass("active");
+                $(this).attr('data-display', "false");
+            }
+        });
+
     });
 
     let arrow = document.querySelector("#arrow");
@@ -42,60 +80,9 @@
 
     var resigBtn = document.getElementById('rform');
     resigBtn.addEventListener('click', function() {
-    window.open("assets/files/resignation.pdf", '_blank').focus();
- });
-
-
-    var accountIcon = document.querySelector('#account-icon');
-    var logoutDD = document.querySelector('#logout-dropdown');
-    var logoutDropdown = false;
-    accountIcon.addEventListener('click', function() {
-        logoutDropdown = !logoutDropdown;
-        if (logoutDropdown) {
-            logoutDD.style.display = "block";
-        } else {
-            logoutDD.style.display = "none";
-        }
-
+        window.open("assets/files/resignation.pdf", '_blank').focus();
     });
 
-    var notificationIcon = document.querySelector('#notification-icon');
-    var notificationDD = document.querySelector('#notification-dropdown');
-    var notificationDropdown = false;
-    notificationIcon.addEventListener('click', function() {
-        notificationDropdown = !notificationDropdown;
-        if (notificationDropdown) {
-            notificationDD.style.display = "block";
-        } else {
-            notificationDD.style.display = "none";
-        }
-
-    })
-    var DropdownLink = document.querySelectorAll('.dropdown-link');
-    var Dropdown = document.querySelectorAll('.dropdown');
-    var DropdownLinkIsClicked = false;
-    DropdownLink.forEach((el) => {
-        el.addEventListener('click', function(event) {
-
-            let isDropdown = this.getAttribute('data-display');
-            let getDropdown = this.parentNode.querySelectorAll('.dropdown')[0];
-            // console.log(get)
-            console.log(getDropdown)
-
-            if (this !== event.target) return;
-
-
-
-            if (isDropdown == "false") {
-                getDropdown.classList.add("active");
-                this.setAttribute('data-display', "true");
-            } else {
-                getDropdown.classList.remove("active");
-                this.setAttribute('data-display', "false");
-            }
-
-        });
-    });
 </script>
 </body>
 
