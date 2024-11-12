@@ -161,7 +161,7 @@ include './layout/header.php';
                     </div>
                 </div>
                 <div class="col-3">
-                    <select name="payroll_period" class="form-control">
+                    <select name="days" class="form-control">
                         <option value="">Payroll Period</option>
                         <?php foreach ($payrollPeriods as $period): ?>
                             <option value="<?php echo htmlspecialchars($period['days']); ?>">
