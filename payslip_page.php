@@ -23,10 +23,10 @@ $offset = ($current_page - 1) * $recordsPerPage;
 
 // Base query
 $query = "SELECT pr.payroll_id, e.firstname, e.middlename, e.lastname, 
-              pr.days, ps.position_name, pr.netpay, pr.payroll_period, e.*
+            pr.days, ps.position_name, pr.netpay, pr.payroll_period, e.*
             FROM payroll pr 
-             JOIN employees e ON e.employee_id = pr.employee_id
-           JOIN positions ps ON ps.position_id = e.position_id";
+            JOIN employees e ON e.employee_id = pr.employee_id
+            JOIN positions ps ON ps.position_id = e.position_id";
 
 // Apply role-based restrictions
 $conditions = [];  // Array to store conditions
@@ -34,14 +34,16 @@ $conditions = [];  // Array to store conditions
 if ($role_name === "Employee") {
     $conditions[] = "pr.employee_id = :employee_id";
 }
+if ($role_name === "Super Admin") {
+    $conditions[] = "pr.employee_id = :employee_id";
+}
 if ($role_name === "Admin") {
     // Get Admin's project_name
-    $projectQuery = "SELECT project_name FROM employees WHERE employee_id = :employee_id";
-    $projectStmt = $pdo->prepare($projectQuery);
-    $projectStmt->bindParam(':employee_id', $employee_id, PDO::PARAM_INT);
-    $projectStmt->execute();
-    $project = $projectStmt->fetchColumn();
-
+    // $projectQuery = "SELECT project_name FROM employees WHERE employee_id = :employee_id";
+    // $projectStmt = $pdo->prepare($projectQuery);
+    // $projectStmt->bindParam(':employee_id', $employee_id, PDO::PARAM_INT);
+    // $projectStmt->execute();
+    // $project = $projectStmt->fetchColumn();
     $conditions[] = "( pr.employee_id = :employee_id )";
     // $conditions[] = "(pr.employee_id = :employee_id)";
 }
