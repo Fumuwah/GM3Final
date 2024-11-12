@@ -43,7 +43,7 @@ if ($result->num_rows > 0) {
         $data[] = $row['employee_count'];
     }
 } else {
-    echo 'No Data';
+    echo '0';
 }
 
 $permissions_query = "SELECT can_view_own_data, can_view_team_data, can_edit_data, can_manage_roles 
@@ -94,15 +94,25 @@ $stmt->fetch();
 $stmt->close();
 
 $today_date = date("Y-m-d");
+
+$project_name = '';
+$project_query = "SELECT project_name FROM employees WHERE employee_id = ?";
+if ($stmt = $conn->prepare($project_query)) {
+    $stmt->bind_param("i", $employee_id);
+    $stmt->execute();
+    $stmt->bind_result($project_name);
+    $stmt->fetch();
+    $stmt->close();
+}
 $attendance_query = "
     SELECT e.employee_id, e.employee_number, e.firstname, e.lastname, d.time_in, p.project_name
     FROM dtr d
     JOIN employees e ON d.employee_id = e.employee_id
     LEFT JOIN projects p ON e.project_name = p.project_name
-    WHERE d.date = ?";
+    WHERE d.date = ? AND e.project_name = ?";
 
 $attendance_stmt = $conn->prepare($attendance_query);
-$attendance_stmt->bind_param("s", $today_date);
+$attendance_stmt->bind_param("ss", $today_date, $project_name);    
 $attendance_stmt->execute();
 $attendance_result = $attendance_stmt->get_result();
 

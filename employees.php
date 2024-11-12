@@ -16,16 +16,7 @@ $status = isset($_GET['employee_status']) ? mysqli_real_escape_string($conn, $_G
 $position_name = isset($_GET['position_name']) ? mysqli_real_escape_string($conn, $_GET['position_name']) : '';
 $role_name = strtolower($user['role_name'] ?? '');
 $employee_id = $_SESSION['employee_id'];
-$project_name = $_SESSION['project_name'] ?? null;
-
-$project_name_query = "SELECT pr.project_name FROM employees e 
-                       JOIN projects pr ON e.project_name = pr.project_name
-                       WHERE e.employee_id = ?";
-$stmt = $conn->prepare($project_name_query);
-$stmt->bind_param("i", $employee_id);
-$stmt->execute();
-$project_result = $stmt->get_result();
-$user_project_name = ($project_result->num_rows > 0) ? $project_result->fetch_assoc()['project_name'] : '';
+$project_name = $_SESSION['project_name'];
 
 $sql = "SELECT e.employee_id, e.firstname, e.lastname, e.middlename, e.employee_number, e.contactno, e.address, e.birthdate, 
             e.civil_status, e.religion, e.basic_salary, e.hire_date, e.employee_status, e.sss_no, e.philhealth_no, 
@@ -37,13 +28,6 @@ $sql = "SELECT e.employee_id, e.firstname, e.lastname, e.middlename, e.employee_
         LEFT JOIN roles r ON e.role_id = r.role_id
         LEFT JOIN leaves l ON e.employee_id = l.employee_id 
         ";
-
-       
-if ($role_name == 'admin') {
-    $sql .= " WHERE pr.project_name = '$user_project_name'";
-} elseif ($role_name == 'super admin') {
-    $sql .= " WHERE 1";
-}
 
 if (empty($status)) {
     $sql .= "WHERE e.employee_status != 'Archived'";
@@ -709,6 +693,7 @@ include './layout/header.php';
                             ?>
                         </div>
 
+<<<<<<< HEAD
                     <div class="col-3">
                     <label for="firstname">First Name</label>
                     <input type="text" class="form-control" name="firstname" id="firstname" 
@@ -728,7 +713,7 @@ include './layout/header.php';
                     <div class="col-3">
                     <label for="middlename">Middle Name</label>
                     <input type="text" class="form-control" name="middlename" id="middlename" 
-                        required pattern="^[A-Za-zÀ-ÖØ-ÿ\s]+$" 
+                        pattern="^[A-Za-zÀ-ÖØ-ÿ\s]+$" 
                         title="Please enter a valid middle name (only letters and spaces are allowed).">
                     <?php
                     if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -743,6 +728,42 @@ include './layout/header.php';
                 </div>
                 </div>
                                 <div class="form-row form-group">
+=======
+                        <div class="col-3">
+                            <label for="firstname">First Name</label>
+                            <input type="text" class="form-control" name="firstname" id="firstname"
+                                required pattern="^[A-Za-zÀ-ÖØ-ÿ\s]+$"
+                                title="Please enter a valid first name (only letters and spaces are allowed).">
+                            <?php
+                            if ($_SERVER["REQUEST_METHOD"] == "POST") {
+                                $firstname = $_POST['firstname'];
+                                if (!preg_match("/^[A-Za-zÀ-ÖØ-ÿ\s]+$/", $firstname)) {
+                                    echo "<p style='color:red;'>First Name must contain only letters and spaces, and cannot include numbers or special characters.</p>";
+                                } else {
+                                    echo "<p style='color:green;'>First Name is valid.</p>";
+                                }
+                            }
+                            ?>
+                        </div>
+                        <div class="col-3">
+                            <label for="middlename">Middle Name</label>
+                            <input type="text" class="form-control" name="middlename" id="middlename"
+                                required pattern="^[A-Za-zÀ-ÖØ-ÿ\s]+$"
+                                title="Please enter a valid middle name (only letters and spaces are allowed).">
+                            <?php
+                            if ($_SERVER["REQUEST_METHOD"] == "POST") {
+                                $middlename = $_POST['middlename'];
+                                if (!preg_match("/^[A-Za-zÀ-ÖØ-ÿ\s]+$/", $middlename)) {
+                                    echo "<p style='color:red;'>Middle Name must contain only letters and spaces, and cannot include numbers or special characters.</p>";
+                                } else {
+                                    echo "<p style='color:green;'>Middle Name is valid.</p>";
+                                }
+                            }
+                            ?>
+                        </div>
+                    </div>
+                    <div class="form-row form-group">
+>>>>>>> 9acf3ecdc198d94d70891dcf4283237672313956
                         <div class="col-3">
                             <label for="contactno">Contact No.</label>
                             <input type="text" class="form-control" name="contactno" id="contactno" required pattern="\d{11}" title="Please enter a valid contact number (11 digits are required)." maxlength="11">
