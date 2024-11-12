@@ -82,6 +82,9 @@ $dash_onleave_query_run = mysqli_query($conn, $dash_onleave_query);
 $dash_onapproval_query = "SELECT * FROM leave_requests WHERE status != 'Archived' AND status = 'Pending'";
 $dash_onapproval_query_run = mysqli_query($conn, $dash_onapproval_query);
 
+$dash_profapproval_query = "SELECT * FROM profile_change_requests WHERE status != 'Archived'";
+$dash_profapproval_query_run =  mysqli_query($conn, $dash_profapproval_query);
+
 $query = "SELECT lastname FROM employees WHERE employee_id = ?";
 $stmt = $conn->prepare($query);
 $stmt->bind_param("i", $employee_id);
@@ -187,8 +190,16 @@ include 'layout/header.php';
                             <div class="card">
                                 <div class="card-body text-center">
                                     <div class="m-0">Number of Request</div>
-                                    <p class="card-text font-weight-bold mt-3" style="font-size:2.2em;">5</p>
-                                    <div class="m-0">For Employees</div>
+                                    <?php
+
+                                    if ($profapproval_total = mysqli_num_rows($dash_profapproval_query_run)) {
+                                        echo ' <p class="card-text font-weight-bold mt-3" style="font-size:2.2em;">' . $profapproval_total . '</p>';
+                                    } else {
+                                        echo ' <p class="card-text font-weight-bold mt-3" style="font-size:2.2em;">No Data</p>';
+                                    }
+
+                                    ?>
+                                    <div class="m-0">For Profile Change</div>
                                 </div>
                             </div>
                         </div>
