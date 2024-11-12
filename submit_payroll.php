@@ -36,7 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $payroll_period = date('m', strtotime($fromDay)) . '/' . date('d', strtotime($fromDay)) . '-' . date('d', strtotime($toDay)) . '/' . date('y', strtotime($toDay));
     $xmonth = date('m', strtotime($fromDay));
     $xfromto =  date('d', strtotime($fromDay)) . '-' . date('d', strtotime($toDay));
-    $xyear = date('y', strtotime($toDay));
+    $xyear =  '20' . date('y', strtotime($toDay));
 
     $query = "
             INSERT INTO payroll (
