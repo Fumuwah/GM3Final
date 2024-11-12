@@ -159,13 +159,19 @@ $age = date_diff(date_create($employee['birthdate']), date_create('today'))->y;
                     <div class="form-group form-row">
                     <div class="col-6">
                     <label for="">Contact No.</label>
-                    <input class="form-control" type="text" name="contactno" placeholder="New Contact Number" 
+                    <input class="form-control" 
+                        type="text" 
+                        name="contactno" 
+                        placeholder="New Contact Number" 
                         value="<?php echo $employee['contactno']; ?>" 
                         pattern="^\d{11}$" 
                         maxlength="11" 
                         title="Please enter exactly 11 digits." 
+                        inputmode="numeric" 
+                        oninput="this.value = this.value.replace(/[^0-9]/g, '')" 
                         required>
-                        </div>
+                </div>
+
                         <div class="col-6">
                             <label for="">Address</label>
                             <textarea class="form-control" name="address" placeholder="New Address"><?php echo $employee['address']; ?></textarea>
