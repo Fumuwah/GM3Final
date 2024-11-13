@@ -53,14 +53,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     UPDATE dtr 
                     SET time_out = ?, 
                         total_hrs = ROUND(
-                            TIMESTAMPDIFF(MINUTE, time_in, ?) / 60 
-                            - (CASE 
-                                WHEN time_in <= '12:00:00' AND ? >= '13:00:00' THEN 1 
-                                ELSE 0 
-                            END), 2) 
+                            TIMESTAMPDIFF(MINUTE, time_in, ?) / 60, 2) 
                     WHERE employee_id = ? AND date = ?";
                 $stmt = $conn->prepare($total_hours_query);
-                $stmt->bind_param('sssss', $time_out, $time_out, $time_out, $employee_id, $date);
+                $stmt->bind_param('ssss', $time_out, $time_out, $employee_id, $date);
 
                 if ($stmt->execute()) {
                     $ot_query = "
