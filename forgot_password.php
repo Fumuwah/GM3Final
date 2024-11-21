@@ -31,7 +31,7 @@ if (isset($_POST['forgot_password'])) {
 
         if (mysqli_stmt_affected_rows($insertTokenPrep) > 0) {
             // Send reset email
-            $resetLink = "https://yourwebsite.com/reset_password.php?token=$token";
+            $resetLink = "https://gm3builders.com/reset_password.php?token=$token";
             $message = "Hello, " . $user['firstname'] . " " . $user['lastname'] . ",\n\n";
             $message .= "We received a request to reset your password. Please click the link below to reset your password:\n";
             $message .= "$resetLink\n\n";
