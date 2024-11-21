@@ -194,7 +194,7 @@ session_start();
 
                 </div>
                 <div class="">
-                    <p class="py-2 m-0">Have you <a href="/forgot_password.php">forgot your password</a>?</p>
+                    <p class="py-2 m-0">Have you <a href="forgot_password.php">forgot your password</a>?</p>
                 </div>
                 <div class="form-btn">
                     <button type="submit" value="Login" name="login" id="login-btn" class="btn btn-primary">Login</button>

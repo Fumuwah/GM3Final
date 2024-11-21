@@ -9,7 +9,6 @@ $display = "";
 if (isset($_POST['forgot_password'])) {
     $employeenums = isset($_POST['employeenumber']) ? $_POST['employeenumber'] : '';
 
-
     $getdata = "SELECT * FROM employees WHERE employee_number = ?";
     $getdataprep = mysqli_prepare($conn, $getdata);
     mysqli_stmt_bind_param($getdataprep, 's', $employeenums);
@@ -18,58 +17,39 @@ if (isset($_POST['forgot_password'])) {
     $user = mysqli_fetch_array($getdataresult, MYSQLI_ASSOC);
 
     if (!$user) {
-        $display = "<div class='alert alert-danger'>Your account has been archived and cannot access the website.</div>";
+        $display = "<div class='alert alert-danger'>No account found with that Employee Number.</div>";
     } else {
-        if ($user['role_id'] == 3) {
-            send_email_to_admin($user['project_name'], $user);
-            $display = "<div class='alert alert-danger'>Change Password Request has been sent to Project Admin.</div>";
-        }
-        if ($user['role_id'] == 2) {
-            send_email_to_masteradmin($user);
-            $display = "<div class='alert alert-danger'>Change Password Request has been sent to Super Admin/HR.</div>";
-        }
-        if ($user['role_id'] == 1) {
-            $display = "<div class='alert alert-danger'>Contact Tech Support.</div>";
+        $email = $user['email'];
+        $token = bin2hex(random_bytes(50));
+        $expires_at = date("Y-m-d H:i:s", strtotime("+1 hour"));
+
+        // Insert the reset token into the database
+        $insertToken = "INSERT INTO password_reset (employee_number, token, expires_at) VALUES (?, ?, ?)";
+        $insertTokenPrep = mysqli_prepare($conn, $insertToken);
+        mysqli_stmt_bind_param($insertTokenPrep, 'sss', $employeenums, $token, $expires_at);
+        mysqli_stmt_execute($insertTokenPrep);
+
+        if (mysqli_stmt_affected_rows($insertTokenPrep) > 0) {
+            // Send reset email
+            $resetLink = "https://yourwebsite.com/reset_password.php?token=$token";
+            $message = "Hello, " . $user['firstname'] . " " . $user['lastname'] . ",\n\n";
+            $message .= "We received a request to reset your password. Please click the link below to reset your password:\n";
+            $message .= "$resetLink\n\n";
+            $message .= "This link will expire in 1 hour.\n\n";
+            $message .= "If you did not request a password reset, please ignore this email.";
+
+            if (smtp_mailer($email, "Password Reset Request", $message)) {
+                $display = "<div class='alert alert-success'>A password reset link has been sent to your email.</div>";
+            } else {
+                $display = "<div class='alert alert-danger'>Failed to send reset email. Please try again later.</div>";
+            }
+        } else {
+            $display = "<div class='alert alert-danger'>Failed to process your request. Please try again later.</div>";
         }
     }
 }
-
-function send_email_to_admin($project_name, $requester)
-{
-    $admin_id = 2;
-    $admindata = "SELECT * FROM employees WHERE role_id = ? AND project_name = ?";
-    $admindataprep = mysqli_prepare($GLOBALS['xconn'], $admindata);
-    mysqli_stmt_bind_param($admindataprep, 'ss', $admin_id, $project_name);
-    mysqli_stmt_execute($admindataprep);
-    $admindataresult = mysqli_stmt_get_result($admindataprep);
-    $admins = mysqli_fetch_all($admindataresult, MYSQLI_ASSOC);
-
-
-    $message = $requester['employee_number'] . ": " . $requester['lastname'] . " " . $requester['firstname'] . " Forgot a password.";
-
-    foreach ($admins as $admin) {
-        smtp_mailer($admin['email'], "Forgot Password Request", $message);
-    }
-}
-
-function send_email_to_masteradmin($requester)
-{
-    $masteradmin_id = 1;
-    $masteradmindata = "SELECT * FROM employees WHERE role_id = ?";
-    $masteradmindataprep = mysqli_prepare($GLOBALS['xconn'], $masteradmindata);
-    mysqli_stmt_bind_param($masteradmindataprep, 's', $masteradmin_id);
-    mysqli_stmt_execute($masteradmindataprep);
-    $masteradmindataresult = mysqli_stmt_get_result($masteradmindataprep);
-    $masteradmins = mysqli_fetch_all($masteradmindataresult, MYSQLI_ASSOC);
-
-    $message = $requester['employee_number'] . ": " . $requester['lastname'] . " " . $requester['firstname'] . " Forgot a password.";
-
-    foreach ($masteradmins as $masteradmin) {
-        smtp_mailer($masteradmin['email'], "Forgot Password Request", $message);
-    }
-}
-
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
