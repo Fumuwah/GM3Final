@@ -111,36 +111,10 @@ $age = date_diff(date_create($employee['birthdate']), date_create('today'))->y;
         <button class="btn accordion-btn" data-accordion="information-update" type="button">
             Information Update
         </button>
-        <button class="btn accordion-btn" data-accordion="resignation-form" type="button">
-            Resignation Form
-        </button>
         <button class="btn accordion-btn" data-accordion="more-details" type="button">
             More Details
         </button>
-        
-        <!-- Resignation Form Accordion -->
-        <div class="card accordion" id="resignation-form">
-            <div class="card-body">
-                <h2>Resignation Form</h2>
-                <div class="table-responsive">
-                    <table class="table">
-                        <tbody>
-                            <tr>
-                                <td>1</td>
-                                <td>Resignation</td>
-                                <td style="text-align: right;">
-                                    <a id="rform" href="assets/files/resignation.pdf" target="_blank"
-                                        style="display: inline-block; padding: 8px 16px; color: #fff; background-color: red; border-radius: 5px; text-decoration: none; font-weight: bold; cursor: pointer;">
-                                        Download
-                                    </a>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
+    
         <!-- Information Update Accordion -->
         <div class="card accordion" id="information-update">
             <div class="card-body">

@@ -68,73 +68,6 @@ include './layout/header.php';
                                     <label for="name">Name:</label>
                                     <input type="text" class="form-control" id="name" name="name">
                                 </div>
-                                <div class="form-group mb-3">
-                                    <label for="hire_date">Date Hired</label>
-                                    <input type="date" class="form-control" id="hire_date" name="hire_date">
-                                </div>
-                                <div class="form-group mb-3">
-                                    <label for="position">Position</label>
-                                    <select name="position_id" id="position" class="form-control">
-                                        <option value="">Select Position</option>
-                                        <option value="Owner">Owner</option>
-                                        <option value="HR/Admin Manager">HR/Admin Manager</option>
-                                        <option value="Foreman">Foreman</option>
-                                        <option value="Leadman">Leadman</option>
-                                        <option value="Civil Engineer">Civil Engineer</option>
-                                        <option value="Mechanical Engineer">Mechanical Engineer</option>
-                                        <option value="Laborer">Laborer</option>
-                                        <option value="HR Officer">HR Officer</option>
-                                        <option value="Field Coordinator">Field Coordinator</option>
-                                        <option value="Warehouse Man">Warehouse Man</option>
-                                        <option value="Electrician">Electrician</option>
-                                        <option value="Mason">Mason</option>
-                                        <option value="Surveyor">Surveyor</option>
-                                        <option value="Driver">Driver</option>
-                                        <option value="Project Engineer">Project Engineer</option>
-                                        <option value="Safety Officer">Safety Officer</option>
-                                        <option value="Helper">Helper</option>
-                                        <option value="Architectural Designer">Architectural Designer</option>
-                                        <option value="Admin Specialist">Admin Specialist</option>
-                                        <option value="HR Specialist">HR Specialist</option>
-                                    </select>
-                                </div>
-                                <div class="form-group mb-3">
-                                    <label for="role_id">Role</label>
-                                    <select name="role_id" id="role" class="form-control">
-                                        <option value="">Select Role</option>
-                                        <option value="Super Admin">Super Admin</option>
-                                        <option value="Admin">Admin</option>
-                                        <option value="Employee">Employee</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-lg-6 col-md-6 col-12 mb-3">
-                        <div class="card">
-                            <div class="card-body">
-                                <h4>Deductions</h4>
-                                <div class="form-group mb-3">
-                                    <label for="">Withholding Tax</label>
-                                    <input type="text" class="form-control" name="withhold_tax" id="withhold_tax">
-                                </div>
-                                <div class="form-group mb-3">
-                                    <label for="">SSS Contribution</label>
-                                    <input type="text" class="form-control" name="sss_con" id="sss_con">
-                                </div>
-                                <div class="form-group mb-3">
-                                    <label for="">Philhealth</label>
-                                    <input type="text" class="form-control" name="philhealth_con" id="philhealth_con">
-                                </div>
-                                <div class="form-group mb-3">
-                                    <label for="">Pag-Ibig</label>
-                                    <input type="text" class="form-control" name="pag-ibig_con" id="pag-ibig_con">
-                                </div>
-                                <div class="form-group mb-3">
-                                    <label for="">Others</label>
-                                    <input type="text" class="form-control" name="other_deduc" id="other_deduc">
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -201,14 +134,6 @@ include './layout/header.php';
                         <div class="card">
                             <div class="card-body">
                                 <h4>Salary</h4>
-                                <div class="form-group mb-3">
-                                    <label for="">Special Holiday</label>
-                                    <input type="text" class="form-control" name="special_holiday" id="special_holiday">
-                                </div>
-                                <div class="form-group mb-3">
-                                    <label for="">Special Leave</label>
-                                    <input type="text" class="form-control" name="special_leave" id="special_leave">
-                                </div>
                                 <div class="form-group mb-3">
                                     <label for="">Gross</label>
                                     <input type="text" class="form-control" name="gross" id="gross">
