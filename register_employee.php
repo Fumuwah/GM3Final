@@ -10,7 +10,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $address = $_POST['address'];
     $birthdate = $_POST['birthdate'];
     $civil_status = $_POST['civil_status'];
-    $religion = $_POST['religion'];
+    $daily_salary = $_POST['daily_salary'];
     $basic_salary = $_POST['basic_salary'];
     $position_name = $_POST['position_name'];
     $hire_date = $_POST['hire_date'];
@@ -19,8 +19,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $philhealth_no = $_POST['philhealth_no'];
     $hdmf_no = $_POST['hdmf_no'];
     $tin_no = $_POST['tin_no'];
+    $sss_con = $_POST['sss_con'];
+    $philhealth_con = $_POST ['philhealth_con'];
+    $pag_ibig_con = $_POST['pag_ibig_con'];
+    $withhold_tax = $_POST['withhold_tax'];
     $email = $_POST['email'];
-    $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
+    // Generate the password using "gm3builders" and the birthdate
+    $password_raw = "gm3builders" . $birthdate;
+    $password = password_hash($password_raw, PASSWORD_DEFAULT);
+
     $emergency_contactno = $_POST['emergency_contactno'];
     $role_id = (int)$_POST['role_id'];  // Ensure role_id is an integer
     $project_name = $_POST['project_name'];
@@ -54,16 +61,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Insert employee into the employees table
     $sql_employee = "INSERT INTO employees (
         employee_number, lastname, firstname, middlename, contactno, address, birthdate, 
-        civil_status, religion, basic_salary, hire_date, employee_status, 
-        sss_no, philhealth_no, hdmf_no, tin_no, email, password, emergency_contactno, 
+        civil_status, daily_salary, basic_salary, hire_date, employee_status, 
+        sss_no, philhealth_no, hdmf_no, tin_no, sss_con, philhealth_con, pag_ibig_con, withhold_tax,
+        email, password, emergency_contactno, 
         position_id, role_id, project_name
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     $stmt_employee = mysqli_prepare($conn, $sql_employee);
-    mysqli_stmt_bind_param($stmt_employee, "sssssssssssssssssssiis", 
+    mysqli_stmt_bind_param($stmt_employee, "sssssssssssssssssssssssiis", 
         $employee_number, $lastname, $firstname, $middlename, $contactno, $address, 
-        $birthdate, $civil_status, $religion, $basic_salary, $hire_date, $employee_status, 
-        $sss_no, $philhealth_no, $hdmf_no, $tin_no, $email, $password, 
+        $birthdate, $civil_status, $daily_salary, $basic_salary, $hire_date, $employee_status, 
+        $sss_no, $philhealth_no, $hdmf_no, $tin_no, $sss_con, $philhealth_con,
+        $pag_ibig_con, $withhold_tax, $email, $password, 
         $emergency_contactno, $position_id, $role_id, $project_name
     );
 

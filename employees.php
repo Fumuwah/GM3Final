@@ -20,8 +20,8 @@ $employee_id = $_SESSION['employee_id'];
 $user_project_name = $_SESSION['project_name'] ?? '';
 
 $sql = "SELECT e.employee_id, e.firstname, e.lastname, e.middlename, e.employee_number, e.contactno, e.address, e.birthdate, 
-e.civil_status, e.religion, e.basic_salary, e.hire_date, e.employee_status, e.sss_no, e.philhealth_no, 
-e.hdmf_no, e.tin_no, e.email, e.emergency_contactno, p.position_name, pr.project_name, r.role_name, r.role_id,
+e.civil_status, e.daily_salary, e.basic_salary, e.hire_date, e.employee_status, e.sss_no, e.philhealth_no, 
+e.hdmf_no, e.tin_no, e.sss_con, e.philhealth_con, e.pag_ibig_con, e.withhold_tax, e.email, e.emergency_contactno, p.position_name, pr.project_name, r.role_name, r.role_id,
 l.sick_leave, l.vacation_leave, l.used_leave, l.leave_without_pay 
 FROM employees e
 JOIN positions p ON e.position_id = p.position_id
@@ -164,9 +164,6 @@ include './layout/header.php';
                     <button type="submit" class="btn btn-primary">Search</button>
                 </form>
                 <div class="d-flex">
-                    <form action="profile-change-requests.php">
-                        <button type="submit" class="btn btn-success mb-2 mr-2" id="approvals">Approvals</button>
-                    </form>
 
                     <?php if ($_SESSION['role_name'] == 'Super Admin'): ?>
                         <form action="">
@@ -202,7 +199,7 @@ include './layout/header.php';
                                 $address = htmlspecialchars($row['address'] ?? '');
                                 $birthdate = htmlspecialchars($row['birthdate'] ?? '');
                                 $civil_status = htmlspecialchars($row['civil_status'] ?? '');
-                                $religion = htmlspecialchars($row['religion'] ?? '');
+                                $daily_salary = htmlspecialchars($row['daily_salary'] ?? '');
                                 $basic_salary = htmlspecialchars($row['basic_salary'] ?? '');
                                 $project_name = htmlspecialchars($row['project_name'] ?? '');
                                 $position_name2 = htmlspecialchars($row['position_name'] ?? '');
@@ -212,8 +209,11 @@ include './layout/header.php';
                                 $philhealth_no = htmlspecialchars($row['philhealth_no'] ?? '');
                                 $hdmf_no = htmlspecialchars($row['hdmf_no'] ?? '');
                                 $tin_no = htmlspecialchars($row['tin_no'] ?? '');
+                                $sss_con = htmlspecialchars($row['sss_con'] ?? '');
+                                $philhealth_con = htmlspecialchars($row['philhealth_con'] ?? '');
+                                $pag_ibig_con = htmlspecialchars($row['pag_ibig_con'] ?? '');
+                                $withhold_tax = htmlspecialchars($row['withhold_tax'] ?? '');
                                 $email = htmlspecialchars($row['email'] ?? '');
-                                $password = htmlspecialchars($row['password'] ?? '');
                                 $emergency_contactno = htmlspecialchars($row['emergency_contactno'] ?? '');
                                 $role_id = strtolower($row['role_id'] ?? '');
                                 $sick_leave = htmlspecialchars($row['sick_leave'] ?? 'N/A');
@@ -248,7 +248,7 @@ include './layout/header.php';
                                             data-address='{$address}' 
                                             data-birthdate='{$birthdate}' 
                                             data-civil-status='{$civil_status}' 
-                                            data-religion='{$religion}'
+                                            data-daily-salary='{$daily_salary}'
                                             data-basic-salary='{$basic_salary}' 
                                             data-project-name='{$project_name}'
                                             data-position-name='{$position_name2}' 
@@ -258,8 +258,11 @@ include './layout/header.php';
                                             data-philhealth-no='{$philhealth_no}' 
                                             data-hdmf-no='{$hdmf_no}' 
                                             data-tin-no='{$tin_no}' 
-                                            data-email='{$email}' 
-                                            data-password='{$password}' 
+                                            data-sss-con='{$sss_con}'
+                                            data-philhealth-con='{$philhealth_con}'
+                                            data-pag-ibig-con='{$pag_ibig_con}'
+                                            data-withhold-tax='{$withhold_tax}'
+                                            data-email='{$email}'  
                                             data-emergency-contactno='{$emergency_contactno}' 
                                             data-role-id='{$role_id}'>Edit</button>
                                             <button type='button' class='btn btn-secondary mb-2 leaves-btn' data-id='{$employee_number}'>Leaves</button>
@@ -483,8 +486,8 @@ include './layout/header.php';
                             </select>
                         </div>
                         <div class="col-3">
-                            <label for="religion">Religion</label>
-                            <input type="text" class="form-control" name="religion" id="edit_religion">
+                            <label for="daily_salary">Daily Salary</label>
+                            <input type="text" class="form-control" name="daily_salary" id="edit_daily_salary">
                         </div>
                         <div class="col-3">
                             <label for="basic_salary">Basic Salary</label>
@@ -549,7 +552,7 @@ include './layout/header.php';
                             <select name="employee_status" id="edit_employee_status_select" class="form-control" required>
                                 <option value="">Select Status</option>
                                 <option value="Regular">Regular</option>
-                                <option value="Probationary">Probationary</option>
+                                <option value="Contractual">Contractual</option>
                                 <option value="Archived">Archived</option>
                             </select>
                         </div>
@@ -612,14 +615,29 @@ include './layout/header.php';
                             ?>
                         </div>
                     </div>
+                    <h5>Deductions</h5>
+                    <div class="form-row form-group">
+                        <div class="col-3">
+                            <label for="sss_con">SSS</label>
+                            <input type="text" class="form-control" name="sss_con" id="edit_sss_con">
+                        </div>
+                        <div class="col-3">
+                            <label for="philhealth_con">PhilHealth</label>
+                            <input type="text" class="form-control" name="philhealth_con" id="edit_philhealth_con">
+                        </div>
+                        <div class="col-3">
+                            <label for="pag_ibig_con">Pag Ibig</label>
+                            <input type="text" class="form-control" name="pag_ibig_con" id="edit_pag_ibig_con">
+                        </div>
+                        <div class="col-3">
+                            <label for="withhold_tax">Withholding Tax</label>
+                            <input type="text" class="form-control" name="withhold_tax" id="edit_withhold_tax">
+                        </div>
+                    </div>
                     <div class="form-row form-group">
                         <div class="col-3">
                             <label for="email">Email</label>
                             <input type="email" class="form-control" name="email" id="edit_email" required>
-                        </div>
-                        <div class="col-3">
-                            <label for="password">Password</label>
-                            <input type="text" class="form-control" name="password" id="edit_password" required>
                         </div>
                         <div class="col-3">
                             <label for="emergency_contactno">In case of Emergency</label>
@@ -763,12 +781,12 @@ include './layout/header.php';
                             </select>
                         </div>
                         <div class="col-3">
-                            <label for="religion">Religion</label>
-                            <input type="text" class="form-control" name="religion">
+                            <label for="daily_salary">Daily Salary</label>
+                            <input type="text" class="form-control" name="daily_salary">
                         </div>
                         <div class="col-3">
                             <label for="basic_salary">Basic Salary</label>
-                            <input type="text" class="form-control" name="basic_salary" id="basic_salary" required pattern="\d+" title="Please enter a valid integer.">
+                            <input type="text" class="form-control" name="basic_salary" id="basic_salary" pattern="\d+" title="Please enter a valid integer.">
                             <?php
                             if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                 $basic_salary = $_POST['basic_salary'];
@@ -836,9 +854,7 @@ include './layout/header.php';
                             <select name="employee_status" id="employee_status" class="form-control" required>
                                 <option value="">Select Status</option>
                                 <option value="Regular">Regular</option>
-                                <option value="Probationary">Probationary</option>
-                                <option value="Resgined">Resigned</option>
-                                <option value="Retired">Retired</option>
+                                <option value="Contractual">Contractual</option>
                             </select>
                         </div>
                     </div>
@@ -900,14 +916,29 @@ include './layout/header.php';
                             ?>
                         </div>
                     </div>
+                    <h5>Deductions</h5>
+                    <div class="form-row form-group">
+                        <div class="col-3">
+                            <label for="sss_con">SSS</label>
+                            <input type="text" class="form-control" name="sss_con" id="sss_con">
+                        </div>
+                        <div class="col-3">
+                            <label for="philhealth_con">PhilHealth</label>
+                            <input type="text" class="form-control" name="philhealth_con" id="philhealth_con">
+                        </div>
+                        <div class="col-3">
+                            <label for="pag_ibig_con">Pag Ibig</label>
+                            <input type="text" class="form-control" name="pag_ibig_con" id="pag_ibig_con">
+                        </div>
+                        <div class="col-3">
+                            <label for="withhold_tax">Withholding Tax</label>
+                            <input type="text" class="form-control" name="withhold_tax" id="withhold_tax">
+                        </div>
+                    </div>
                     <div class="form-row form-group">
                         <div class="col-3">
                             <label for="email">Email</label>
                             <input type="email" class="form-control" name="email" required>
-                        </div>
-                        <div class="col-3">
-                            <label for="password">Password</label>
-                            <input type="password" class="form-control" name="password" required>
                         </div>
                         <div class="col-3">
                             <label for="emergency_contactno">In case of Emergency</label>
@@ -993,7 +1024,7 @@ include './layout/header.php';
                 const address = button.getAttribute('data-address');
                 const birthDate = button.getAttribute('data-birthdate');
                 const civilStatus = button.getAttribute('data-civil-status');
-                const religion = button.getAttribute('data-religion');
+                const dailySalary = button.getAttribute('data-daily-salary');
                 const basicSalary = button.getAttribute('data-basic-salary');
                 const projectName = button.getAttribute('data-project-name');
                 const hireDate = button.getAttribute('data-hire-date');
@@ -1001,8 +1032,11 @@ include './layout/header.php';
                 const philhealthNo = button.getAttribute('data-philhealth-no');
                 const hdmfNo = button.getAttribute('data-hdmf-no');
                 const tinNo = button.getAttribute('data-tin-no');
+                const sssCon = button.getAttribute('data-sss-con');
+                const philhealthCon = button.getAttribute('data-philhealth-con');
+                const pagibigCon = button.getAttribute('data-pag-ibig-con');
+                const withholdTax = button.getAttribute('data-withhold-tax');
                 const email = button.getAttribute('data-email');
-                const password = button.getAttribute('data-password');
                 const emergencyContactNo = button.getAttribute('data-emergency-contactno');
                 const position = button.getAttribute('data-position-name');
                 const employeeStatus = button.getAttribute('data-employee-status');
@@ -1023,7 +1057,7 @@ include './layout/header.php';
                 setSelectedValue('#edit_employee_status_select', employeeStatus);
                 setSelectedValue('#edit_role_name_select', role);
 
-                document.querySelector('#edit_religion').value = religion;
+                document.querySelector('#edit_daily_salary').value = dailySalary;
                 document.querySelector('#edit_basic_salary').value = basicSalary;
                 document.querySelector('#edit_hire_date').value = hireDate;
                 document.querySelector('#edit_sss_no').value = sssNo;
@@ -1031,7 +1065,6 @@ include './layout/header.php';
                 document.querySelector('#edit_hdmf_no').value = hdmfNo;
                 document.querySelector('#edit_tin_no').value = tinNo;
                 document.querySelector('#edit_email').value = email;
-                document.querySelector('#edit_password').value = password;
                 document.querySelector('#edit_emergency_contactno').value = emergencyContactNo;
 
                 editModal.classList.remove('fade');
