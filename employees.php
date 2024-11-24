@@ -151,7 +151,7 @@ include './layout/header.php';
                             <option value="Warehouse Man" <?php echo isset($_GET['position_name']) && $_GET['position_name'] == 'Warehouse Man' ? 'selected' : ''; ?>>Warehouse Man</option>
                             <option value="Electrician" <?php echo isset($_GET['position_name']) && $_GET['position_name'] == 'Electrician' ? 'selected' : ''; ?>>Electrician</option>
                             <option value="Mason" <?php echo isset($_GET['position_name']) && $_GET['position_name'] == 'Mason' ? 'selected' : ''; ?>>Mason</option>
-                            <option value="Surveyor" <?php echo isset($_GET['posiposition_nametion']) && $_GET['position_name'] == 'Surveyor' ? 'selected' : ''; ?>>Surveyor</option>
+                            <option value="Surveyor" <?php echo isset($_GET['position_name']) && $_GET['position_name'] == 'Surveyor' ? 'selected' : ''; ?>>Surveyor</option>
                             <option value="Driver" <?php echo isset($_GET['position_name']) && $_GET['position_name'] == 'Driver' ? 'selected' : ''; ?>>Driver</option>
                             <option value="Project Engineer" <?php echo isset($_GET['position_name']) && $_GET['position_name'] == 'Project Engineer' ? 'selected' : ''; ?>>Project Engineer</option>
                             <option value="Safety Officer" <?php echo isset($_GET['position_name']) && $_GET['position_name'] == 'Safety Officer' ? 'selected' : ''; ?>>Safety Officer</option>

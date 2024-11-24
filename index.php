@@ -95,54 +95,32 @@ $stmt->close();
 
 $today_date = date("Y-m-d");
 
-$project_name = '';
-$project_query = "SELECT project_name FROM employees WHERE employee_id = ?";
-if ($stmt = $conn->prepare($project_query)) {
-    $stmt->bind_param("i", $employee_id);
-    $stmt->execute();
-    $stmt->bind_result($project_name);
-    $stmt->fetch();
-    $stmt->close();
-}
+$attendance_data = []; // Initialize attendance data array
+
 $attendance_query = "
-    SELECT e.employee_id, e.employee_number, e.firstname, e.lastname, d.time_in, p.project_name
-    FROM dtr d
-    JOIN employees e ON d.employee_id = e.employee_id
-    LEFT JOIN projects p ON e.project_name = p.project_name
-    WHERE d.date = ?";
+    SELECT e.employee_number, e.firstname, e.lastname, lr.leave_type, lr.start_date, lr.end_date, lr.status
+    FROM leave_requests lr
+    JOIN employees e ON lr.employee_id = e.employee_id
+    WHERE lr.start_date <= ? 
+      AND lr.end_date >= ? 
+      AND lr.status = 'Approved'";
 
-// Add a condition to filter by project name only if the role is not Super Admin
-if ($role !== 'Super Admin') {
-    $attendance_query .= " AND e.project_name = ?";
-}
-
+// Prepare and bind parameters
 $attendance_stmt = $conn->prepare($attendance_query);
+$attendance_stmt->bind_param("ss", $today_date, $today_date);
 
-if ($role === 'Super Admin') {
-    // Super Admin sees all records, so only bind the date parameter
-    $attendance_stmt->bind_param("s", $today_date);
-} else {
-    // Admin binds both date and project name parameters
-    $attendance_stmt->bind_param("ss", $today_date, $project_name);
-}
-
+// Execute and fetch results
 $attendance_stmt->execute();
 $attendance_result = $attendance_stmt->get_result();
 
 $attendance_data = [];
 while ($row = $attendance_result->fetch_assoc()) {
-    $status = "On-Time";
-    if (strtotime($row['time_in']) < strtotime('07:00:00')) {
-        $status = "Early";
-    } elseif (strtotime($row['time_in']) > strtotime('07:00:00')) {
-        $status = "Late";
-    }
     $attendance_data[] = [
         'employee_number' => $row['employee_number'],
         'name' => $row['firstname'] . ' ' . $row['lastname'],
-        'time_in' => $row['time_in'],
-        'project_name' => $row['project_name'],
-        'status' => $status
+        'leave_type' => $row['leave_type'],
+        'from_date' => $row['start_date'],
+        'to_date' => $row['end_date']
     ];
 }
 
@@ -165,13 +143,13 @@ include 'layout/header.php';
                                 <div class="card-body text-center">
                                     <div class="m-0">Number of Employees</div>
                                     <?php
-
+                                    
                                     if ($employee_total = mysqli_num_rows($dash_employee_query_run)) {
-                                        echo ' <p class="card-text font-weight-bold mt-3" style="font-size:2.2em;">' . $employee_total . '</p>';
+                                        echo ' <p class="card-text font-weight-bold mt-3" style="font-size:2.2em;"><a href="employees.php">' . $employee_total . '</a></p>';
                                     } else {
-                                        echo ' <p class="card-text font-weight-bold mt-3" style="font-size:2.2em;">No Data</p>';
+                                        echo ' <p class="card-text font-weight-bold mt-3" style="font-size:2.2em;">0</p>';
                                     }
-
+                                    
                                     ?>
                                     <div class="m-0">This month</div>
                                 </div>
@@ -180,11 +158,11 @@ include 'layout/header.php';
                         <div class="col-12 my-2 col-lg-3">
                             <div class="card">
                                 <div class="card-body text-center">
-                                    <div class="m-0">On Leave</div>
+                                    <div class="m-0">Leave</div>
                                     <?php
 
                                     if ($onleave_total = mysqli_num_rows($dash_onleave_query_run)) {
-                                        echo ' <p class="card-text font-weight-bold mt-3" style="font-size:2.2em;">' . $onleave_total . '</p>';
+                                        echo ' <p class="card-text font-weight-bold mt-3" style="font-size:2.2em;"><a href="hr-leaves-page.php">' . $onleave_total . '</a></p>';
                                     } else {
                                         echo ' <p class="card-text font-weight-bold mt-3" style="font-size:2.2em;">No Data</p>';
                                     }
@@ -200,7 +178,7 @@ include 'layout/header.php';
                                     <?php
 
                                     if ($onapproval_total = mysqli_num_rows($dash_onapproval_query_run)) {
-                                        echo ' <p class="card-text font-weight-bold mt-3" style="font-size:2.2em;">' . $onapproval_total . '</p>';
+                                        echo ' <p class="card-text font-weight-bold mt-3" style="font-size:2.2em;"><a href="hr-leaves-page.php">' . $onapproval_total . '</a></p>';
                                     } else {
                                         echo ' <p class="card-text font-weight-bold mt-3" style="font-size:2.2em;">0</p>';
                                     }
@@ -216,7 +194,7 @@ include 'layout/header.php';
                                     <?php
 
                                     if ($profapproval_total = mysqli_num_rows($dash_profapproval_query_run)) {
-                                        echo ' <p class="card-text font-weight-bold mt-3" style="font-size:2.2em;">' . $profapproval_total . '</p>';
+                                        echo ' <p class="card-text font-weight-bold mt-3" style="font-size:2.2em;"><a href="profile-change-requests.php">' . $profapproval_total . '</a></p>';
                                     } else {
                                         echo ' <p class="card-text font-weight-bold mt-3" style="font-size:2.2em;">No Data</p>';
                                     }
@@ -227,34 +205,34 @@ include 'layout/header.php';
                             </div>
                         </div>
                         <div class="col-12 my-3">
-                            <h4>Attendance</h4>
+                            <h4>On-Leave</h4>
                             <div class="table-responsive-lg" style="overflow-x: scroll;">
                             <table class="table">
                                 <thead>
                                     <tr>
                                         <th>Employee Number</th>
                                         <th>Name</th>
-                                        <th>Time-In</th>
-                                        <th>Assigned Project</th>
-                                        <th>Status</th>
+                                        <th>Leave Type</th>
+                                        <th>From Date</th>
+                                        <th>To Date</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php foreach ($attendance_data as $attendance): ?>
-                                        <tr>
-                                            <td><?php echo htmlspecialchars($attendance['employee_number']); ?></td>
-                                            <td><?php echo htmlspecialchars($attendance['name']); ?></td>
-                                            <td><?php echo htmlspecialchars($attendance['time_in']); ?></td>
-                                            <td><?php echo htmlspecialchars($attendance['project_name']); ?></td>
-                                            <td>
-                                                <?php 
-                                                    $badge_class = ($attendance['status'] === 'Early') ? 'badge-warning' : 
-                                                                (($attendance['status'] === 'On-Time') ? 'badge-success' : 'badge-danger');
-                                                ?>
-                                                <span class="badge <?php echo $badge_class; ?>"><?php echo $attendance['status']; ?></span>
-                                            </td>
-                                        </tr>
-                                    <?php endforeach; ?>
+                                <?php if (!empty($attendance_data)): ?>
+                            <?php foreach ($attendance_data as $attendance): ?>
+                                <tr>
+                                    <td><?php echo htmlspecialchars($attendance['employee_number']); ?></td>
+                                    <td><?php echo htmlspecialchars($attendance['name']); ?></td>
+                                    <td><?php echo htmlspecialchars($attendance['leave_type']); ?></td>
+                                    <td><?php echo htmlspecialchars($attendance['from_date']); ?></td>
+                                    <td><?php echo htmlspecialchars($attendance['to_date']); ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <tr>
+                                <td colspan="5">No records found for today.</td>
+                            </tr>
+                        <?php endif; ?>
                                 </tbody>
                             </table>
                         </div>
@@ -327,15 +305,14 @@ include 'layout/header.php';
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
 
 <canvas id="pie-grap" width="300" height="300"></canvas>
 
 <script>
     const pie = document.getElementById('pie-grap').getContext('2d');
 
-    const labels = <?php echo json_encode($labels); ?>;
-    const data = <?php echo json_encode($data); ?>;
+    const labels = <?php echo json_encode($labels); ?>; // Position labels
+    const data = <?php echo json_encode($data); ?>; // Data for each position
 
     const positionChart = new Chart(pie, {
         type: 'doughnut',
@@ -375,9 +352,18 @@ include 'layout/header.php';
                         }
                     }
                 },
+            },
+            onClick: function(event, elements) {
+                if (elements.length > 0) {
+                    const segmentIndex = elements[0].index; // Get the clicked segment's index
+                    const position = labels[segmentIndex]; // Get the corresponding position label
+                    // Redirect to the employees page with the position_name filter
+                    window.location.href = `employees.php?position_name=${encodeURIComponent(position)}`;
+                }
             }
         },
     });
 </script>
+
 <?php include './layout/script.php'; ?>
 <?php include 'layout/footer.php'; ?>
