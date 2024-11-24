@@ -153,7 +153,6 @@ include './layout/header.php';
                                 <th>Allowance</th>
                                 <th>REG</th>
                                 <th>OT</th>
-                                <th>S.H/V.L</th>
                                 <th>Gross</th>
                                 <th>Cash Advance</th>
                                 <th>Deduction</th>
@@ -168,7 +167,6 @@ include './layout/header.php';
                                     <td><?php echo number_format($payroll['allowance'], 2); ?></td>
                                     <td><?php echo number_format($payroll['total_hrs'], 2); ?></td>
                                     <td><?php echo number_format($payroll['other_ot'], 2); ?></td>
-                                    <td><?php echo number_format($payroll['special_holiday'], 2); ?></td>
                                     <td><?php echo number_format($payroll['gross'], 2); ?></td>
                                     <td><?php echo number_format($payroll['cash_adv'], 2); ?></td>
                                     <td><?php echo number_format($payroll['total_deduc'], 2); ?></td>
