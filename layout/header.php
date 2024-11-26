@@ -64,7 +64,7 @@ $can_manage_roles = $user['can_manage_roles'] ?? false;
 <body>
     <nav class="navbar navbar-light bg-light flex-column flex-lg-row align-items-start">
         <div class="d-flex align-items-center nav-phone justify-content-between">
-            <?php if ($role_name === 'super admin' || $role_name === 'admin'): ?>
+            <?php if ($can_view_team_data): ?>
                 <a class="navbar-brand font-weight-bold bg-blue" href="index.php">
                     <img src="assets/images/gm3-logo-small.png" width="30" height="30" class="d-inline-block align-top" alt="">
                     GM3 Builders
@@ -79,7 +79,7 @@ $can_manage_roles = $user['can_manage_roles'] ?? false;
         </div>
         <ul class="navbar-nav flex-row flex-column flex-lg-row">
             <li class="nav-item active mx-3 d-flex align-items-center">
-                <?php if ($role_name === 'super admin' || $role_name === 'admin'): ?>
+                <?php if ($can_view_team_data): ?>
                     <img src="assets/images/home.png" class="header-icons mr-2" href="index.php"> <a class="nav-link" href="index.php">Home<span class="sr-only">(current)</span></a>
                 <?php endif; ?>
                 <?php if ($role_name === 'employee'): ?>

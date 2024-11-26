@@ -195,9 +195,7 @@ $activePage = 'dtr';
                     </div>
                     <div class="d-flex col-sm-2">
                         <button type="submit" class="btn btn-primary">Filter</button>
-                        <?php if ($role_name === 'super admin' || $role_name === 'admin'): ?>
-                            <button type="button" class="btn btn-secondary" id="attendance-btn">Attendance</button>
-                        <?php endif; ?>
+                        <button type="button" class="btn btn-secondary" id="attendance-btn">Attendance</button>
                     </div>
                 </div>
             </form>

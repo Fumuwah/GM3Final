@@ -63,6 +63,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['employee_id'])) {
     $employee_id = $_POST['employee_id'];
     $new_role_id = $_POST['role_id'];
 
+    // Prevent Super Admin from changing their own role
+    if ($_SESSION['role_name'] === 'Super Admin' && $employee_id == $_SESSION['employee_id']) {
+        $_SESSION['message'] = "You cannot change your own role as a Super Admin.";
+        header("Location: users.php");
+        exit();
+    }
+
     $role_stmt = $conn->prepare("SELECT r.role_id, perm.can_manage_roles 
                                 FROM employees e 
                                 LEFT JOIN roles r ON e.role_id = r.role_id
@@ -112,6 +119,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['employee_id'])) {
     header("Location: users.php");
     exit();
 }
+
 
 $search = isset($_GET['search']) ? $_GET['search'] : '';
 $current_page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
@@ -197,6 +205,7 @@ include './layout/header.php';
                                                             <option value="1" <?php if ($row['role_name'] == 'Super Admin') echo 'selected'; ?>>Super Admin</option>
                                                             <option value="2" <?php if ($row['role_name'] == 'Admin') echo 'selected'; ?>>Admin</option>
                                                             <option value="3" <?php if ($row['role_name'] == 'Employee') echo 'selected'; ?>>Employee</option>
+                                                            <option value="4" <?php if ($row['role_name'] == 'HR_Admin') echo 'selected'; ?>>HR Admin</option>
                                                         </select>
                                                     </div>
                                                     <div class="flex-end">

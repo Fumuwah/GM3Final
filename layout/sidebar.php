@@ -10,10 +10,11 @@ if (!$employee_id) {
 
 $query = "SELECT r.role_name, 
                 p.can_view_own_data, p.can_view_team_data, 
-                p.can_edit_data, p.can_manage_roles 
+                p.can_edit_data, p.can_manage_roles, ps.position_name 
         FROM employees e 
         JOIN roles r ON e.role_id = r.role_id 
         LEFT JOIN permissions p ON r.role_id = p.permission_id 
+        LEFT JOIN positions ps ON e.position_id = ps.position_id
         WHERE e.employee_id = ?";
 
 $stmt = $pdo->prepare($query);
@@ -24,6 +25,7 @@ if (!$user) {
     die('User data not found.');
 }
 
+$position_name = $user['position_name'] ?? '';
 $role_name = strtolower($user['role_name'] ?? '');
 $can_view_own_data = $user['can_view_own_data'] ?? false;
 $can_view_team_data = $user['can_view_team_data'] ?? false;
@@ -39,7 +41,7 @@ $activePage = $activePage ?? '';
         <p class="text-dark" style="font-size: 20px;font-weight:700;">Navigation</p>
     </div>
     <ul class="sidebar-nav">
-        <?php if ($role_name === 'super admin' || $role_name === 'admin'): ?>
+        <?php if ($can_view_team_data): ?>
             <li class="sidebar-item" style="">
                 <a class="sidebar-link" href="index.php" style="<?= ($activePage === 'dashboard') ? 'background-color:rgba(0, 123, 255, 0.5);border-left: 3px solid #3b7ddd;' : ''; ?>">
                     <span>Dashboard</span>
@@ -60,7 +62,7 @@ $activePage = $activePage ?? '';
                 </a>
             </li>
         <?php endif; ?>
-        <?php if ($can_manage_roles): ?>
+        <?php if ($position_name === 'Owner'): ?>
             <li class="sidebar-item" style="">
                 <a class="sidebar-link" href="users.php" style="<?= ($activePage === 'user_controller') ? 'background-color:rgba(0, 123, 255, 0.5);border-left: 3px solid #3b7ddd;' : ''; ?>">
                     <span>User Controller</span>
@@ -74,14 +76,14 @@ $activePage = $activePage ?? '';
                 </a>
             </li>
         <?php endif; ?>
-        <?php if ($role_name === 'super admin' || $role_name === 'admin' || $role_name === 'employee'): ?>
+        <?php if ($can_view_own_data): ?>
             <li class="sidebar-item" style="">
                 <a class="sidebar-link" href="dtr.php" style="<?= ($activePage === 'dtr') ? 'background-color:rgba(0, 123, 255, 0.5);border-left: 3px solid #3b7ddd;' : ''; ?>">
                     <span>Daily Time Record</span>
                 </a>
             </li>
         <?php endif; ?>
-        <?php if ($role_name === 'super admin' || $role_name === 'admin'): ?>
+        <?php if ($can_view_team_data): ?>
             <li class="sidebar-item" style="">
                 <a class="sidebar-link has-dropdown collapsed" id="collapse1" data-bs-toggle="collapse" href="#" style="<?= ($activePage === 'hr-leaves-page') || ($activePage === 'my_leaves') ? 'background-color:rgba(0, 123, 255, 0.5);border-left: 3px solid #3b7ddd;' : ''; ?>">
                     <span>Leave Credits</span>
@@ -111,9 +113,6 @@ $activePage = $activePage ?? '';
                     <span>Payroll</span>
                 </a>
                 <ul class="sidebar-dropdown list-unstyled collapse" id="collapsetest2" data-bs-parent="#sidebar">
-                    <li class="sidebar-item">
-                        <a class="sidebar-link" href="payroll.php">Employee Payroll</a>
-                    </li>
                     <li class="sidebar-item">
                         <a class="sidebar-link" href="generate_payroll_site.php">Payroll Summary</a>
                     </li>

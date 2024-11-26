@@ -132,7 +132,7 @@ include './layout/header.php';
                         <select name="status" id="status" class="form-control">
                             <option value="">Select Status</option>
                             <option value="Regular" <?php echo isset($_GET['status']) && $_GET['status'] == 'Regular' ? 'selected' : ''; ?>>Regular</option>
-                            <option value="Probationary" <?php echo isset($_GET['status']) && $_GET['status'] == 'Probationary' ? 'selected' : ''; ?>>Probationary</option>
+                            <option value="Contractual" <?php echo isset($_GET['status']) && $_GET['status'] == 'Contractual' ? 'selected' : ''; ?>>Contractual</option>
                             <option value="Archived" <?php echo isset($_GET['status']) && $_GET['status'] == 'Archived' ? 'selected' : ''; ?>>Archived</option>
                         </select>
                     </div>
@@ -615,23 +615,25 @@ include './layout/header.php';
                             ?>
                         </div>
                     </div>
-                    <h5>Deductions</h5>
-                    <div class="form-row form-group">
-                        <div class="col-3">
-                            <label for="sss_con">SSS</label>
-                            <input type="text" class="form-control" name="sss_con" id="edit_sss_con">
-                        </div>
-                        <div class="col-3">
-                            <label for="philhealth_con">PhilHealth</label>
-                            <input type="text" class="form-control" name="philhealth_con" id="edit_philhealth_con">
-                        </div>
-                        <div class="col-3">
-                            <label for="pag_ibig_con">Pag Ibig</label>
-                            <input type="text" class="form-control" name="pag_ibig_con" id="edit_pag_ibig_con">
-                        </div>
-                        <div class="col-3">
-                            <label for="withhold_tax">Withholding Tax</label>
-                            <input type="text" class="form-control" name="withhold_tax" id="edit_withhold_tax">
+                    <div id="deductions-section">
+                        <h5>Deductions</h5>
+                        <div class="form-row form-group">
+                            <div class="col-3">
+                                <label for="sss_con">SSS</label>
+                                <input type="text" class="form-control" name="sss_con" id="edit_sss_con">
+                            </div>
+                            <div class="col-3">
+                                <label for="philhealth_con">PhilHealth</label>
+                                <input type="text" class="form-control" name="philhealth_con" id="edit_philhealth_con">
+                            </div>
+                            <div class="col-3">
+                                <label for="pag_ibig_con">Pag Ibig</label>
+                                <input type="text" class="form-control" name="pag_ibig_con" id="edit_pag_ibig_con">
+                            </div>
+                            <div class="col-3">
+                                <label for="withhold_tax">Withholding Tax</label>
+                                <input type="text" class="form-control" name="withhold_tax" id="edit_withhold_tax">
+                            </div>
                         </div>
                     </div>
                     <div class="form-row form-group">
@@ -643,7 +645,7 @@ include './layout/header.php';
                             <label for="emergency_contactno">In case of Emergency</label>
                             <input type="text" class="form-control" name="emergency_contactno" id="edit_emergency_contactno">
                         </div>
-                        <?php if ($can_manage_roles): ?>
+                        <?php if ($position_name === 'Owner'): ?>
                             <div class="col-3">
                                 <label for="role_id">Role</label>
                                 <select name="role_id" id="edit_role_name_select" class="form-control" required>
@@ -651,6 +653,10 @@ include './layout/header.php';
                                     <option value="1"
                                         <?php if (isset($employeeData) && $employeeData['role_name'] == 'super admin') echo 'selected'; ?>>
                                         Super Admin
+                                    </option>
+                                    <option value="4"
+                                        <?php if (isset($employeeData) && $employeeData['role_name'] == 'hr_admin') echo 'selected'; ?>>
+                                        HR Admin
                                     </option>
                                     <option value="2"
                                         <?php if (isset($employeeData) && $employeeData['role_name'] == 'admin') echo 'selected'; ?>>
@@ -952,6 +958,10 @@ include './layout/header.php';
                                     <?php if (isset($employeeData) && $employeeData['role_name'] == 'super admin') echo 'selected'; ?>>
                                     Super Admin
                                 </option>
+                                <option value="4"
+                                        <?php if (isset($employeeData) && $employeeData['role_name'] == 'hr_admin') echo 'selected'; ?>>
+                                        HR Admin
+                                    </option>
                                 <option value="2"
                                     <?php if (isset($employeeData) && $employeeData['role_name'] == 'admin') echo 'selected'; ?>>
                                     Admin
@@ -1175,6 +1185,27 @@ include './layout/header.php';
             }, 400);
         });
     });
+    document.addEventListener('DOMContentLoaded', function () {
+    const employeeStatusSelect = document.getElementById('edit_employee_status_select');
+    const deductionsSection = document.getElementById('deductions-section');
+
+    function toggleDeductions() {
+        if (employeeStatusSelect.value === 'Contractual') {
+            deductionsSection.style.display = 'none';
+        } else {
+            deductionsSection.style.display = 'block';
+        }
+    }
+
+    // Event listener for modal shown
+    $('#edit-modal').on('show.bs.modal', function () {
+        toggleDeductions(); // Check the status when the modal is opened
+    });
+
+    // Listen for changes in the employee_status field
+    employeeStatusSelect.addEventListener('change', toggleDeductions);
+});
+
 </script>
 
 <?php if ($_SESSION['role_name'] == "Super Admin") { ?>

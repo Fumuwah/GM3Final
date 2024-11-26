@@ -51,7 +51,7 @@ include './layout/header.php';
 
 $query = "
     SELECT e.employee_number, e.firstname, e.middlename, e.lastname, p.position_name, e.email, e.contactno, 
-        e.address, e.birthdate, e.civil_status, e.religion, e.basic_salary, e.hire_date, e.employee_status,
+        e.address, e.birthdate, e.civil_status, e.basic_salary, e.hire_date, e.employee_status,
         e.sss_no, e.philhealth_no, e.hdmf_no, e.tin_no, e.emergency_contactno, e.image_path
     FROM employees e
     LEFT JOIN positions p ON e.position_id = p.position_id
@@ -180,10 +180,6 @@ $age = date_diff(date_create($employee['birthdate']), date_create('today'))->y;
                     <div class="col-12 col-sm-6 col-lg-3 mt-2">
                         <h5>Civil Status:</h5>
                         <p><?php echo $employee['civil_status']; ?></p>
-                    </div>
-                    <div class="col-12 col-sm-6 col-lg-3 mt-2">
-                        <h5>Religion:</h5>
-                        <p><?php echo $employee['religion']; ?></p>
                     </div>
                     <div class="col-12 col-sm-6 col-lg-3 mt-2">
                         <h5>Basic Salary:</h5>
