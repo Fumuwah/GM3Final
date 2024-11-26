@@ -48,15 +48,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $time_in = $row['time_in'];
                 $time_out = $time;
 
-                // Calculate total hours worked, excluding 12 PM to 1 PM
                 $total_hours_query = "
                     UPDATE dtr 
                     SET time_out = ?, 
                         total_hrs = ROUND(
-                            TIMESTAMPDIFF(MINUTE, time_in, ?) / 60, 2) 
+                            TIMESTAMPDIFF(MINUTE, time_in, ?) / 60 2) 
                     WHERE employee_id = ? AND date = ?";
                 $stmt = $conn->prepare($total_hours_query);
-                $stmt->bind_param('ssss', $time_out, $time_out, $employee_id, $date);
+                $stmt->bind_param('sssss', $time_out, $time_out, $time_out, $employee_id, $date);
 
                 if ($stmt->execute()) {
                     $ot_query = "

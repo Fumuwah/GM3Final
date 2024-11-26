@@ -68,7 +68,6 @@ session_start();
 </head>
 
 <body class="d-flex flex-wrap">
-    <!-- Just an image -->
     <div class="login-bg h-100 col-12 col-md-6 position-relative" style="background: url(assets/images/login-bg-low.jpg) no-repeat center center; background-size: cover;">
         <div class="overlay"></div>
     </div>
