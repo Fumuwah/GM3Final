@@ -7,7 +7,7 @@ if (!isset($_SESSION['role_name']) || !isset($_SESSION['employee_id'])) {
     exit();
 }
 
-$recordsPerPage = 5;
+$recordsPerPage = 15;
 $current_page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $offset = ($current_page - 1) * $recordsPerPage;
 
@@ -41,7 +41,7 @@ $total_pages = ceil($totalRecords / $recordsPerPage);
 
 $query = "
     SELECT e.employee_id AS employee_id, employee_number, e.firstname, e.middlename, e.lastname, 
-           pr.monthly, pr.allowance, pr.total_hrs, pr.other_ot, pr.special_holiday, 
+           pr.monthly, pr.allowance, pr.total_hrs, pr.other_ot, 
            pr.gross, pr.cash_adv, pr.total_deduc, pr.netpay, e.daily_salary, e.basic_salary
     FROM payroll pr
     LEFT JOIN employees e ON e.employee_id = pr.employee_id
@@ -160,6 +160,7 @@ include './layout/header.php';
                                 <th>Cash Advance</th>
                                 <th>Deduction</th>
                                 <th>Netpay</th>
+                                <th>Action</th>
                             </tr>
                         </thead>
                         <tbody><?php foreach ($payrolls as $payroll): ?>
@@ -170,12 +171,13 @@ include './layout/header.php';
                                     <td><?php echo number_format($payroll['daily_salary'], 2); ?></td>
                                     <td><?php echo number_format($payroll['daily_salary'] / 8, 2); ?></td>
                                     <td><?php echo number_format($payroll['allowance'], 2); ?></td>
-                                    <td><?php echo number_format($payroll['total_hrs'], 2); ?></td>
-                                    <td><?php echo number_format($payroll['other_ot'], 2); ?></td>
+                                    <td><?php echo number_format($payroll['total_hrs'] * $payroll['daily_salary'] / 8, 2); ?></td>
+                                    <td><?php echo number_format($payroll['other_ot'] * $payroll['daily_salary'] / 8, 2); ?></td>
                                     <td><?php echo number_format($payroll['gross'], 2); ?></td>
                                     <td><?php echo number_format($payroll['cash_adv'], 2); ?></td>
                                     <td><?php echo number_format($payroll['total_deduc'], 2); ?></td>
                                     <td><?php echo number_format($payroll['netpay'], 2); ?></td>
+                                    <td><button class="btn btn-success">Edit</button></td>
                                 </tr>
                             <?php endforeach; ?>
                         </tbody>
@@ -217,27 +219,27 @@ include './layout/header.php';
                 <h5 class="modal-title" id="payrollModalLabel">Generate Payroll</h5>
             </div>
             <div class="modal-body">
-                <form id="payrollForm" action="submit_payroll.php" method="POST" autocomplete="off" onsubmit="return validatePayrollForm()">
+                <form id="payrollForm" method="POST" autocomplete="off">
                     <div class="col-4">Payroll Period:</div>
-                        <div class="form-group div form-row align-items-center">
-                            <div class="col-6">
-                                <input type="date" class="form-control" placeholder="From" name="fromDay" id="fromDay">
-                            </div>
-                            <div class="col-6">
-                                <input type="date" class="form-control" placeholder="To" name="toDay" id="toDay">
-                            </div>
+                    <div class="form-group div form-row align-items-center">
+                        <div class="col-6">
+                            <input type="date" class="form-control" placeholder="From" name="fromDay" id="fromDay" required>
                         </div>
-                        <div class="col-15">
-                            <label for="employee_status">Employee Status:</label>
-                            <select name="employee_status" id="employee_status" class="form-control" required>
-                                <option value="">Select Employee Status</option>
-                                <option value="Regular">Regular</option>
-                                <option value="Contractual">Contractual</option>
-                            </select>
+                        <div class="col-6">
+                            <input type="date" class="form-control" placeholder="To" name="toDay" id="toDay" required>
                         </div>
+                    </div>
+                    <div class="col-15">
+                        <label for="employee_status">Employee Status:</label>
+                        <select name="employee_status" id="employee_status" class="form-control" required>
+                            <option value="">Select Employee Status</option>
+                            <option value="Regular">Regular</option>
+                            <option value="Contractual">Contractual</option>
+                        </select>
+                    </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary close-modal">Close</button>
-                        <button type="submit" class="btn btn-primary">Submit</button>
+                        <button type="button" class="btn btn-primary" id="generatePayrollBtn">Submit</button>
                     </div>
                 </form>
             </div>
@@ -274,7 +276,32 @@ include './layout/header.php';
             }, 400)
         });
     });
+
+    document.getElementById('generatePayrollBtn').addEventListener('click', function () {
+    const fromDay = document.getElementById('fromDay').value;
+    const toDay = document.getElementById('toDay').value;
+    const employeeStatus = document.getElementById('employee_status').value;
+
+    if (!fromDay || !toDay || !employeeStatus) {
+        alert("Please fill out all fields.");
+        return;
+    }
+
+    fetch('generate_payroll.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ fromDay, toDay, employeeStatus }),
+    })
+});
+
 </script>
+
+<script>
+    
+</script>
+
 
 
 <?php include './layout/script.php'; ?>
