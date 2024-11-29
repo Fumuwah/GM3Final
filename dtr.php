@@ -79,7 +79,7 @@ $query_today .= " LIMIT ? OFFSET ?";
 
 $stmt = $conn->prepare($query_today);
 if ($role_name === 'admin') {
-    $params[] = $project_name;  // Add the project_name for admin role filtering
+    $params[] = $project_name;
 } else if ($role_name !== 'super admin') {
     $params[] = $employee_id;
 }
@@ -249,7 +249,7 @@ $activePage = 'dtr';
                                     }
 
                                     $update_sql = "UPDATE dtr 
-                                                SET total_hrs = ? - 1, other_ot = ? 
+                                                SET total_hrs = ?, other_ot = ? 
                                                 WHERE employee_id = ? AND date = ?";
                                     $update_stmt = $conn->prepare($update_sql);
                                     $update_stmt->bind_param("ddis", $today_hrs, $today_ot, $employee_id, $row['date']);
