@@ -30,6 +30,11 @@ include 'layout/header.php';
     <div class="main" style="max-height: calc(100vh - 80px);overflow-y:scroll">
         <div class="container-fluid">
             <h2>Hello <?php echo htmlspecialchars($name); ?></h2>
+            <div class="d-flex justify-content-start mb-2">
+    <button class="btn btn-success mr-2">Time-In</button>
+    <button class="btn btn-danger">Time-Out</button>
+</div>
+
             <div class="row">
                 <div class="col-12 col-lg-8 pt-3 pt-md-0">
                     <div class="row numbers-of">
@@ -214,6 +219,7 @@ include 'layout/header.php';
                                 }
                                 ?>
                             </ul>
+                            
                         </div>
                     </div>
                 </div>
