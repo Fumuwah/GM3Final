@@ -144,8 +144,7 @@ include './layout/header.php';
                             <tr>
                                 <th colspan="2"></th>
                                 <th colspan=2 class="text-center">Rate</th>
-                                <th colspan=2 class="text-center">Payroll</th>
-                                <th colspan="5"></th>
+                                <th colspan=7 class="text-center">Payroll</th>
                             </tr>
                             <tr>
                                 <th>Emp #</th>

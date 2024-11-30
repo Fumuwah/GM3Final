@@ -280,19 +280,19 @@ include './layout/header.php';
                             <ul class="pagination">
                                 <?php if ($page > 1): ?>
                                     <li class="page-item">
-                                        <a class="page-link" href="?page=<?php echo $page - 1; ?>&search=<?php echo urlencode($search); ?>&status=<?php echo urlencode($status); ?>&position_name=<?php echo urlencode($position_name); ?>">Previous</a>
+                                        <a class="page-link" href="?page=<?php echo $page - 1; ?>&search=<?php echo urlencode($search); ?>&status=<?php echo urlencode($status); ?>">Previous</a>
                                     </li>
                                 <?php endif; ?>
 
                                 <?php for ($i = 1; $i <= $total_pages; $i++): ?>
                                     <li class="page-item <?php if ($i == $page) echo 'active'; ?>">
-                                        <a class="page-link" href="?page=<?php echo $i; ?>&search=<?php echo $search; ?>&status=<?php echo urlencode($status); ?>&position_name=<?php echo $position_name; ?>"><?php echo $i; ?></a>
+                                        <a class="page-link" href="?page=<?php echo $i; ?>&search=<?php echo $search; ?>&status=<?php echo urlencode($status); ?>"><?php echo $i; ?></a>
                                     </li>
                                 <?php endfor; ?>
 
                                 <?php if ($page < $total_pages): ?>
                                     <li class="page-item">
-                                        <a class="page-link" href="?page=<?php echo $page + 1; ?>&search=<?php echo urlencode($search); ?>&status=<?php echo urlencode($status); ?>&position_name=<?php echo urlencode($position_name); ?>">Next</a>
+                                        <a class="page-link" href="?page=<?php echo $page + 1; ?>&search=<?php echo urlencode($search); ?>&status=<?php echo urlencode($status); ?>">Next</a>
                                     </li>
                                 <?php endif; ?>
                             </ul>
@@ -349,7 +349,7 @@ include './layout/header.php';
             </div>
             <form action="archive_employee.php" method="post">
                 <div class="modal-body">
-                    Are you sure you want to archive this employee?
+                    Reason to Archive:
                     <input type="hidden" id="archive-employee-id" name="archive_id" value="">
                 </div>
                 <div class="modal-footer">
@@ -645,7 +645,7 @@ include './layout/header.php';
                             <label for="emergency_contactno">In case of Emergency</label>
                             <input type="text" class="form-control" name="emergency_contactno" id="edit_emergency_contactno">
                         </div>
-                        <?php if ($position_name === 'Owner'): ?>
+                        <?php if ($can_manage_roles): ?>
                             <div class="col-3">
                                 <label for="role_id">Role</label>
                                 <select name="role_id" id="edit_role_name_select" class="form-control" required>

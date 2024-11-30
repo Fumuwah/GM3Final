@@ -18,6 +18,9 @@ $dtr_filters = $_SESSION['dtr_filters'] ?? [];
 $role_name = strtolower($_SESSION['role_name'] ?? '');
 $employee_id = $_SESSION['employee_id'] ?? 1;
 
+$from_day_filter = $_GET['from_day'] ?? '';
+$to_day_filter = $_GET['to_day'] ?? '';
+
 $records_per_page = 10;
 $current_page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $offset = ($current_page - 1) * $records_per_page;
@@ -26,9 +29,10 @@ $search_user = $_GET['search_user'] ?? '';
 $project_filter = $_GET['project_name'] ?? '';
 $month_filter = $_GET['month'] ?? '';
 $year_filter = $_GET['year'] ?? '';
-$day_filter = $_GET['day'] ?? '';
+$from_day_filter = $_GET['from_day'] ?? '';
+$to_day_filter = $_GET['to_day'] ?? '';
 $today_filter = '';
-if (empty($day_filter)) {
+if (empty($from_day_filter || $to_day_filter || $month_filter || $year_filter)) {
     date_default_timezone_set("Asia/Manila");
     $today_filter = date('Y-m-d');
 }
@@ -55,6 +59,13 @@ function getRoleBasedQuery($role_name, $employee_id, $project_name = null)
             JOIN employees e ON d.employee_id = e.employee_id
             LEFT JOIN projects p ON e.project_name = p.project_name
             WHERE p.project_name = ?";
+    } elseif ($role_name === 'hr admin') {
+        $query = "
+            SELECT d.*, e.lastname, e.firstname, p.project_name
+            FROM dtr d
+            JOIN employees e ON d.employee_id = e.employee_id
+            LEFT JOIN projects p ON e.project_name = p.project_name
+            WHERE p.project_name = ?";
     } else {
         $query = "
             SELECT d.*, e.lastname, e.firstname, p.project_name
@@ -72,13 +83,19 @@ if (!empty($search_user)) $query_today .= " AND e.firstname LIKE ? OR e.middlena
 if (!empty($project_filter)) $query_today .= " AND p.project_name = ?";
 if (!empty($month_filter)) $query_today .= " AND d.month = ?";
 if (!empty($year_filter)) $query_today .= " AND d.year = ?";
-if (!empty($day_filter)) $query_today .= " AND d.day = ?";
+if (!empty($from_day_filter) && !empty($to_day_filter)) {
+    $query_today .= " AND (STR_TO_DATE(CONCAT(d.year, '-', LPAD(d.month, 2, '0'), '-', LPAD(d.day, 2, '0')), '%Y-%m-%d') BETWEEN ? AND ?)";
+} elseif (!empty($from_day_filter)) {
+    $query_today .= " AND (STR_TO_DATE(CONCAT(d.year, '-', LPAD(d.month, 2, '0'), '-', LPAD(d.day, 2, '0')), '%Y-%m-%d') >= ?)";
+} elseif (!empty($to_day_filter)) {
+    $query_today .= " AND (STR_TO_DATE(CONCAT(d.year, '-', LPAD(d.month, 2, '0'), '-', LPAD(d.day, 2, '0')), '%Y-%m-%d') <= ?)";
+}
 if (!empty($today_filter)) $query_today .= " AND d.date = ?";
 
 $query_today .= " LIMIT ? OFFSET ?";
 
 $stmt = $conn->prepare($query_today);
-if ($role_name === 'admin') {
+if ($role_name === 'admin' || $role_name === 'hr admin') {
     $params[] = $project_name;
 } else if ($role_name !== 'super admin') {
     $params[] = $employee_id;
@@ -92,13 +109,20 @@ if (!empty($search_user)) {
 if (!empty($project_filter)) $params[] = $project_filter;
 if (!empty($month_filter)) $params[] = $month_filter;
 if (!empty($year_filter)) $params[] = $year_filter;
-if (!empty($day_filter)) $params[] = $day_filter;
+if (!empty($from_day_filter) && !empty($to_day_filter)) {
+    $params[] = $from_day_filter;
+    $params[] = $to_day_filter;
+} elseif (!empty($from_day_filter)) {
+    $params[] = $from_day_filter;
+} elseif (!empty($to_day_filter)) {
+    $params[] = $to_day_filter;
+}
 if (!empty($today_filter)) $params[] = $today_filter;
 $params[] = $records_per_page;
 $params[] = $offset;
-if ($params) {
-    $stmt->bind_param(str_repeat('s', count($params)), ...$params);
-}
+
+$stmt->bind_param(str_repeat('s', count($params)), ...$params);
+
 
 if (!$stmt->execute()) {
     die("Error executing statement: " . $stmt->error);
@@ -111,7 +135,14 @@ if (!empty($search_user)) $total_query .= " AND e.firstname LIKE ? OR e.middlena
 if (!empty($project_filter)) $total_query .= " AND p.project_name = ?";
 if (!empty($month_filter)) $total_query .= " AND d.month = ?";
 if (!empty($year_filter)) $total_query .= " AND d.year = ?";
-if (!empty($day_filter)) $total_query .= " AND d.day = ?";
+if (!empty($from_day_filter) && !empty($to_day_filter)) {
+    $params[] = $from_day_filter;
+    $params[] = $to_day_filter;
+} elseif (!empty($from_day_filter)) {
+    $params[] = $from_day_filter;
+} elseif (!empty($to_day_filter)) {
+    $params[] = $to_day_filter;
+}
 if (!empty($today_filter)) $total_query .= " AND d.date = ?";
 
 $total_stmt = $conn->prepare($total_query);
@@ -126,7 +157,14 @@ if (!empty($search_user)) {
 if (!empty($project_filter)) $params_total[] = $project_filter;
 if (!empty($month_filter)) $params_total[] = $month_filter;
 if (!empty($year_filter)) $params_total[] = $year_filter;
-if (!empty($day_filter)) $params_total[] = $day_filter;
+if (!empty($from_day_filter) && !empty($to_day_filter)) {
+    $params[] = $from_day_filter;
+    $params[] = $to_day_filter;
+} elseif (!empty($from_day_filter)) {
+    $params[] = $from_day_filter;
+} elseif (!empty($to_day_filter)) {
+    $params[] = $to_day_filter;
+}
 if (!empty($today_filter)) $params_total[] = $today_filter;
 
 if ($params_total) {
@@ -148,10 +186,10 @@ $activePage = 'dtr';
             <h2>Generate Daily Time Record</h2>
             <form action="" method="GET">
                 <div class="form-group row">
-                    <div class="col-sm-3">
+                    <div class="col-sm-2">
                         <input class="form-control" type="text" name="search_user" id="search_user" placeholder="Search User...">
                     </div>
-                    <div class="col-sm-3">
+                    <div class="col-sm-2">
 
 
                         <?php if ($role_name === 'super admin'): ?>
@@ -169,7 +207,7 @@ $activePage = 'dtr';
                         <?php endif; ?>
 
                     </div>
-                    <div class="col-sm-4 d-flex">
+                    <div class="col-sm-1 d-flex">
                         <select name="month" id="month" class="form-control">
                             <option value="">Month</option>
                             <?php for ($i = 1; $i <= 12; $i++) {
@@ -177,23 +215,24 @@ $activePage = 'dtr';
                                 echo "<option value='$i' $selected>" . date("F", mktime(0, 0, 0, $i, 10)) . "</option>";
                             } ?>
                         </select>
-                        <select name="year" id="year" class="form-control">
+                    </div>
+                    <div class="col-sm-1 d-flex">
+                    <select name="year" id="year" class="form-control">
                             <option value="">Year</option>
                             <?php for ($y = 2021; $y <= 2024; $y++) {
                                 $selected = ($y == $year_filter) ? 'selected' : '';
                                 echo "<option value='$y' $selected>$y</option>";
                             } ?>
                         </select>
-                        <select name="day" id="day" class="form-control">
-                            <option value="">Day</option>
-                            <?php for ($d = 1; $d <= 31; $d++) {
-                                $selected = ($d == $day_filter) ? 'selected' : '';
-                                echo "<option value='$d' $selected>$d</option>";
-                            } ?>
-                        </select>
-
                     </div>
-                    <div class="d-flex col-sm-2">
+                    <div class="col-sm-3 d-flex">
+                        <label>From</label>
+                        <input type="date" name="from_day" id="from_day" class="form-control" value="<?= htmlspecialchars($_GET['from_day'] ?? '') ?>" placeholder="From Day">
+                        &nbsp;&nbsp;
+                        <label>To</label>
+                        <input type="date" name="to_day" id="to_day" class="form-control" value="<?= htmlspecialchars($_GET['to_day'] ?? '') ?>" placeholder="To Day">
+                    </div>
+                    <div class="col-sm-3 d-flex ">
                         <button type="submit" class="btn btn-primary">Filter</button>
                         <button type="button" class="btn btn-secondary" id="attendance-btn">Attendance</button>
                     </div>
@@ -295,19 +334,19 @@ $activePage = 'dtr';
                     <ul class="pagination">
                         <?php if ($current_page > 1): ?>
                             <li class="page-item">
-                                <a class="page-link" href="?page=<?php echo $current_page - 1; ?>&search_user=<?php echo $search_user; ?>&project_name=<?php echo $project_filter; ?>&month=<?php echo $month_filter; ?>&year=<?php echo $year_filter; ?>&day=<?php echo $day_filter; ?>">Previous</a>
+                                <a class="page-link" href="?page=<?php echo $current_page - 1; ?>&search_user=<?php echo $search_user; ?>&project_name=<?php echo $project_filter; ?>&month=<?php echo $month_filter; ?>&year=<?php echo $year_filter; ?>&from_day=<?php echo $from_day_filter; ?>&to_day=<?php echo $to_day_filter; ?>">Previous</a>
                             </li>
                         <?php endif; ?>
 
                         <?php for ($i = 1; $i <= $total_pages; $i++): ?>
                             <li class="page-item <?php if ($current_page == $i) echo 'active'; ?>">
-                                <a class="page-link" href="?page=<?php echo $i; ?>&search_user=<?php echo $search_user; ?>&project_name=<?php echo $project_filter; ?>&month=<?php echo $month_filter; ?>&year=<?php echo $year_filter; ?>&day=<?php echo $day_filter; ?>"><?php echo $i; ?></a>
+                                <a class="page-link" href="?page=<?php echo $i; ?>&search_user=<?php echo $search_user; ?>&project_name=<?php echo $project_filter; ?>&month=<?php echo $month_filter; ?>&year=<?php echo $year_filter; ?>&from_day=<?php echo $from_day_filter; ?>&to_day=<?php echo $to_day_filter; ?>"><?php echo $i; ?></a>
                             </li>
                         <?php endfor; ?>
 
                         <?php if ($current_page < $total_pages): ?>
                             <li class="page-item">
-                                <a class="page-link" href="?page=<?php echo $current_page + 1; ?>&search_user=<?php echo $search_user; ?>&project_name=<?php echo $project_filter; ?>&month=<?php echo $month_filter; ?>&year=<?php echo $year_filter; ?>&day=<?php echo $day_filter; ?>">Next</a>
+                                <a class="page-link" href="?page=<?php echo $current_page + 1; ?>&search_user=<?php echo $search_user; ?>&project_name=<?php echo $project_filter; ?>&month=<?php echo $month_filter; ?>&year=<?php echo $year_filter; ?>&from_day=<?php echo $from_day_filter; ?>&to_day=<?php echo $to_day_filter; ?>">Next</a>
                             </li>
                         <?php endif; ?>
                     </ul>

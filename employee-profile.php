@@ -152,7 +152,7 @@ $age = date_diff(date_create($employee['birthdate']), date_create('today'))->y;
                         </div>
                     </div>
                     <div class="text-right d-flex align-items-center justify-content-end">
-                        <button type="submit" class="btn btn-success">Submit Request</button>
+                        <button type="submit" class="btn btn-success">Update</button>
                         <a href="#" class="btn btn-danger ml-3">Reset</a>
                     </div>
                 </form>

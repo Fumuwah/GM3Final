@@ -155,6 +155,11 @@ session_start();
                                 $logging_prep->close();
                                 header("Location: index.php");
                                 exit();
+                            } elseif ($_SESSION['role_name'] === 'hr admin' || $_SESSION['can_view_team_data']) {
+                                $logging_prep->execute();
+                                $logging_prep->close();
+                                header("Location: index.php");
+                                exit();
                             } elseif ($_SESSION['role_name'] === 'admin' || $_SESSION['can_view_team_data']) {
                                 $logging_prep->execute();
                                 $logging_prep->close();
