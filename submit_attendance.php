@@ -48,7 +48,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $time_in = $row['time_in'];
                 $time_out = $time;
 
-                // Calculate total hours worked, excluding 12 PM to 1 PM
                 $total_hours_query = "
                     UPDATE dtr 
                     SET time_out = ?, 

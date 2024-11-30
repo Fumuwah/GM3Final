@@ -29,7 +29,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $address = $_POST['address'];
     $birthdate = $_POST['birthdate'];
     $civil_status = $_POST['civil_status'];
-    $religion = $_POST['religion'];
+    $daily_salary = $_POST['daily_salary'];
     $basic_salary = $_POST['basic_salary'];
     $position_name = $_POST['position'];
     $hire_date = $_POST['hire_date'];
@@ -38,6 +38,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $philhealth_no = $_POST['philhealth_no'];
     $hdmf_no = $_POST['hdmf_no'];
     $tin_no = $_POST['tin_no'];
+    $sss_con = $_POST['sss_con'];
+    $philhealth_con = $_POST['philhealth_con'];
+    $pag_ibig_con = $_POST['pag_ibig_con'];
+    $withhold_tax = $_POST['withhold_tax'];
     $email = $_POST['email'];
     $emergency_contactno = $_POST['emergency_contactno'];
     $role_id = $_POST['role_id'];
@@ -92,17 +96,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     $sql_employee = "UPDATE employees 
                      SET employee_number = ?, lastname = ?, firstname = ?, middlename = ?, contactno = ?, 
-                         address = ?, birthdate = ?, civil_status = ?, religion = ?, basic_salary = ?, 
+                         address = ?, birthdate = ?, civil_status = ?, daily_salary = ?, basic_salary = ?, 
                          position_id = ?, hire_date = ?, employee_status = ?, sss_no = ?, philhealth_no = ?, 
-                         hdmf_no = ?, tin_no = ?, email = ?, emergency_contactno = ?, role_id = ?, project_name = ?, password = ? 
+                         hdmf_no = ?, tin_no = ?, sss_con = ?, philhealth_con = ?, pag_ibig_con = ?, withhold_tax = ?,
+                         email = ?, emergency_contactno = ?, role_id = ?, project_name = ?
                      WHERE employee_id = ?";
 
     $stmt_employee = mysqli_prepare($conn, $sql_employee);
-    mysqli_stmt_bind_param($stmt_employee, "ssssssssssissssssssissi", 
+    mysqli_stmt_bind_param($stmt_employee, "ssssssssssissssssssssssisi", 
         $employee_number, $lastname, $firstname, $middlename, $contactno, $address, $birthdate, 
-        $civil_status, $religion, $basic_salary, $position_id, $hire_date, $employee_status, 
-        $sss_no, $philhealth_no, $hdmf_no, $tin_no, $email, $emergency_contactno, $role_id, 
-        $project_name, $password, $employee_id);
+        $civil_status, $daily_salary, $basic_salary, $position_id, $hire_date, $employee_status, 
+        $sss_no, $philhealth_no, $hdmf_no, $tin_no, $sss_con, $philhealth_con, $pag_ibig_con, $withhold_tax,
+        $email, $emergency_contactno, $role_id, 
+        $project_name, $employee_id);
 
     if (mysqli_stmt_execute($stmt_employee)) {
         echo "<div class='alert alert-success'>Employee updated successfully!</div>";

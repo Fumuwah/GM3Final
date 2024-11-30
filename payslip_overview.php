@@ -11,8 +11,8 @@ if (!isset($_SESSION['role_name']) || !isset($_SESSION['employee_id'])) {
 $payslipID = $_GET['pid'];
 $query = "SELECT pr.payroll_id, e.firstname, e.middlename, e.lastname, 
         pr.payroll_period, e.project_name, e.employee_number,  ps.position_name, 
-        pr.totalHrs, pr.allowance, pr.special_holiday, pr.special_leave, pr.gross,
-        pr.withhold_tax, pr.sss_con, pr.philhealth_con, pr.pag_ibig_con, pr.other_deduc,
+        pr.totalHrs, pr.allowance, pr.gross,
+        e.withhold_tax, e.sss_con, e.philhealth_con, e.pag_ibig_con, pr.other_deduc,
         pr.total_deduc, pr.netpay, pr.netpay
         FROM payroll pr 
         LEFT JOIN employees e ON e.employee_id = pr.employee_id
@@ -23,8 +23,6 @@ $stmt = $pdo->prepare($query);
 $stmt->bindParam(':payslipID', $payslipID, PDO::PARAM_INT);
 $stmt->execute();
 $payslip = $stmt->fetch(PDO::FETCH_ASSOC);
-
-$others = $payslip['special_holiday'] + $payslip['special_leave'];
 
 $activePage = 'payslip';
 include './layout/header.php';
@@ -180,10 +178,6 @@ include './layout/header.php';
                 <div class="d-flex gap-5">
                     <p class="p-10 bg-gray" style="flex: 1 1 20%;">Allowance</p>
                     <p class="p-10 bg-gray" style="flex: 1 1 80%;"><?php echo $payslip['allowance'] ?></p>
-                </div>
-                <div class="d-flex gap-5">
-                    <p class="p-10 bg-gray" style="flex: 1 1 20%;">Others</p>
-                    <p class="p-10 bg-gray" style="flex: 1 1 80%;"><?php echo $others ?></p>
                 </div>
                 <div class="d-flex gap-5">
                     <p class="p-10 bg-blue text-white" style="flex: 1 1 20%;"><strong>GROSS PAY</strong></p>

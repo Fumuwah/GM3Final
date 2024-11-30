@@ -2,6 +2,7 @@
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     require_once "database.php";
 
+    // Existing variables and logic
     $employee_number = $_POST['employee_number'];
     $lastname = $_POST['lastname'];
     $firstname = $_POST['firstname'];
@@ -14,22 +15,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $basic_salary = $_POST['basic_salary'];
     $position_name = $_POST['position_name'];
     $hire_date = $_POST['hire_date'];
-    $employee_status = $_POST['employee_status'];
+    $employee_status = $_POST['employee_status']; // Used for the new condition
     $sss_no = $_POST['sss_no'];
     $philhealth_no = $_POST['philhealth_no'];
     $hdmf_no = $_POST['hdmf_no'];
     $tin_no = $_POST['tin_no'];
     $sss_con = $_POST['sss_con'];
-    $philhealth_con = $_POST ['philhealth_con'];
+    $philhealth_con = $_POST['philhealth_con'];
     $pag_ibig_con = $_POST['pag_ibig_con'];
     $withhold_tax = $_POST['withhold_tax'];
     $email = $_POST['email'];
-    // Generate the password using "gm3builders" and the birthdate
     $password_raw = "gm3builders" . $birthdate;
     $password = password_hash($password_raw, PASSWORD_DEFAULT);
 
     $emergency_contactno = $_POST['emergency_contactno'];
-    $role_id = (int)$_POST['role_id'];  // Ensure role_id is an integer
+    $role_id = (int)$_POST['role_id'];
     $project_name = $_POST['project_name'];
 
     // Check if a new project is being added
@@ -79,24 +79,30 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (mysqli_stmt_execute($stmt_employee)) {
         $employee_id = mysqli_insert_id($conn);  // Get the new employee ID
 
-        // Determine initial leave balances based on role_id
-        $sick_leave = ($role_id <= 2) ? 7 : 6;  // 7 for Admins/Super Admins, 6 for Employees
-        $vacation_leave = $sick_leave;
+        // ** New Clause: Skip leave creation for "Contractual" employees **
+        if (strtolower($employee_status) !== "contractual") {
+            // Determine initial leave balances based on role_id
+            $sick_leave = ($role_id <= 2) ? 7 : 6;  // 7 for Admins/Super Admins, 6 for Employees
+            $vacation_leave = $sick_leave;
 
-        // Insert leave record for the new employee
-        $sql_leave = "INSERT INTO leaves (employee_id, sick_leave, vacation_leave, role_id) 
-                      VALUES (?, ?, ?, ?)";
-        $stmt_leave = mysqli_prepare($conn, $sql_leave);
-        mysqli_stmt_bind_param($stmt_leave, "iiii", $employee_id, $sick_leave, $vacation_leave, $role_id);
+            // Insert leave record for the new employee
+            $sql_leave = "INSERT INTO leaves (employee_id, sick_leave, vacation_leave, role_id) 
+                          VALUES (?, ?, ?, ?)";
+            $stmt_leave = mysqli_prepare($conn, $sql_leave);
+            mysqli_stmt_bind_param($stmt_leave, "iiii", $employee_id, $sick_leave, $vacation_leave, $role_id);
 
-        if (mysqli_stmt_execute($stmt_leave)) {
-            echo "<div class='alert alert-success'>Employee and leave record registered successfully!</div>";
-            header('Location: employees.php');
+            if (mysqli_stmt_execute($stmt_leave)) {
+                echo "<div class='alert alert-success'>Employee and leave record registered successfully!</div>";
+                header('Location: employees.php');
+            } else {
+                echo "<div class='alert alert-danger'>Error inserting leave record: " . mysqli_error($conn) . "</div>";
+                header('Location: employees.php');
+            }
+            mysqli_stmt_close($stmt_leave);
         } else {
-            echo "<div class='alert alert-danger'>Error inserting leave record: " . mysqli_error($conn) . "</div>";
+            echo "<div class='alert alert-success'>Contractual employee registered successfully without leave records.</div>";
             header('Location: employees.php');
         }
-        mysqli_stmt_close($stmt_leave);
     } else {
         echo "<div class='alert alert-danger'>Error inserting employee: " . mysqli_error($conn) . "</div>";
     }
