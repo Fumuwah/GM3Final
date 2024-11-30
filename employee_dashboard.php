@@ -29,11 +29,11 @@ include 'layout/header.php';
     <?php include 'layout/sidebar.php'; ?>
     <div class="main" style="max-height: calc(100vh - 80px);overflow-y:scroll">
         <div class="container-fluid">
-            <h2>Hello <?php echo htmlspecialchars($name); ?></h2>
+            <h2>Hello <?php echo htmlspecialchars($name); ?>!</h2>
             <div class="d-flex justify-content-start mb-2">
-    <button class="btn btn-success mr-2">Time-In</button>
-    <button class="btn btn-danger">Time-Out</button>
-</div>
+                <button class="btn btn-success mr-2">Time-In</button>
+                <button class="btn btn-danger">Time-Out</button>
+            </div>
 
             <div class="row">
                 <div class="col-12 col-lg-8 pt-3 pt-md-0">
@@ -115,47 +115,6 @@ include 'layout/header.php';
                                                     <td>{$type}</td>
                                                     <td>{$description}</td>
                                                     <td>{$num_days}</td>
-                                                </tr>";
-                                        }
-                                        $stmt->close();
-                                        ?>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-
-                        <!-- Payslips Summary -->
-                        <div class="col-12">
-                            <h4>Payslips Summary</h4>
-                            <div class="overflow-x-auto">
-                                <table class="table">
-                                    <thead>
-                                        <tr>
-                                            <th>Payroll Period</th>
-                                            <th>Basic Salary</th>
-                                            <th>Overtime</th>
-                                            <th>Deduction</th>
-                                            <th>Net Pay</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <?php
-                                        $query = "SELECT p.payroll_period, e.basic_salary, p.other_ot, p.total_deduc, p.netpay
-                                                FROM payroll p
-                                                JOIN employees e ON p.employee_id = e.employee_id
-                                                WHERE p.employee_id = ?";
-                                        $stmt = $conn->prepare($query);
-                                        $stmt->bind_param("i", $employee_id);
-                                        $stmt->execute();
-                                        $stmt->bind_result($payroll_period, $basic_salary, $overtime, $deduction, $net_pay);
-
-                                        while ($stmt->fetch()) {
-                                            echo "<tr>
-                                                    <td>{$payroll_period}</td>
-                                                    <td>{$basic_salary}</td>
-                                                    <td>{$overtime}</td>
-                                                    <td>{$deduction}</td>
-                                                    <td>{$net_pay}</td>
                                                 </tr>";
                                         }
                                         $stmt->close();

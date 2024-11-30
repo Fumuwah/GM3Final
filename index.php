@@ -135,10 +135,14 @@ include 'layout/header.php';
     <div class="main pt-3" style="max-height: calc(100vh - 80px);overflow-y:scroll">
         <div class="container-fluid pl-5">
             <h2>Hello, <?php echo htmlspecialchars($name); ?>!</h2>
+            <div class="d-flex justify-content-start mb-2">
+                <button class="btn btn-success mr-2">Time-In</button>
+                <button class="btn btn-danger">Time-Out</button>
+            </div>
             <div class="row">
                 <div class="col-12 col-lg-8 pt-3 pt-md-0">
                     <div class="row numbers-of">
-                        <div class="col-12 my-2 col-lg-3">
+                        <div class="col-12 my-2 col-lg-4">
                             <div class="card">
                                 <div class="card-body text-center">
                                     <div class="m-0">Number of Employees</div>
@@ -155,7 +159,7 @@ include 'layout/header.php';
                                 </div>
                             </div>
                         </div>
-                        <div class="col-12 my-2 col-lg-3">
+                        <div class="col-12 my-2 col-lg-4">
                             <div class="card">
                                 <div class="card-body text-center">
                                     <div class="m-0">Leave</div>
@@ -171,7 +175,7 @@ include 'layout/header.php';
                                 </div>
                             </div>
                         </div>
-                        <div class="col-12 my-2 col-lg-3">
+                        <div class="col-12 my-2 col-lg-4">
                             <div class="card">
                                 <div class="card-body text-center">
                                     <div class="m-0">Pending Approvals</div>
@@ -184,23 +188,6 @@ include 'layout/header.php';
                                     }
                                     ?>
                                     <div class="m-0">For leaves</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-12 my-2 col-lg-3">
-                            <div class="card">
-                                <div class="card-body text-center">
-                                    <div class="m-0">Number of Request</div>
-                                    <?php
-
-                                    if ($profapproval_total = mysqli_num_rows($dash_profapproval_query_run)) {
-                                        echo ' <p class="card-text font-weight-bold mt-3" style="font-size:2.2em;"><a href="profile-change-requests.php">' . $profapproval_total . '</a></p>';
-                                    } else {
-                                        echo ' <p class="card-text font-weight-bold mt-3" style="font-size:2.2em;">No Data</p>';
-                                    }
-
-                                    ?>
-                                    <div class="m-0">For Profile Change</div>
                                 </div>
                             </div>
                         </div>

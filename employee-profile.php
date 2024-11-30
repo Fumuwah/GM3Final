@@ -1,27 +1,99 @@
 <?php
 session_start();
 require 'database.php';
+
 if (!isset($_SESSION['role_name']) || !isset($_SESSION['employee_id'])) {
     header("Location: login.php");
     exit();
 }
 
+$employee_id = $_SESSION['employee_id'];
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Get current employee data from the database
+    $query = "
+        SELECT password, contactno, address 
+        FROM employees 
+        WHERE employee_id = ?
+    ";
+    $stmt = $conn->prepare($query);
+    if (!$stmt) {
+        die("Error preparing statement: " . $conn->error);
+    }
+    $stmt->bind_param("i", $employee_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $employee = $result->fetch_assoc();
+
+    if (!$employee) {
+        die("Error: Employee data not found.");
+    }
+
+    // Get new input values
     $newPassword = $_POST['password'];
     $newContactNo = $_POST['contactno'];
     $newAddress = $_POST['address'];
-    $updateQueries = [];
-    $fields = ['password' => $newPassword, 'contactno' => $newContactNo, 'address' => $newAddress];
 
-    foreach ($fields as $type => $newData) {
-        if (!empty($newData) && $newData != $employee[$type]) {
-            $stmt = $conn->prepare("INSERT INTO profile_change_requests (employee_id, request_type, old_data, new_data) VALUES (?, ?, ?, ?)");
-            $stmt->bind_param("isss", $employee_id, $type, $employee[$type], $newData);
-            $stmt->execute();
+    // Track updates
+    $updateFields = [];
+    $updateValues = [];
+    $passwordChanged = false;
+
+    // Check for password update (and hash it securely)
+    if (!empty($newPassword)) {
+        if (!password_verify($newPassword, $employee['password'])) {
+            $hashedPassword = password_hash($newPassword, PASSWORD_BCRYPT);
+            $updateFields[] = "password = ?";
+            $updateValues[] = $hashedPassword;
+            $passwordChanged = true;
         }
     }
 
-    header("Location: profile-change-requests.php");
+    // Check for contact number change
+    if (!empty($newContactNo) && $newContactNo != $employee['contactno']) {
+        $updateFields[] = "contactno = ?";
+        $updateValues[] = $newContactNo;
+    }
+
+    // Check for address change
+    if (!empty($newAddress) && $newAddress != $employee['address']) {
+        $updateFields[] = "address = ?";
+        $updateValues[] = $newAddress;
+    }
+
+    // Update database if there are changes
+    if (!empty($updateFields)) {
+        $query = "UPDATE employees SET " . implode(", ", $updateFields) . " WHERE employee_id = ?";
+        $updateValues[] = $employee_id; // Add employee_id for WHERE clause
+
+        $stmt = $conn->prepare($query);
+        if (!$stmt) {
+            die("Error preparing update statement: " . $conn->error);
+        }
+
+        // Dynamically bind parameters
+        $types = str_repeat("s", count($updateValues) - 1) . "i"; // 's' for strings, 'i' for the final employee_id
+        $stmt->bind_param($types, ...$updateValues);
+
+        if ($stmt->execute()) {
+            if ($passwordChanged) {
+                echo "Password updated successfully! You will now be logged out for security reasons.";
+                // Log out the user
+                session_unset();
+                session_destroy();
+                header("Location: login.php");
+                exit();
+            } else {
+                echo "Profile updated successfully!";
+            }
+        } else {
+            echo "Error updating profile: " . $stmt->error;
+        }
+    } else {
+        echo "No changes detected in the profile.";
+    }
+
+    header("Location: employee-profile.php");
     exit();
 }
 
@@ -119,7 +191,7 @@ $age = date_diff(date_create($employee['birthdate']), date_create('today'))->y;
         <div class="card accordion" id="information-update">
             <div class="card-body">
                 <h2>Edit Information</h2>
-                <form action="profile-change-request.php" method="POST">
+                <form action="" method="POST">
                     <div class="form-group form-row">
                         <div class="col-6">
                             <label for="">Password</label>
