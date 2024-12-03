@@ -95,9 +95,9 @@ if (!empty($today_filter)) $query_today .= " AND d.date = ?";
 $query_today .= " LIMIT ? OFFSET ?";
 
 $stmt = $conn->prepare($query_today);
-if ($role_name === 'admin' || $role_name === 'hr admin') {
+if ($role_name === 'admin') {
     $params[] = $project_name;
-} else if ($role_name !== 'super admin') {
+} else if ($role_name !== 'super admin' || $role_name !== 'hr admin') {
     $params[] = $employee_id;
 }
 
@@ -147,7 +147,7 @@ if (!empty($today_filter)) $total_query .= " AND d.date = ?";
 
 $total_stmt = $conn->prepare($total_query);
 $params_total = [];
-if ($role_name !== 'super admin') $params_total[] = $employee_id;
+if ($role_name !== 'super admin' || $role_name !== 'hr admin') $params_total[] = $employee_id;
 
 if (!empty($search_user)) {
     $params_total[] = "%{$search_user}%";
@@ -190,11 +190,7 @@ $activePage = 'dtr';
                         <input class="form-control" type="text" name="search_user" id="search_user" placeholder="Search User...">
                     </div>
                     <div class="col-sm-2">
-
-
-                        <?php if ($role_name === 'super admin'): ?>
-
-
+                        <?php if ($role_name === 'super admin' || $role_name === 'hr admin'): ?>
                             <select name="project_name" id="project_name" class="form-control">
                                 <option value="">Select Project</option>
                                 <?php
@@ -205,7 +201,6 @@ $activePage = 'dtr';
                                 ?>
                             </select>
                         <?php endif; ?>
-
                     </div>
                     <div class="col-sm-1 d-flex">
                         <select name="month" id="month" class="form-control">

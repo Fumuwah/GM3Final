@@ -110,7 +110,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['employee_id'])) {
 
 $search = isset($_GET['search']) ? $_GET['search'] : '';
 $current_page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-$limit = 5;
+$limit = 10;
 $start = ($current_page - 1) * $limit;
 
 $total_count = fetchTotalEmployeesCount($conn, $search);
