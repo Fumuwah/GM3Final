@@ -234,40 +234,77 @@ include './layout/header.php';
                                         <td>{$hire_date}</td>
                                         <td>";
 
-                                if ($_SESSION['role_name'] == 'Super Admin') {
-                                    echo "<button type='button' class='btn btn-danger mb-2 {$archiveClass}' data-id='{$employee_id}'>{$archiveButtonText}</button>";
-                                }
+                                    if ($_SESSION['role_name'] == 'Super Admin' && $_SESSION['employee_id'] != $employee_id) {
+                                        echo "<button type='button' class='btn btn-danger mb-2 {$archiveClass}' data-id='{$employee_id}'>{$archiveButtonText}</button>";
+                                    }
 
+                                    // Edit Button Visibility Based on Role
+                                    if ($_SESSION['role_name'] == 'Super Admin') {
+                                        // Super Admin can see the Edit button for all employees
+                                        echo "<button type='button' class='btn btn-primary mb-2 edit-employee-btn' data-employee-id='{$employee_id}' 
+                                                data-employee-number='{$employee_number}' 
+                                                data-lastname='{$lastname}' 
+                                                data-firstname='{$firstname}' 
+                                                data-middlename='{$middlename}' 
+                                                data-contactno='{$contactno}' 
+                                                data-address='{$address}' 
+                                                data-birthdate='{$birthdate}' 
+                                                data-civil-status='{$civil_status}' 
+                                                data-daily-salary='{$daily_salary}'
+                                                data-basic-salary='{$basic_salary}' 
+                                                data-project-name='{$project_name}'
+                                                data-position-name='{$position_name2}' 
+                                                data-hire-date='{$hire_date}' 
+                                                data-employee-status='{$employee_status}' 
+                                                data-sss-no='{$sss_no}' 
+                                                data-philhealth-no='{$philhealth_no}' 
+                                                data-hdmf-no='{$hdmf_no}' 
+                                                data-tin-no='{$tin_no}' 
+                                                data-sss-con='{$sss_con}'
+                                                data-philhealth-con='{$philhealth_con}'
+                                                data-pag-ibig-con='{$pag_ibig_con}'
+                                                data-withhold-tax='{$withhold_tax}'
+                                                data-email='{$email}'  
+                                                data-emergency-contactno='{$emergency_contactno}' 
+                                                data-role-id='{$role_id}'>Edit</button>";
+                                    } elseif ($_SESSION['role_name'] == 'HR Admin') {
+                                        // HR Admin can see the Edit button for Employee and Admin roles, but not for their own or Super Admin
+                                        if ($_SESSION['employee_id'] != $employee_id && $_SESSION['role_name'] != 'Super Admin') {
+                                            echo "<button type='button' class='btn btn-primary mb-2 edit-employee-btn' data-employee-id='{$employee_id}' 
+                                                    data-employee-number='{$employee_number}' 
+                                                    data-lastname='{$lastname}' 
+                                                    data-firstname='{$firstname}' 
+                                                    data-middlename='{$middlename}' 
+                                                    data-contactno='{$contactno}' 
+                                                    data-address='{$address}' 
+                                                    data-birthdate='{$birthdate}' 
+                                                    data-civil-status='{$civil_status}' 
+                                                    data-daily-salary='{$daily_salary}'
+                                                    data-basic-salary='{$basic_salary}' 
+                                                    data-project-name='{$project_name}'
+                                                    data-position-name='{$position_name2}' 
+                                                    data-hire-date='{$hire_date}' 
+                                                    data-employee-status='{$employee_status}' 
+                                                    data-sss-no='{$sss_no}' 
+                                                    data-philhealth-no='{$philhealth_no}' 
+                                                    data-hdmf-no='{$hdmf_no}' 
+                                                    data-tin-no='{$tin_no}' 
+                                                    data-sss-con='{$sss_con}'
+                                                    data-philhealth-con='{$philhealth_con}'
+                                                    data-pag-ibig-con='{$pag_ibig_con}'
+                                                    data-withhold-tax='{$withhold_tax}'
+                                                    data-email='{$email}'  
+                                                    data-emergency-contactno='{$emergency_contactno}' 
+                                                    data-role-id='{$role_id}'>Edit</button>";
+                                        }
+                                    } else {
+                                        // Admin cannot see the Edit button at all
+                                        echo "";
+                                    }
 
-                                echo "          <button type='button' class='btn btn-primary mb-2 edit-employee-btn' data-employee-id='{$employee_id}' 
-                                            data-employee-number='{$employee_number}' 
-                                            data-lastname='{$lastname}' 
-                                            data-firstname='{$firstname}' 
-                                            data-middlename='{$middlename}' 
-                                            data-contactno='{$contactno}' 
-                                            data-address='{$address}' 
-                                            data-birthdate='{$birthdate}' 
-                                            data-civil-status='{$civil_status}' 
-                                            data-daily-salary='{$daily_salary}'
-                                            data-basic-salary='{$basic_salary}' 
-                                            data-project-name='{$project_name}'
-                                            data-position-name='{$position_name2}' 
-                                            data-hire-date='{$hire_date}' 
-                                            data-employee-status='{$employee_status}' 
-                                            data-sss-no='{$sss_no}' 
-                                            data-philhealth-no='{$philhealth_no}' 
-                                            data-hdmf-no='{$hdmf_no}' 
-                                            data-tin-no='{$tin_no}' 
-                                            data-sss-con='{$sss_con}'
-                                            data-philhealth-con='{$philhealth_con}'
-                                            data-pag-ibig-con='{$pag_ibig_con}'
-                                            data-withhold-tax='{$withhold_tax}'
-                                            data-email='{$email}'  
-                                            data-emergency-contactno='{$emergency_contactno}' 
-                                            data-role-id='{$role_id}'>Edit</button>
-                                            <button type='button' class='btn btn-secondary mb-2 leaves-btn' data-id='{$employee_number}'>Leaves</button>
-                                        </td>
-                                    </tr>";
+                                    echo "      <button type='button' class='btn btn-secondary mb-2 leaves-btn' data-id='{$employee_number}'>Leaves</button>
+                                            </td>
+                                        </tr>";
 
                                 $counter++;
                             }
@@ -349,8 +386,16 @@ include './layout/header.php';
             </div>
             <form action="archive_employee.php" method="post">
                 <div class="modal-body">
-                    Reason to Archive:
+                    <div class="form-group">
+                    <label for="archive-reason" class="form-label">Reason to Archive:</label>
+                    <select class="form-select form-control" id="archive-reason" name="archive_reason" required>
+                        <option value="" disabled selected>Select a reason</option>
+                        <option value="Resigned">Resigned</option>
+                        <option value="Retired">Retired</option>
+                        <option value="Terminated">Terminated</option>
+                    </select>
                     <input type="hidden" id="archive-employee-id" name="archive_id" value="">
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-success close-modal" data-bs-dismiss="modal">Close</button>
@@ -361,6 +406,7 @@ include './layout/header.php';
     </div>
 </div>
 
+
 <div class="modal fade" id="unarchive-modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -369,7 +415,14 @@ include './layout/header.php';
             </div>
             <form action="unarchive_employee.php" method="post">
                 <div class="modal-body">
-                    Are you sure you want to unarchive this employee?
+                    <p>Are you sure you want to unarchive this employee?</p> 
+                    <label for="unarchive-status" class="form-label">Set Employee Status:</label>
+                    <select class="form-select form-control" id="unarchive-status" name="employee_status" required>
+                        <option value="" disabled selected>Select status</option>
+                        <option value="Regular">Regular</option>
+                        <option value="Contractual">Contractual</option>
+                    </select>
+                    
                     <input type="hidden" id="unarchive-employee-id" name="unarchive_id" value="">
                 </div>
                 <div class="modal-footer">
@@ -380,6 +433,7 @@ include './layout/header.php';
         </div>
     </div>
 </div>
+
 
 
 <div class="modal fade" id="edit-modal" tabindex="-1" aria-hidden="true">
@@ -788,9 +842,9 @@ include './layout/header.php';
                         </div>
                         <div class="col-3">
                             <label for="daily_salary">Daily Salary</label>
-                            <input type="text" class="form-control" name="daily_salary">
+                            <input type="text" class="form-control" name="daily_salary" id="daily_salary">
                         </div>
-                        <div class="col-3">
+                        <div class="col-3" id="basic-salary-container">
                             <label for="basic_salary">Basic Salary</label>
                             <input type="text" class="form-control" name="basic_salary" id="basic_salary" pattern="\d+" title="Please enter a valid integer.">
                             <?php
@@ -922,23 +976,25 @@ include './layout/header.php';
                             ?>
                         </div>
                     </div>
-                    <h5>Deductions</h5>
-                    <div class="form-row form-group">
-                        <div class="col-3">
-                            <label for="sss_con">SSS</label>
-                            <input type="text" class="form-control" name="sss_con" id="sss_con">
-                        </div>
-                        <div class="col-3">
-                            <label for="philhealth_con">PhilHealth</label>
-                            <input type="text" class="form-control" name="philhealth_con" id="philhealth_con">
-                        </div>
-                        <div class="col-3">
-                            <label for="pag_ibig_con">Pag Ibig</label>
-                            <input type="text" class="form-control" name="pag_ibig_con" id="pag_ibig_con">
-                        </div>
-                        <div class="col-3">
-                            <label for="withhold_tax">Withholding Tax</label>
-                            <input type="text" class="form-control" name="withhold_tax" id="withhold_tax">
+                    <div id="deductions-section-add">
+                        <h5>Deductions</h5>
+                        <div class="form-row form-group">
+                            <div class="col-3">
+                                <label for="sss_con">SSS</label>
+                                <input type="text" class="form-control" name="sss_con" id="sss_con">
+                            </div>
+                            <div class="col-3">
+                                <label for="philhealth_con">PhilHealth</label>
+                                <input type="text" class="form-control" name="philhealth_con" id="philhealth_con">
+                            </div>
+                            <div class="col-3">
+                                <label for="pag_ibig_con">Pag Ibig</label>
+                                <input type="text" class="form-control" name="pag_ibig_con" id="pag_ibig_con">
+                            </div>
+                            <div class="col-3">
+                                <label for="withhold_tax">Withholding Tax</label>
+                                <input type="text" class="form-control" name="withhold_tax" id="withhold_tax">
+                            </div>
                         </div>
                     </div>
                     <div class="form-row form-group">
@@ -1207,6 +1263,69 @@ include './layout/header.php';
 });
 
 </script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const employeeStatus = document.getElementById("employee_status");
+    const dailySalary = document.getElementById("daily_salary");
+    const basicSalary = document.getElementById("basic_salary");
+    const deductionsSection = document.getElementById("deductions-section-add");
+
+    // Function to toggle visibility for Basic Salary and Deductions sections
+    function toggleVisibility() {
+        if (employeeStatus && employeeStatus.value === "Contractual") {
+            // Hide Basic Salary field
+            basicSalary.parentElement.style.display = "none";
+            basicSalary.value = ""; // Clear the value if hidden
+
+            // Hide Deductions section
+            deductionsSection.style.display = "none";
+        } else {
+            // Show Basic Salary field
+            basicSalary.parentElement.style.display = "";
+
+            // Show Deductions section
+            deductionsSection.style.display = "block";
+        }
+    }
+
+    // Function to calculate the Basic Salary
+    function calculateBasicSalary() {
+        if (!dailySalary || !basicSalary) {
+            console.error("Daily salary or basic salary field is missing in the DOM.");
+            return;
+        }
+
+        const dailySalaryValue = parseFloat(dailySalary.value || 0); // Get the current value
+        if (!isNaN(dailySalaryValue) && dailySalaryValue > 0) {
+            const calculatedBasicSalary = (dailySalaryValue * 26).toFixed(2);
+            console.log(`Calculating Basic Salary: ${calculatedBasicSalary}`);
+            basicSalary.value = calculatedBasicSalary; // Update the Basic Salary field
+        } else {
+            console.warn("Invalid daily salary value. Clearing basic salary field.");
+            basicSalary.value = ""; // Clear if the input is invalid
+        }
+    }
+
+    // Add event listeners
+    if (employeeStatus) {
+        employeeStatus.addEventListener("change", toggleVisibility);
+    } else {
+        console.error("Employee status field not found in the DOM.");
+    }
+
+    if (dailySalary) {
+        dailySalary.addEventListener("blur", calculateBasicSalary);
+    } else {
+        console.error("Daily salary field not found in the DOM.");
+    }
+
+    // Initialize visibility and calculate Basic Salary on page load
+    toggleVisibility();
+});
+
+</script>
+
 
 <?php if ($_SESSION['role_name'] == "Super Admin") { ?>
 

@@ -30,7 +30,7 @@ include 'layout/header.php';
     <div class="main" style="max-height: calc(100vh - 80px);overflow-y:scroll">
     <div class="container-fluid">
     <div class="d-flex justify-content-between align-items-center mb-2">
-        <h2>Hello <?php echo htmlspecialchars($name); ?></h2>
+        <h2>Hello <?php echo htmlspecialchars($name); ?>!</h2>
         <div>
             <button class="btn btn-success mr-2">Time-In</button>
             <button class="btn btn-danger">Time-Out</button>

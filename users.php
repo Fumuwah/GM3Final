@@ -190,7 +190,7 @@ include './layout/header.php';
                                                     <div class="flex-fill">
                                                         <select name="role_id" class="form-control">
                                                             <option value="1" <?php if ($row['role_name'] == 'Super Admin') echo 'selected'; ?>>Super Admin</option>
-                                                            <option value="4" <?php if ($row['role_name'] == 'HR_Admin') echo 'selected'; ?>>HR Admin</option>
+                                                            <option value="4" <?php if ($row['role_name'] == 'HR Admin') echo 'selected'; ?>>HR Admin</option>
                                                             <option value="2" <?php if ($row['role_name'] == 'Admin') echo 'selected'; ?>>Admin</option>
                                                             <option value="3" <?php if ($row['role_name'] == 'Employee') echo 'selected'; ?>>Employee</option>
                                                         </select>
