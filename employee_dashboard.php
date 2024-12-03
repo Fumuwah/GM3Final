@@ -28,12 +28,16 @@ include 'layout/header.php';
 <div class="d-flex align-items-stretch">
     <?php include 'layout/sidebar.php'; ?>
     <div class="main" style="max-height: calc(100vh - 80px);overflow-y:scroll">
-        <div class="container-fluid">
-            <h2>Hello <?php echo htmlspecialchars($name); ?></h2>
-            <div class="d-flex justify-content-start mb-2">
-    <button class="btn btn-success mr-2">Time-In</button>
-    <button class="btn btn-danger">Time-Out</button>
+    <div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <h2>Hello <?php echo htmlspecialchars($name); ?></h2>
+        <div>
+            <button class="btn btn-success mr-2">Time-In</button>
+            <button class="btn btn-danger">Time-Out</button>
+        </div>
+    </div>
 </div>
+
 
             <div class="row">
                 <div class="col-12 col-lg-8 pt-3 pt-md-0">
@@ -53,7 +57,7 @@ include 'layout/header.php';
                                     </thead>
                                     <tbody>
                                         <?php
-                                        $query = "SELECT date, time_in, time_out FROM dtr WHERE employee_id = ?";
+                                        $query = "SELECT date, time_in, time_out FROM dtr WHERE employee_id = ? ORDER BY date DESC LIMIT 3";
                                         $stmt = $conn->prepare($query);
                                         $stmt->bind_param("i", $employee_id);
                                         $stmt->execute();
@@ -97,11 +101,15 @@ include 'layout/header.php';
                                     </thead>
                                     <tbody>
                                         <?php
-                                        $query = "SELECT start_date, end_date, leave_type, reason FROM leave_requests WHERE employee_id = ?";
-                                        $stmt = $conn->prepare($query);
-                                        $stmt->bind_param("i", $employee_id);
-                                        $stmt->execute();
-                                        $stmt->bind_result($start_date, $end_date, $type, $description);
+                                         $query = "SELECT start_date, end_date, leave_type, reason 
+                                         FROM leave_requests 
+                                         WHERE employee_id = ? 
+                                         ORDER BY start_date DESC 
+                                         LIMIT 3";
+                                         $stmt = $conn->prepare($query);
+                                         $stmt->bind_param("i", $employee_id);
+                                         $stmt->execute();
+                                         $stmt->bind_result($start_date, $end_date, $type, $description);
 
                                         while ($stmt->fetch()) {
                                             // Calculate number of leave days
@@ -123,49 +131,6 @@ include 'layout/header.php';
                                 </table>
                             </div>
                         </div>
-
-                        <!-- Payslips Summary -->
-                        <div class="col-12">
-                            <h4>Payslips Summary</h4>
-                            <div class="overflow-x-auto">
-                                <table class="table">
-                                    <thead>
-                                        <tr>
-                                            <th>Payroll Period</th>
-                                            <th>Basic Salary</th>
-                                            <th>Overtime</th>
-                                            <th>Deduction</th>
-                                            <th>Net Pay</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <?php
-                                        $query = "SELECT p.payroll_period, e.basic_salary, p.other_ot, p.total_deduc, p.netpay
-                                                FROM payroll p
-                                                JOIN employees e ON p.employee_id = e.employee_id
-                                                WHERE p.employee_id = ?";
-                                        $stmt = $conn->prepare($query);
-                                        $stmt->bind_param("i", $employee_id);
-                                        $stmt->execute();
-                                        $stmt->bind_result($payroll_period, $basic_salary, $overtime, $deduction, $net_pay);
-
-                                        while ($stmt->fetch()) {
-                                            echo "<tr>
-                                                    <td>{$payroll_period}</td>
-                                                    <td>{$basic_salary}</td>
-                                                    <td>{$overtime}</td>
-                                                    <td>{$deduction}</td>
-                                                    <td>{$net_pay}</td>
-                                                </tr>";
-                                        }
-                                        $stmt->close();
-                                        ?>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-
-
                     </div>
                 </div>
 
