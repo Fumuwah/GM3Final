@@ -1,10 +1,22 @@
 <?php
 require './database.php';
-$notification = "SELECT * FROM notification ORDER BY id DESC LIMIT 3";
-$notification_prep = mysqli_prepare($conn, $notification);
+
+// Fetch notifications for the dropdown
+$notification_query = "SELECT * FROM notification ORDER BY timestamp DESC";
+$notification_prep = mysqli_prepare($conn, $notification_query);
 mysqli_stmt_execute($notification_prep);
 $resultnotification = mysqli_stmt_get_result($notification_prep);
 $notifs = mysqli_fetch_all($resultnotification, MYSQLI_ASSOC);
+
+// Count unread notifications
+$unread_query = "SELECT COUNT(*) AS unread_count FROM notification WHERE is_read = 0";
+$result_unread = mysqli_query($conn, $unread_query);
+
+if ($result_unread) {
+    $unread_count = mysqli_fetch_assoc($result_unread)['unread_count'];
+} else {
+    $unread_count = 0;
+}
 
 $employee_id = $_SESSION['employee_id'] ?? null;
 
@@ -33,12 +45,10 @@ $can_view_own_data = $user['can_view_own_data'] ?? false;
 $can_view_team_data = $user['can_view_team_data'] ?? false;
 $can_edit_data = $user['can_edit_data'] ?? false;
 $can_manage_roles = $user['can_manage_roles'] ?? false;
-
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -46,21 +56,15 @@ $can_manage_roles = $user['can_manage_roles'] ?? false;
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">
-
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="stylesheet" href="assets/css/main.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     <style>
         .material-symbols-outlined {
-            font-variation-settings:
-                'FILL' 0,
-                'wght' 400,
-                'GRAD' 0,
-                'opsz' 20
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20
         }
     </style>
 </head>
-
 <body>
     <nav class="navbar navbar-light bg-light flex-column flex-lg-row align-items-start">
         <div class="d-flex align-items-center nav-phone justify-content-between">
@@ -80,17 +84,35 @@ $can_manage_roles = $user['can_manage_roles'] ?? false;
         <ul class="navbar-nav flex-row flex-column flex-lg-row">
             <li class="nav-item active mx-3 d-flex align-items-center">
                 <?php if ($can_view_team_data): ?>
-                    <img src="assets/images/home.png" class="header-icons mr-2" href="index.php"> <a class="nav-link" href="index.php">Home<span class="sr-only">(current)</span></a>
+                    <img src="assets/images/home.png" class="header-icons mr-2" href="index.php"> <a class="nav-link" href="index.php">Home</a>
                 <?php endif; ?>
                 <?php if ($role_name === 'employee'): ?>
-                    <img src="assets/images/home.png" class="header-icons mr-2" href="employee_dashboard.php"> <a class="nav-link" href="index.php">Home<span class="sr-only">(current)</span></a>
+                    <img src="assets/images/home.png" class="header-icons mr-2" href="employee_dashboard.php"> <a class="nav-link" href="employee_dashboard.php">Home</a>
                 <?php endif; ?>
             </li>
             <li class="nav-item mx-3 d-flex align-items-center">
                 <img src="assets/images/about.png" class="header-icons mr-1"> <a class="nav-link" href="about.php">About</a>
             </li>
             <li class="nav-item mx-3" id="notification-icon">
-                <a class="nav-link" href="#"><img src="assets/images/notification.png" class="header-icons" alt=""></a>
+                <a class="nav-link" href="#">
+                    <div style="position: relative;">
+                        <img src="assets/images/notification.png" class="header-icons" alt="">
+                        <?php if ($unread_count > 0): ?>
+                            <span style="
+                                position: absolute;
+                                top: -5px;
+                                right: -10px;
+                                background: red;
+                                color: white;
+                                font-size: 12px;
+                                border-radius: 50%;
+                                padding: 2px 6px;
+                            ">
+                                <?php echo $unread_count; ?>
+                            </span>
+                        <?php endif; ?>
+                    </div>
+                </a>
             </li>
             <li class="nav-item mx-3">
                 <img src="assets/images/account.png" alt="" style="width:39px;" id="account-icon">
@@ -121,6 +143,46 @@ $can_manage_roles = $user['can_manage_roles'] ?? false;
                     ?>
                 </div>
             </li>
-
         </ul>
     </nav>
+
+    <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const notificationBadge = document.querySelector("#notification-icon span");
+
+        function updateNotificationCount() {
+            fetch("check_notifications.php")
+                .then(response => response.json())
+                .then(data => {
+                    if (data.unread_count > 0) {
+                        if (!notificationBadge) {
+                            // Create the badge if it doesn't exist
+                            const newBadge = document.createElement("span");
+                            newBadge.style.position = "absolute";
+                            newBadge.style.top = "-5px";
+                            newBadge.style.right = "-10px";
+                            newBadge.style.background = "red";
+                            newBadge.style.color = "white";
+                            newBadge.style.fontSize = "12px";
+                            newBadge.style.borderRadius = "50%";
+                            newBadge.style.padding = "2px 6px";
+                            newBadge.textContent = data.unread_count;
+                            document.querySelector("#notification-icon div").appendChild(newBadge);
+                        } else {
+                            // Update the badge count
+                            notificationBadge.textContent = data.unread_count;
+                        }
+                    } else if (notificationBadge) {
+                        // Remove the badge if no unread notifications
+                        notificationBadge.remove();
+                    }
+                })
+                .catch(err => console.error("Error updating notifications:", err));
+        }
+
+        // Poll the server every 5 seconds
+        setInterval(updateNotificationCount, 5000);
+        updateNotificationCount(); // Initial fetch
+    });
+</script>
+
