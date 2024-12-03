@@ -199,11 +199,28 @@ include 'layout/header.php';
                             <h3>Announcement</h3>
                             <div class="card custom-border">
                                 <div class="card-body">
-                                    <div class="m-0">No announcement for today.</div>
+                                    <?php
+                                    $announcements_query = "SELECT a.message, a.created_at, e.firstname, e.lastname 
+                                                            FROM announcements a 
+                                                            JOIN employees e ON a.created_by = e.employee_id 
+                                                            ORDER BY a.created_at DESC LIMIT 1";
 
+                                    $result = $conn->query($announcements_query);
+
+                                    if ($result->num_rows > 0) {
+                                        while ($row = $result->fetch_assoc()) {
+                                            echo "<div class='announcement-item'>";
+                                            echo "<p><strong>" . htmlspecialchars($row['message']) . "</strong></p>";
+                                            echo "<p><small>Posted by: " . htmlspecialchars($row['firstname']) . " " . htmlspecialchars($row['lastname']) . " on " . htmlspecialchars($row['created_at']) . "</small></p>";
+                                            echo "</div>";
+                                        }
+                                    } else {
+                                        echo "<div class='m-0'>No announcements for today.</div>";
+                                    }
+                                    ?>
                                     <div class="d-flex justify-content-end">
-                                    <button class="btn btn-primary announce-btn" id="announce-btn">Announcement</button>
-                                </div>
+                                        <button class="btn btn-primary announce-btn" id="announce-btn">New Announcement</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
