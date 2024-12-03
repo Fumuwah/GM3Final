@@ -146,7 +146,7 @@ include 'layout/header.php';
                 <div class="col-12 col-lg-8 pt-3 pt-md-0">
                     <div class="row numbers-of">
                         <div class="col-12 my-2 col-lg-4">
-                            <div class="card">
+                            <div class="card custom-border">
                                 <div class="card-body text-center">
                                     <div class="m-0">Number of Employees</div>
                                     <?php
@@ -163,7 +163,7 @@ include 'layout/header.php';
                             </div>
                         </div>
                         <div class="col-12 my-2 col-lg-4">
-                            <div class="card">
+                            <div class="card custom-border">
                                 <div class="card-body text-center">
                                     <div class="m-0">Leave</div>
                                     <?php
@@ -179,7 +179,7 @@ include 'layout/header.php';
                             </div>
                         </div>
                         <div class="col-12 my-2 col-lg-4">
-                            <div class="card">
+                            <div class="card custom-border">
                                 <div class="card-body text-center">
                                     <div class="m-0">Pending Approvals</div>
                                     <?php
@@ -194,9 +194,24 @@ include 'layout/header.php';
                                 </div>
                             </div>
                         </div>
+
+                        <div class="col-12 my-10">
+                            <h3>Announcement</h3>
+                            <div class="card custom-border">
+                                <div class="card-body">
+                                    <div class="m-0">No announcement for today.</div>
+
+                                    <div class="d-flex justify-content-end">
+                                    <button class="btn btn-primary announce-btn" id="announce-btn">Announcement</button>
+                                </div>
+                                </div>
+                            </div>
+                        </div>
+
+
                         <div class="col-12 my-3">
                             <h4>On-Leave</h4>
-                            <div class="table-responsive-lg" style="overflow-x: scroll;">
+                            <div class="table-responsive-lg custom-border" style="overflow-x: scroll;">
                             <table class="table">
                                 <thead>
                                     <tr>
@@ -234,7 +249,7 @@ include 'layout/header.php';
                 include 'database.php';
                 ?>
 
-                <div class="card birthday-container mt-2">
+                <div class="card birthday-container mt-2 custom-border">
                     <div class="card-header font-weight-bold">
                         Birthdays
                     </div>
@@ -284,7 +299,7 @@ include 'layout/header.php';
                     </div>
                 </div>
                 <div class="card mt-2">
-                    <div class="card-body">
+                    <div class="card-body custom-border">
                         <canvas id="pie-grap"></canvas>
                     </div>
                 </div>
@@ -292,6 +307,30 @@ include 'layout/header.php';
         </div>
     </div>
 </div>
+</div>
+
+<div class="modal fade" id="announce-modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <form id="announce-form" action="submit_announcement.php" method="POST" enctype="multipart/form-data">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Announcement</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="form-row form-group">
+                        <div class="col-12">
+                            <label for="reason"></label>
+                            <textarea name="reason" id="reason" class="form-control" required></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger close-modalwForm">Close</button>
+                    <button type="submit" class="btn btn-success">Announce</button>
+                </div>
+            </div>
+        </form>
+    </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -352,6 +391,37 @@ include 'layout/header.php';
                 }
             }
         },
+    });
+</script>
+
+<script>
+    document.querySelectorAll('.close-modalwForm').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.getElementById('announce-modal').classList.add('fade');
+            setTimeout(() => {
+                document.getElementById('announce-modal').style.display = 'none';
+            }, 400);
+        });
+    });
+
+    var requestLeaveBtn = document.querySelector('#announce-btn');
+    var requestLeaveModal = document.querySelector('#announce-modal');
+    var closeModalwForm = document.querySelectorAll('.close-modalwForm');
+
+    requestLeaveBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        requestLeaveModal.classList.remove('fade');
+        requestLeaveModal.style.display = 'block';
+    });
+
+    closeModalwForm.forEach((d) => {
+        d.addEventListener('click', function(i) {
+            var modalParent = d.parentNode.parentNode.parentNode.parentNode.parentNode;
+            modalParent.classList.add('fade');
+            setTimeout(function() {
+                modalParent.style.display = 'none';
+            }, 400)
+        });
     });
 </script>
 

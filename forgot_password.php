@@ -127,10 +127,16 @@ if (isset($_POST['forgot_password'])) {
                 </div>
                 <div class="form-btn">
                     <button type="submit" value="forgot_password" name="forgot_password" id="login-btn" class="btn btn-primary mt-3">Submit</button>
+                    <button type="button" value="cancel" name="cancel" id="cancel-btn" class="btn btn-secondary mt-3" onclick="redirectToLogin()">Cancel</button>
                 </div>
             </form>
         </div>
     </div>
+    <script>
+    function redirectToLogin() {
+        window.location.href = 'login.php'; // Redirect to the login page
+    }
+</script>
 </body>
 
 </html>
