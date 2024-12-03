@@ -122,7 +122,7 @@ if (isset($_GET['token'])) {
                     <label for="new_password">New Password:</label>
                     <input type="password" name="new_password" required>
                     <img src="./assets/images/eye.png" style="position:absolute; width:21px; cursor:pointer; right:10px; top:9px;" id="eye">
-                    <button type="submit" name="reset_password">Reset Password</button>
+                    <button type="submit" name="reset_password" class="btn btn-primary">Reset Password</button>
                 </form>
             <?php endif; ?>
         </div>
