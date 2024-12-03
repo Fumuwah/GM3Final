@@ -70,6 +70,12 @@ $can_manage_roles = $user['can_manage_roles'] ?? false;
             overflow-y: auto;  /* Enable vertical scrolling */
             width: 300px;      /* Optional: Set the width to match your design */
         }
+        .card.custom-border {
+            border: 1px solid #c7c7c5; /* Change to your desired color and thickness */
+        }
+        .custom-border {
+            border: 1px solid #c7c7c5;
+        }
     </style>
 </head>
 <body>

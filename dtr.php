@@ -177,11 +177,13 @@ $activePage = 'dtr';
                             } ?>
                         </select>
                     </div>
-                    <div class="col-sm-3 d-flex">
+                    <div class="col-sm-3 d-flex align-items-center justify-content-between">
                         <label>From</label>
+                        &nbsp;
                         <input type="date" name="from_day" id="from_day" class="form-control" value="<?= htmlspecialchars($_GET['from_day'] ?? '') ?>" placeholder="From Day">
-                        &nbsp;&nbsp;
+                        &nbsp;
                         <label>To</label>
+                        &nbsp;
                         <input type="date" name="to_day" id="to_day" class="form-control" value="<?= htmlspecialchars($_GET['to_day'] ?? '') ?>" placeholder="To Day">
                     </div>
                     <div class="col-sm-3 d-flex ">
@@ -209,6 +211,9 @@ $activePage = 'dtr';
                         </thead>
                         <tbody>
                             <?php
+                            $session_role_name = $_SESSION['role_name'];
+
+                            
                             if (mysqli_num_rows($result_today) > 0) {
                                 $i = 1;
                                 while ($row = mysqli_fetch_assoc($result_today)) {
@@ -267,7 +272,11 @@ $activePage = 'dtr';
                                     echo "<td>$time_out_display</td>";
                                     echo "<td>" . number_format($today_ot, 2) . "</td>";
                                     echo "<td>" . number_format($today_hrs, 2) . "</td>";
-                                    echo "<td><button type='button' class='btn btn-success edit-btn' data-timein='{$row['time_in']}' data-timeout='{$row['time_out']}' data-did='{$row['dtr_id']}'>Edit</button></td>";
+                                    if ($session_role_name !== 'Admin' && $session_role_name !== 'Employee') {
+                                        echo "<td><button type='button' class='btn btn-success edit-btn' data-timein='{$row['time_in']}' data-timeout='{$row['time_out']}' data-did='{$row['dtr_id']}'>Edit</button></td>";
+                                    } else {
+                                        echo "<td></td>"; // Leave the cell empty for Admin and Employee
+                                    }
                                     echo "</tr>";
 
                                     $i++;

@@ -6,7 +6,8 @@ if (!isset($_SESSION['role_name']) || !isset($_SESSION['employee_id'])) {
     header("Location: login.php");
     exit();
 }
-
+$activePage = "employee_profile";
+$role_name = $_SESSION['role_name'];
 $employee_id = $_SESSION['employee_id'];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -115,10 +116,6 @@ if (isset($_FILES['file']) && $_FILES['file']['error'] === UPLOAD_ERR_OK) {
 //     echo "No file uploaded or there was an upload error.";
 // }
 
-
-$activePage = "employee_profile";
-$role_name = $_SESSION['role_name'];
-$employee_id = $_SESSION['employee_id'];
 include './layout/header.php';
 
 $query = "
@@ -153,11 +150,11 @@ $age = date_diff(date_create($employee['birthdate']), date_create('today'))->y;
     <?php include './layout/sidebar.php'; ?>
     <div class="main pt-3" style="max-height: calc(100vh - 80px);overflow-y:scroll">
         <div class="container-fluid pl-5">
-            <div class="card">
+            <div class="card custom-border">
                 <div class="card-body d-flex align-items-center">
                     <div>
                         <?php
-                        $imagePath = isset($_GET['image']) ? $_GET['image'] : 'default.jpg';
+                        $imagePath;
                         ?>
 
                         <form action="submit_employee_image.php" enctype="multipart/form-data" id="form" method="POST">
@@ -180,16 +177,16 @@ $age = date_diff(date_create($employee['birthdate']), date_create('today'))->y;
             </div>
             <div class="row mt-3">
     <div class="col-12">
-        <button class="btn accordion-btn" data-accordion="information-update" type="button">
+        <button class="btn accordion-btn custom-border" data-accordion="information-update" type="button">
             Information Update
         </button>
-        <button class="btn accordion-btn" data-accordion="more-details" type="button">
+        <button class="btn accordion-btn custom-border" data-accordion="more-details" type="button">
             More Details
         </button>
     
         <!-- Information Update Accordion -->
         <div class="card accordion" id="information-update">
-            <div class="card-body">
+            <div class="card-body custom-border">
                 <h2>Edit Information</h2>
                 <form action="" method="POST">
                     <div class="form-group form-row">
@@ -233,7 +230,7 @@ $age = date_diff(date_create($employee['birthdate']), date_create('today'))->y;
 
         <!-- More Details Accordion (default open) -->
         <div class="card accordion" id="more-details" style="display: block;">
-            <div class="card-body">
+            <div class="card-body custom-border">
                 <h2>More Details</h2>
                 <hr class="mb-4">
                 <div class="d-flex flex-wrap align-items-center">

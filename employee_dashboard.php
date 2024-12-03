@@ -38,14 +38,27 @@ include 'layout/header.php';
     </div>
 </div>
 
-
             <div class="row">
                 <div class="col-12 col-lg-8 pt-3 pt-md-0">
                     <div class="row numbers-of">
+                    <div class="col-12 my-10">
+                            <h3>Announcement</h3>
+                            <div class="card custom-border">
+                                <div class="card-body">
+                                    <div class="m-0">No announcement for today.</div>
+
+                                    <div class="d-flex justify-content-end">
+                                    <?php if ($role_name !== 'employee' || $role_name !== 'admin'): ?>
+                                    <button class="btn btn-primary announce-btn" id="announce-btn">Announcement</button>
+                                    <?php endif; ?>
+                                </div>
+                                </div>
+                            </div>
+                        </div>
 
                         <div class="col-12 my-3">
                             <h4>DTR Summary</h4>
-                            <div class="overflow-x-auto">
+                            <div class="overflow-x-auto custom-border">
                                 <table class="table">
                                     <thead>
                                         <tr>
@@ -88,7 +101,7 @@ include 'layout/header.php';
 
                         <div class="col-12">
                             <h4>Leaves Summary</h4>
-                            <div class="overflow-x-auto">
+                            <div class="overflow-x-auto custom-border">
                                 <table class="table">
                                     <thead>
                                         <tr>
