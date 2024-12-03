@@ -61,7 +61,14 @@ $can_manage_roles = $user['can_manage_roles'] ?? false;
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     <style>
         .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+        }
+
+        /* Style to make the notification dropdown scrollable */
+        #notification-dropdown .custom-dropdown-right {
+            max-height: 300px; /* Adjust this value based on your needs */
+            overflow-y: auto;  /* Enable vertical scrolling */
+            width: 300px;      /* Optional: Set the width to match your design */
         }
     </style>
 </head>
@@ -98,16 +105,7 @@ $can_manage_roles = $user['can_manage_roles'] ?? false;
                     <div style="position: relative;">
                         <img src="assets/images/notification.png" class="header-icons" alt="">
                         <?php if ($unread_count > 0): ?>
-                            <span style="
-                                position: absolute;
-                                top: -5px;
-                                right: -10px;
-                                background: red;
-                                color: white;
-                                font-size: 12px;
-                                border-radius: 50%;
-                                padding: 2px 6px;
-                            ">
+                            <span style="position: absolute; top: -5px; right: -10px; background: red; color: white; font-size: 12px; border-radius: 50%; padding: 2px 6px;">
                                 <?php echo $unread_count; ?>
                             </span>
                         <?php endif; ?>
@@ -127,14 +125,13 @@ $can_manage_roles = $user['can_manage_roles'] ?? false;
                     <?php
                     foreach ($notifs as $notif) {
                         $redirect =  $notif['request_type'] == "leave_request" ? 'hr-leaves-page.php' : 'profile-change-requests.php?';
-
                         echo '<div class="d-flex p-3 border-bottom dropdown-list">';
                         echo '<div class="pr-3" style="flex:0 0 91%;">';
                         echo '<p class="font-weight-bold p-0 m-0">' . $notif['message'] . '</p>';
                         echo '<p class="p-0 m-0">' . $notif['timestamp'] . '</p>';
                         echo '</div>';
                         echo '<div style="flex:0 0 30px;">';
-                        echo '<a href="' . $redirect . '">';
+                        echo '<a href="' . $redirect . '" class="mark-read" data-id="' . $notif['id'] . '">';
                         echo '<img src="assets/images/arrow-right.svg" style="width:30px; cursor:pointer;" alt="">';
                         echo '</a>';
                         echo '</div>';
@@ -156,7 +153,6 @@ $can_manage_roles = $user['can_manage_roles'] ?? false;
                 .then(data => {
                     if (data.unread_count > 0) {
                         if (!notificationBadge) {
-                            // Create the badge if it doesn't exist
                             const newBadge = document.createElement("span");
                             newBadge.style.position = "absolute";
                             newBadge.style.top = "-5px";
@@ -169,20 +165,40 @@ $can_manage_roles = $user['can_manage_roles'] ?? false;
                             newBadge.textContent = data.unread_count;
                             document.querySelector("#notification-icon div").appendChild(newBadge);
                         } else {
-                            // Update the badge count
                             notificationBadge.textContent = data.unread_count;
                         }
                     } else if (notificationBadge) {
-                        // Remove the badge if no unread notifications
                         notificationBadge.remove();
                     }
                 })
                 .catch(err => console.error("Error updating notifications:", err));
         }
 
-        // Poll the server every 5 seconds
         setInterval(updateNotificationCount, 5000);
-        updateNotificationCount(); // Initial fetch
-    });
-</script>
+        updateNotificationCount(); 
 
+        document.querySelectorAll('.mark-read').forEach(arrow => {
+            arrow.addEventListener('click', function () {
+                const notificationId = this.getAttribute('data-id');
+
+                fetch('mark_notification_read.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ id: notificationId }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        this.closest('.dropdown-list').style.display = 'none';
+                        updateNotificationCount();
+                    }
+                })
+                .catch(error => console.error('Error marking notification as read:', error));
+            });
+        });
+    });
+    </script>
+</body>
+</html>
