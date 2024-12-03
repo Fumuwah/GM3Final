@@ -20,7 +20,6 @@ $employee_id = $_SESSION['employee_id'] ?? 1;
 
 $from_day_filter = $_GET['from_day'] ?? '';
 $to_day_filter = $_GET['to_day'] ?? '';
-
 $records_per_page = 10;
 $current_page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $offset = ($current_page - 1) * $records_per_page;
@@ -32,7 +31,8 @@ $year_filter = $_GET['year'] ?? '';
 $from_day_filter = $_GET['from_day'] ?? '';
 $to_day_filter = $_GET['to_day'] ?? '';
 $today_filter = '';
-if (empty($from_day_filter || $to_day_filter || $month_filter || $year_filter)) {
+
+if (empty($from_day_filter) && empty($to_day_filter) && empty($month_filter) && empty($year_filter)) {
     date_default_timezone_set("Asia/Manila");
     $today_filter = date('Y-m-d');
 }
@@ -41,45 +41,37 @@ $query_projects = "SELECT project_name FROM projects";
 $result_projects = mysqli_query($conn, $query_projects) or die("Error fetching projects: " . mysqli_error($conn));
 
 $project_name = $_SESSION['project_name'] ?? null;
-$query_today = getRoleBasedQuery($role_name, $employee_id, $project_name);
 
-function getRoleBasedQuery($role_name, $employee_id, $project_name = null)
+function getRoleBasedQuery($role_name)
 {
     if ($role_name === 'super admin') {
-        $query = "
+        return "
             SELECT d.*, e.lastname, e.firstname, p.project_name
             FROM dtr d
             JOIN employees e ON d.employee_id = e.employee_id
             LEFT JOIN projects p ON e.project_name = p.project_name
             WHERE 1=1";
-    } elseif ($role_name === 'admin') {
-        $query = "
-            SELECT d.*, e.lastname, e.firstname, p.project_name
-            FROM dtr d
-            JOIN employees e ON d.employee_id = e.employee_id
-            LEFT JOIN projects p ON e.project_name = p.project_name
-            WHERE p.project_name = ?";
-    } elseif ($role_name === 'hr admin') {
-        $query = "
+    } elseif ($role_name === 'admin' || $role_name === 'hr admin') {
+        return "
             SELECT d.*, e.lastname, e.firstname, p.project_name
             FROM dtr d
             JOIN employees e ON d.employee_id = e.employee_id
             LEFT JOIN projects p ON e.project_name = p.project_name
             WHERE p.project_name = ?";
     } else {
-        $query = "
+        return "
             SELECT d.*, e.lastname, e.firstname, p.project_name
             FROM dtr d
             JOIN employees e ON d.employee_id = e.employee_id
             LEFT JOIN projects p ON e.project_name = p.project_name
             WHERE d.employee_id = ?";
     }
-    return $query;
 }
 
-$query_today = getRoleBasedQuery($role_name, $employee_id);
+$query_today = getRoleBasedQuery($role_name);
 
-if (!empty($search_user)) $query_today .= " AND e.firstname LIKE ? OR e.middlename LIKE ? OR e.lastname LIKE ?";
+// Add filters to the query
+if (!empty($search_user)) $query_today .= " AND (e.firstname LIKE ? OR e.middlename LIKE ? OR e.lastname LIKE ?)";
 if (!empty($project_filter)) $query_today .= " AND p.project_name = ?";
 if (!empty($month_filter)) $query_today .= " AND d.month = ?";
 if (!empty($year_filter)) $query_today .= " AND d.year = ?";
@@ -92,20 +84,26 @@ if (!empty($from_day_filter) && !empty($to_day_filter)) {
 }
 if (!empty($today_filter)) $query_today .= " AND d.date = ?";
 
+// Add pagination
 $query_today .= " LIMIT ? OFFSET ?";
 
 $stmt = $conn->prepare($query_today);
+
+$params = [];
+
+// Add role-based parameters
 if ($role_name === 'admin' || $role_name === 'hr admin') {
     $params[] = $project_name;
-} else if ($role_name !== 'super admin') {
+} elseif ($role_name !== 'super admin') {
     $params[] = $employee_id;
 }
 
+// Add filters to parameters
 if (!empty($search_user)) {
     $params[] = "%{$search_user}%";
     $params[] = "%{$search_user}%";
     $params[] = "%{$search_user}%";
-};
+}
 if (!empty($project_filter)) $params[] = $project_filter;
 if (!empty($month_filter)) $params[] = $month_filter;
 if (!empty($year_filter)) $params[] = $year_filter;
@@ -118,67 +116,26 @@ if (!empty($from_day_filter) && !empty($to_day_filter)) {
     $params[] = $to_day_filter;
 }
 if (!empty($today_filter)) $params[] = $today_filter;
+
+// Add pagination parameters
 $params[] = $records_per_page;
 $params[] = $offset;
 
+// Bind the parameters
 $stmt->bind_param(str_repeat('s', count($params)), ...$params);
 
-
+// Execute and fetch results
 if (!$stmt->execute()) {
     die("Error executing statement: " . $stmt->error);
 }
 $result_today = $stmt->get_result();
-
-
-$total_query = getRoleBasedQuery($role_name, $employee_id);
-if (!empty($search_user)) $total_query .= " AND e.firstname LIKE ? OR e.middlename LIKE ? OR e.lastname LIKE ?";
-if (!empty($project_filter)) $total_query .= " AND p.project_name = ?";
-if (!empty($month_filter)) $total_query .= " AND d.month = ?";
-if (!empty($year_filter)) $total_query .= " AND d.year = ?";
-if (!empty($from_day_filter) && !empty($to_day_filter)) {
-    $params[] = $from_day_filter;
-    $params[] = $to_day_filter;
-} elseif (!empty($from_day_filter)) {
-    $params[] = $from_day_filter;
-} elseif (!empty($to_day_filter)) {
-    $params[] = $to_day_filter;
-}
-if (!empty($today_filter)) $total_query .= " AND d.date = ?";
-
-$total_stmt = $conn->prepare($total_query);
-$params_total = [];
-if ($role_name !== 'super admin') $params_total[] = $employee_id;
-
-if (!empty($search_user)) {
-    $params_total[] = "%{$search_user}%";
-    $params_total[] = "%{$search_user}%";
-    $params_total[] = "%{$search_user}%";
-};
-if (!empty($project_filter)) $params_total[] = $project_filter;
-if (!empty($month_filter)) $params_total[] = $month_filter;
-if (!empty($year_filter)) $params_total[] = $year_filter;
-if (!empty($from_day_filter) && !empty($to_day_filter)) {
-    $params[] = $from_day_filter;
-    $params[] = $to_day_filter;
-} elseif (!empty($from_day_filter)) {
-    $params[] = $from_day_filter;
-} elseif (!empty($to_day_filter)) {
-    $params[] = $to_day_filter;
-}
-if (!empty($today_filter)) $params_total[] = $today_filter;
-
-if ($params_total) {
-    $total_stmt->bind_param(str_repeat('s', count($params_total)), ...$params_total);
-}
-
-$total_stmt->execute();
-$total_result = $total_stmt->get_result();
-$total_records = $total_result->num_rows;
+$total_records = $result_today->num_rows;
 
 $total_pages = ceil($total_records / $records_per_page);
 
 $activePage = 'dtr';
 ?>
+
 <div class="d-flex">
     <?php include './layout/sidebar.php'; ?>
     <div class="main p-3" style="max-height: calc(100vh - 80px);overflow-y:scroll">
@@ -190,11 +147,7 @@ $activePage = 'dtr';
                         <input class="form-control" type="text" name="search_user" id="search_user" placeholder="Search User...">
                     </div>
                     <div class="col-sm-2">
-
-
-                        <?php if ($role_name === 'super admin'): ?>
-
-
+                        <?php if ($role_name === 'super admin' || $role_name === 'hr admin'): ?>
                             <select name="project_name" id="project_name" class="form-control">
                                 <option value="">Select Project</option>
                                 <?php
@@ -205,7 +158,6 @@ $activePage = 'dtr';
                                 ?>
                             </select>
                         <?php endif; ?>
-
                     </div>
                     <div class="col-sm-1 d-flex">
                         <select name="month" id="month" class="form-control">
@@ -360,7 +312,7 @@ $activePage = 'dtr';
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="attendanceModalLabel">Attendance</h5>
+                <h5 class="modal-title" id="attendanceModalLabel">Edit Attendance</h5>
             </div>
             <div class="modal-body">
                 <form id="attendanceForm" action="submit_attendance.php" method="POST" autocomplete="off" onsubmit="return validateAttendanceForm()">
@@ -376,11 +328,11 @@ $activePage = 'dtr';
                     </div>
                     <div class="form-group">
                         <label for="date">Date</label>
-                        <input type="date" name="date" class="form-control" required>
+                        <input type="date" name="date" class="form-control" required readonly>
                     </div>
                     <div class="form-group">
                         <label for="time">Time</label>
-                        <input type="time" name="time" class="form-control" required>
+                        <input type="time" name="time" class="form-control" required readonly>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary close-modal">Close</button>

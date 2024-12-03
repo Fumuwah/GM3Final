@@ -6,20 +6,38 @@ if (!isset($_SESSION['role_name']) || !isset($_SESSION['employee_id'])) {
 }
 
 require_once "database.php";
+
 if (isset($_POST['submit'])) {
     $id = $_POST['archive_id'];
-    $sql = "UPDATE employees SET employee_status = 'Archived' WHERE employee_number = ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("i", $id);
+    $reason = $_POST['archive_reason'] ?? '';
 
-    if ($stmt->execute()) {
-        header("Location: employees.php");
+    // Check if a reason is provided
+    if (empty($reason)) {
+        echo "<script>
+                alert('Please select a reason to archive.');
+                window.history.back();
+              </script>";
         exit();
-    } else {
-        echo "Error updating record: " . $conn->error;
     }
 
+    $sql = "UPDATE employees SET employee_status = 'Archived', archive_reason = ? WHERE employee_number = ?";
+    $stmt = $conn->prepare($sql);
 
-    $stmt->close();
+    if ($stmt) {
+        $stmt->bind_param("si", $reason, $id);
+
+        if ($stmt->execute()) {
+            header("Location: employees.php");
+            exit();
+        } else {
+            echo "Error updating record: " . $stmt->error;
+        }
+
+        $stmt->close();
+    } else {
+        echo "Error preparing statement: " . $conn->error;
+    }
+
     $conn->close();
 }
+?>

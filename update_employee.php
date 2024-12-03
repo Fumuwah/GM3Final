@@ -12,13 +12,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     $employee_id = $_POST['employee_id'];
 
-    $sql_fetch = "SELECT password FROM employees WHERE employee_id = ?";
-    $stmt_fetch = mysqli_prepare($conn, $sql_fetch);
-    mysqli_stmt_bind_param($stmt_fetch, "i", $employee_id);
-    mysqli_stmt_execute($stmt_fetch);
-    mysqli_stmt_bind_result($stmt_fetch, $current_password);
-    mysqli_stmt_fetch($stmt_fetch);
-    mysqli_stmt_close($stmt_fetch);
+    // Step 1: Fetch the role of the employee being updated
+    $sql_fetch_role = "SELECT r.role_name FROM employees e
+                       JOIN roles r ON e.role_id = r.role_id
+                       WHERE e.employee_id = ?";
+    $stmt_fetch_role = mysqli_prepare($conn, $sql_fetch_role);
+    mysqli_stmt_bind_param($stmt_fetch_role, "i", $employee_id);
+    mysqli_stmt_execute($stmt_fetch_role);
+    mysqli_stmt_bind_result($stmt_fetch_role, $target_role_name);
+    mysqli_stmt_fetch($stmt_fetch_role);
+    mysqli_stmt_close($stmt_fetch_role);
+
+    // Step 2: Check if the current user is HR Admin or Admin, and target user is Super Admin
+    if (($current_user_role === "HR Admin" || $current_user_role === "Admin") && $target_role_name === "Super Admin") {
+        echo "<script>
+            alert('HR Admin and Admin users cannot modify Super Admin roles.');
+            window.location.href = 'employees.php';
+        </script>";
+        exit();
+    }
 
     $employee_id = $_POST['employee_id'];
     $employee_number = $_POST['employee_number'];

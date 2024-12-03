@@ -41,7 +41,7 @@ $total_pages = ceil($totalRecords / $recordsPerPage);
 
 $query = "
     SELECT e.employee_id AS employee_id, employee_number, e.firstname, e.middlename, e.lastname, 
-           pr.monthly, pr.allowance, pr.total_hrs, pr.other_ot, 
+           pr.monthly, pr.allowance, pr.total_hrs, pr.other_ot, pr.other_deduc, pr.payroll_id,
            pr.gross, pr.cash_adv, pr.total_deduc, pr.netpay, e.daily_salary, e.basic_salary
     FROM payroll pr
     LEFT JOIN employees e ON e.employee_id = pr.employee_id
@@ -176,7 +176,8 @@ include './layout/header.php';
                                     <td><?php echo number_format($payroll['cash_adv'], 2); ?></td>
                                     <td><?php echo number_format($payroll['total_deduc'], 2); ?></td>
                                     <td><?php echo number_format($payroll['netpay'], 2); ?></td>
-                                    <td><button class="btn btn-success">Edit</button></td>
+                                    <td><button class="btn btn-success edit-btn" data-id="<?php echo $payroll['payroll_id']; ?>" data-cash-adv="<?php echo $payroll['cash_adv']; ?>" data-allowance="<?php echo $payroll['allowance']; ?>" data-other-deduc="<?php echo $payroll['other_deduc']; ?>">Edit</button></td>
+
                                 </tr>
                             <?php endforeach; ?>
                         </tbody>
@@ -246,6 +247,38 @@ include './layout/header.php';
     </div>
 </div>
 
+<div class="modal fade" id="edit-modal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editModalLabel">Edit Payroll</h5>
+            </div>
+            <div class="modal-body">
+                <form id="editPayrollForm" action="edit_payroll.php" method="POST" autocomplete="off">
+                    <input type="hidden" name="payroll_id" id="payroll_id">
+                    <div class="form-group mb-3">
+                        <label for="edit_cash_advance">Cash Advance:</label>
+                        <input type="number" class="form-control" id="edit_cash_adv" name="cash_adv" step="0.01">
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="edit_allowance">Allowance:</label>
+                        <input type="number" class="form-control" id="edit_allowance" name="allowance" step="0.01">
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="edit_other_deductions">Other Deductions:</label>
+                        <input type="number" class="form-control" id="edit_other_deduc" name="other_deduc" step="0.01">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary closeW-modal">Close</button>
+                        <button type="submit" class="btn btn-primary" id="editPayrollBtn">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 <script>
     document.querySelectorAll('.close-modal').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -268,11 +301,11 @@ include './layout/header.php';
 
     closeModalwForm.forEach((d) => {
         d.addEventListener('click', function(i) {
-            var modalParent = d.parentNode.parentNode.parentNode.parentNode.parentNode;
+            var modalParent = d.closest('.modal');
             modalParent.classList.add('fade');
             setTimeout(function() {
                 modalParent.style.display = 'none';
-            }, 400)
+            }, 400);
         });
     });
 
@@ -295,13 +328,55 @@ include './layout/header.php';
     })
 });
 
+    document.querySelectorAll('.close-modal').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.getElementById('edit-modal').classList.add('fade');
+            setTimeout(() => {
+                document.getElementById('edit-modal').style.display = 'none';
+            }, 400);
+        });
+    });
+
 </script>
 
 <script>
-    
+    document.addEventListener('DOMContentLoaded', function() {
+        
+        const editBtn = document.querySelectorAll('.edit-btn');
+        const editPayrollModal = document.querySelector('#edit-modal');
+        var closeModalForm = document.querySelectorAll('.closeW-modal');
+
+        editBtn.forEach((btn) => {
+            btn.addEventListener('click', function() {
+            const payrollId = this.getAttribute('data-id');
+            const cashAdv = this.getAttribute('data-cash-adv');
+            const allowance = this.getAttribute('data-allowance');
+            const otherDeduc = this.getAttribute('data-other-deduc');
+
+            document.getElementById('payroll_id').value = payrollId;
+            document.getElementById('edit_cash_adv').value = cashAdv;
+            document.getElementById('edit_allowance').value = allowance;
+            document.getElementById('edit_other_deduc').value = otherDeduc;
+
+            editPayrollModal.classList.remove('fade');
+            editPayrollModal.style.display = 'block';
+        });
+    });
+
+    closeModalForm.forEach((d) => {
+        d.addEventListener('click', function(i) {
+            var modalParent = d.closest('.modal');
+            modalParent.classList.add('fade');
+            setTimeout(function() {
+                modalParent.style.display = 'none';
+            }, 400);
+        });
+    });
+
+    });
+
+
 </script>
-
-
 
 <?php include './layout/script.php'; ?>
 <?php include './layout/footer.php'; ?>

@@ -92,7 +92,7 @@ $activePage = $activePage ?? '';
                     <li class="sidebar-item">
                         <a class="sidebar-link" href="hr-leaves-page.php">Employee Leaves</a>
                     </li>
-                    <?php if ($can_view_own_data || $role_name === 'employee'): ?>
+                    <?php if ($role_name === 'employee' || $role_name !== 'super admin' || $role_name === 'admin' || $role_name === 'hr admin'): ?>
                         <li class="sidebar-item">
                             <a class="sidebar-link" href="leave-page.php">My Leaves</a>
                         </li>

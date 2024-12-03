@@ -82,7 +82,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         // ** New Clause: Skip leave creation for "Contractual" employees **
         if (strtolower($employee_status) !== "contractual") {
             // Determine initial leave balances based on role_id
-            $sick_leave = ($role_id <= 2) ? 7 : 6;  // 7 for Admins/Super Admins, 6 for Employees
+            $sick_leave = ($role_id <= 2) ? 7 : 6;
             $vacation_leave = $sick_leave;
 
             // Insert leave record for the new employee

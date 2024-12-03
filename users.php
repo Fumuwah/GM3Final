@@ -70,60 +70,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['employee_id'])) {
         exit();
     }
 
-    $role_stmt = $conn->prepare("SELECT r.role_id, perm.can_manage_roles 
-                                FROM employees e 
-                                LEFT JOIN roles r ON e.role_id = r.role_id
-                                LEFT JOIN permissions perm ON r.role_id = perm.role_id
-                                WHERE e.employee_id = ?");
-    $role_stmt->bind_param("i", $_SESSION['employee_id']);
-    $role_stmt->execute();
-    $role_result = $role_stmt->get_result();
+    // Fetch the current role of the employee being updated
+    $check_role_stmt = $conn->prepare("SELECT role_id FROM employees WHERE employee_id = ?");
+    $check_role_stmt->bind_param("i", $employee_id);
+    $check_role_stmt->execute();
+    $check_role_result = $check_role_stmt->get_result();
 
-    if ($role_result && $role_result->num_rows > 0) {
-        $role_row = $role_result->fetch_assoc();
-        $user_role_id = $role_row['role_id'];
-        $can_manage_roles = (bool) $role_row['can_manage_roles'];
+    if ($check_role_result && $check_role_result->num_rows > 0) {
+        $row = $check_role_result->fetch_assoc();
+        $current_role_id = $row['role_id'];
 
-        if ($user_role_id === 1 || $can_manage_roles) {
-            $check_role_stmt = $conn->prepare("SELECT role_id FROM employees WHERE employee_id = ?");
-            $check_role_stmt->bind_param("i", $employee_id);
-            $check_role_stmt->execute();
-            $check_role_result = $check_role_stmt->get_result();
+        // Ensure the new role is not HR Admin or Admin
+        if (in_array($current_role_id, [4, 2]) || in_array($new_role_id, [4, 2])) {
+            $_SESSION['message'] = "You are not allowed to change HR Admin or Admin roles.";
+            header("Location: users.php");
+            exit();
+        }
 
-            if ($check_role_result && $check_role_result->num_rows > 0) {
-                $row = $check_role_result->fetch_assoc();
-                $current_role_id = $row['role_id'];
+        // Proceed with the role update if valid
+        if ($new_role_id != $current_role_id) {
+            $update_stmt = $conn->prepare("UPDATE employees SET role_id = ? WHERE employee_id = ?");
+            $update_stmt->bind_param("ii", $new_role_id, $employee_id);
 
-                if ($new_role_id != $current_role_id) {
-                    $update_stmt = $conn->prepare("UPDATE employees SET role_id = ? WHERE employee_id = ?");
-                    $update_stmt->bind_param("ii", $new_role_id, $employee_id);
-
-                    if ($update_stmt->execute()) {
-                        $_SESSION['message'] = "Role updated successfully!";
-                    } else {
-                        $_SESSION['message'] = "Error updating role: " . $conn->error;
-                    }
-                } else {
-                    $_SESSION['message'] = "No changes detected. Role remains the same.";
-                }
+            if ($update_stmt->execute()) {
+                $_SESSION['message'] = "Role updated successfully!";
             } else {
-                $_SESSION['message'] = "Error: Employee not found.";
+                $_SESSION['message'] = "Error updating role: " . $conn->error;
             }
         } else {
-            $_SESSION['message'] = "You don't have permission to manage roles.";
+            $_SESSION['message'] = "No changes detected. Role remains the same.";
         }
     } else {
-        $_SESSION['message'] = "Error: Could not determine your role.";
+        $_SESSION['message'] = "Error: Employee not found.";
     }
 
     header("Location: users.php");
     exit();
 }
 
-
 $search = isset($_GET['search']) ? $_GET['search'] : '';
 $current_page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-$limit = 5;
+$limit = 10;
 $start = ($current_page - 1) * $limit;
 
 $total_count = fetchTotalEmployeesCount($conn, $search);
@@ -203,7 +190,7 @@ include './layout/header.php';
                                                     <div class="flex-fill">
                                                         <select name="role_id" class="form-control">
                                                             <option value="1" <?php if ($row['role_name'] == 'Super Admin') echo 'selected'; ?>>Super Admin</option>
-                                                            <option value="4" <?php if ($row['role_name'] == 'HR_Admin') echo 'selected'; ?>>HR Admin</option>
+                                                            <option value="4" <?php if ($row['role_name'] == 'HR Admin') echo 'selected'; ?>>HR Admin</option>
                                                             <option value="2" <?php if ($row['role_name'] == 'Admin') echo 'selected'; ?>>Admin</option>
                                                             <option value="3" <?php if ($row['role_name'] == 'Employee') echo 'selected'; ?>>Employee</option>
                                                         </select>
