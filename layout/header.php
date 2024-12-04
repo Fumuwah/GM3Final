@@ -2,7 +2,7 @@
 require './database.php';
 
 // Fetch notifications for the dropdown
-$notification_query = "SELECT * FROM notification ORDER BY timestamp DESC";
+$notification_query = "SELECT * FROM notification WHERE is_read = 0 ORDER BY timestamp DESC";
 $notification_prep = mysqli_prepare($conn, $notification_query);
 mysqli_stmt_execute($notification_prep);
 $resultnotification = mysqli_stmt_get_result($notification_prep);
@@ -55,7 +55,7 @@ $can_manage_roles = $user['can_manage_roles'] ?? false;
     <title>GM3 Builder Home Page</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="stylesheet" href="assets/css/main.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
@@ -64,17 +64,11 @@ $can_manage_roles = $user['can_manage_roles'] ?? false;
             font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
         }
 
-        /* Style to make the notification dropdown scrollable */
+        /* Style to make the notification dropdown scrollable and wider */
         #notification-dropdown .custom-dropdown-right {
             max-height: 300px; /* Adjust this value based on your needs */
             overflow-y: auto;  /* Enable vertical scrolling */
-            width: 300px;      /* Optional: Set the width to match your design */
-        }
-        .card.custom-border {
-            border: 1px solid #c7c7c5; /* Change to your desired color and thickness */
-        }
-        .custom-border {
-            border: 1px solid #c7c7c5;
+            width: 400px;      /* Adjust the width to make the dropdown a little longer */
         }
     </style>
 </head>
@@ -127,25 +121,36 @@ $can_manage_roles = $user['can_manage_roles'] ?? false;
                 </div>
             </li>
             <li class="pos-relative" id="notification-dropdown">
-                <div class="custom-dropdown-right" aria-labelledby="navbarDropdownMenuLink">
-                    <?php
-                    foreach ($notifs as $notif) {
-                        $redirect =  $notif['request_type'] == "leave_request" ? 'hr-leaves-page.php' : 'profile-change-requests.php?';
-                        echo '<div class="d-flex p-3 border-bottom dropdown-list">';
-                        echo '<div class="pr-3" style="flex:0 0 91%;">';
-                        echo '<p class="font-weight-bold p-0 m-0">' . $notif['message'] . '</p>';
-                        echo '<p class="p-0 m-0">' . $notif['timestamp'] . '</p>';
-                        echo '</div>';
-                        echo '<div style="flex:0 0 30px;">';
-                        echo '<a href="' . $redirect . '" class="mark-read" data-id="' . $notif['id'] . '">';
-                        echo '<img src="assets/images/arrow-right.svg" style="width:30px; cursor:pointer;" alt="">';
-                        echo '</a>';
-                        echo '</div>';
-                        echo '</div>';
-                    }
-                    ?>
-                </div>
-            </li>
+    <div class="custom-dropdown-right" aria-labelledby="navbarDropdownMenuLink">
+    <?php if ($can_view_team_data): ?>
+        <?php
+        // Check if there are any notifications
+        if (empty($notifs)) {
+            echo '<div class="p-3 text-center" style="color: #888; font-style: italic;">';
+            echo 'No notifications available.';
+            echo '</div>';
+        } else {
+            // Loop through notifications if available
+            foreach ($notifs as $notif) {
+                $redirect = $notif['request_type'] == "leave_request" ? 'hr-leaves-page.php' : 'profile-change-requests.php?';
+                echo '<div class="d-flex p-3 border-bottom dropdown-list">';
+                echo '<div class="pr-3" style="flex:0 0 91%;">';
+                echo '<p class="font-weight-bold p-0 m-0">' . $notif['message'] . '</p>';
+                echo '<p class="p-0 m-0">' . $notif['timestamp'] . '</p>';
+                echo '</div>';
+                echo '<div style="flex:0 0 30px;">';
+                echo '<a href="' . $redirect . '" class="mark-read" data-id="' . $notif['id'] . '">';
+                echo '<img src="assets/images/arrow-right.svg" style="width:30px; cursor:pointer;" alt="">';
+                echo '</a>';
+                echo '</div>';
+                echo '</div>';
+            }
+        }
+        ?>
+        <?php endif; ?>
+    </div>
+</li>
+
         </ul>
     </nav>
 
@@ -153,58 +158,60 @@ $can_manage_roles = $user['can_manage_roles'] ?? false;
     document.addEventListener("DOMContentLoaded", function () {
         const notificationBadge = document.querySelector("#notification-icon span");
 
-        function updateNotificationCount() {
-            fetch("check_notifications.php")
-                .then(response => response.json())
-                .then(data => {
-                    if (data.unread_count > 0) {
-                        if (!notificationBadge) {
-                            const newBadge = document.createElement("span");
-                            newBadge.style.position = "absolute";
-                            newBadge.style.top = "-5px";
-                            newBadge.style.right = "-10px";
-                            newBadge.style.background = "red";
-                            newBadge.style.color = "white";
-                            newBadge.style.fontSize = "12px";
-                            newBadge.style.borderRadius = "50%";
-                            newBadge.style.padding = "2px 6px";
-                            newBadge.textContent = data.unread_count;
-                            document.querySelector("#notification-icon div").appendChild(newBadge);
-                        } else {
-                            notificationBadge.textContent = data.unread_count;
-                        }
-                    } else if (notificationBadge) {
-                        notificationBadge.remove();
-                    }
-                })
-                .catch(err => console.error("Error updating notifications:", err));
-        }
-
-        setInterval(updateNotificationCount, 5000);
-        updateNotificationCount(); 
-
         document.querySelectorAll('.mark-read').forEach(arrow => {
             arrow.addEventListener('click', function () {
                 const notificationId = this.getAttribute('data-id');
 
-                fetch('mark_notification_read.php', {
+                // Send the request to update 'is_read' status
+                fetch('<?php echo $_SERVER['PHP_SELF']; ?>', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ id: notificationId }),
+                    body: JSON.stringify({ id: notificationId })
                 })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        this.closest('.dropdown-list').style.display = 'none';
-                        updateNotificationCount();
+                        // Remove the notification item
+                        this.closest('.dropdown-list').remove();
+
+                        // Update unread count
+                        if (notificationBadge) {
+                            let unreadCount = parseInt(notificationBadge.textContent, 10);
+                            unreadCount--;
+                            if (unreadCount <= 0) {
+                                notificationBadge.remove();
+                            } else {
+                                notificationBadge.textContent = unreadCount;
+                            }
+                        }
+                    } else {
+                        console.error('Failed to mark notification as read');
                     }
                 })
-                .catch(error => console.error('Error marking notification as read:', error));
+                .catch(err => console.error('Error:', err));
             });
         });
     });
     </script>
+
+    <?php
+    // Check if the request to mark a notification as read is made
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $data = json_decode(file_get_contents('php://input'), true);
+        if (isset($data['id'])) {
+            $notificationId = $data['id'];
+
+            // Update the notification's is_read status to true
+            $update_query = "UPDATE notification SET is_read = 1 WHERE id = ?";
+            $stmt = $conn->prepare($update_query);
+            $stmt->bind_param("i", $notificationId);
+            $stmt->execute();
+            echo json_encode(['success' => true, 'message' => 'Notification marked as read.']);
+        }
+        exit;
+    }
+    ?>
 </body>
 </html>
