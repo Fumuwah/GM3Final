@@ -1,6 +1,7 @@
 <?php
 session_start();
 include('database.php');
+include('handleAttendance.php');
 
 if (!isset($_SESSION['role_name']) || !isset($_SESSION['employee_id'])) {
     echo "Session is not set. Redirecting to login...";
@@ -14,7 +15,13 @@ $activePage = "dashboard";
 
 $role = $_SESSION['role_name'];
 $employee_id = $_SESSION['employee_id'];
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $employee_id = $_SESSION['employee_id']; // Get employee_id from form data or session
+    $action = $_POST['action']; // 'time_in' or 'time_out'
 
+    $message = handleAttendance($employee_id, $action, $conn);
+    echo "<script>alert('$message');</script>";
+}
 $name = '';
 $query = "SELECT lastname FROM employees WHERE employee_id = ?";
 if ($stmt = $conn->prepare($query)) {
@@ -76,15 +83,6 @@ $dash_onleave_query_run = mysqli_query($conn, $dash_onleave_query);
 $dash_onapproval_query = "SELECT * FROM leave_requests WHERE status != 'Archived' AND status = 'Pending'";
 $dash_onapproval_query_run = mysqli_query($conn, $dash_onapproval_query);
 
-$dash_onleave_query = "SELECT * FROM leave_requests WHERE status != 'Archived' AND status = 'Approved'";
-$dash_onleave_query_run = mysqli_query($conn, $dash_onleave_query);
-
-$dash_onapproval_query = "SELECT * FROM leave_requests WHERE status != 'Archived' AND status = 'Pending'";
-$dash_onapproval_query_run = mysqli_query($conn, $dash_onapproval_query);
-
-$dash_profapproval_query = "SELECT * FROM profile_change_requests WHERE status != 'Archived' AND status = 'pending'";
-$dash_profapproval_query_run =  mysqli_query($conn, $dash_profapproval_query);
-
 $query = "SELECT lastname FROM employees WHERE employee_id = ?";
 $stmt = $conn->prepare($query);
 $stmt->bind_param("i", $employee_id);
@@ -134,14 +132,16 @@ include 'layout/header.php';
     ?>
     <div class="main pt-3" style="max-height: calc(100vh - 80px);overflow-y:scroll">
         <div class="container-fluid pl-5">
-        <div class="d-flex justify-content-between align-items-center mb-2">
-        <h2>Hello <?php echo htmlspecialchars($name); ?>!</h2>
-            <div>
-                <button class="btn btn-success mr-2">Time-In</button>
-                <button class="btn btn-danger">Time-Out</button>
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h2>Hello <?php echo htmlspecialchars($name); ?>!</h2>
+                    <div>
+                        <form method="POST" action="">
+                            <input type="hidden" name="employee_id" value="<?php echo $_SESSION['employee_id']; ?>">
+                            <button type="submit" name="action" value="time_in" class="btn btn-success mr-2">Time-In</button>
+                            <button type="submit" name="action" value="time_out" class="btn btn-danger">Time-Out</button>
+                        </form>
+                    </div>
             </div>
-        </div>
-    </div>
             <div class="row">
                 <div class="col-12 col-lg-8 pt-3 pt-md-0">
                     <div class="row numbers-of">
@@ -323,6 +323,7 @@ include 'layout/header.php';
             </div>
         </div>
     </div>
+</div>
 </div>
 </div>
 

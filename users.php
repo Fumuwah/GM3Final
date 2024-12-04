@@ -80,14 +80,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['employee_id'])) {
         $row = $check_role_result->fetch_assoc();
         $current_role_id = $row['role_id'];
 
-        // Ensure the new role is not HR Admin or Admin
-        if (in_array($current_role_id, [4, 2]) || in_array($new_role_id, [4, 2])) {
-            $_SESSION['message'] = "You are not allowed to change HR Admin or Admin roles.";
+        // Role transition rules
+        $admin_roles = [4, 2]; // HR Admin (4) and Admin (2)
+
+        // Prevent downgrading HR Admin or Admin to non-admin roles
+        if (in_array($current_role_id, $admin_roles) && !in_array($new_role_id, $admin_roles)) {
+            $_SESSION['message'] = "You cannot downgrade HR Admin or Admin to non-admin roles.";
             header("Location: users.php");
             exit();
         }
 
-        // Proceed with the role update if valid
+        // Allow role change if rules are satisfied
         if ($new_role_id != $current_role_id) {
             $update_stmt = $conn->prepare("UPDATE employees SET role_id = ? WHERE employee_id = ?");
             $update_stmt->bind_param("ii", $new_role_id, $employee_id);
@@ -107,6 +110,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['employee_id'])) {
     header("Location: users.php");
     exit();
 }
+
+
 
 $search = isset($_GET['search']) ? $_GET['search'] : '';
 $current_page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
@@ -190,9 +195,9 @@ include './layout/header.php';
                                                     <div class="flex-fill">
                                                         <select name="role_id" class="form-control">
                                                             <option value="1" <?php if ($row['role_name'] == 'Super Admin') echo 'selected'; ?>>Super Admin</option>
-                                                            <option value="4" <?php if ($row['role_name'] == 'HR Admin') echo 'selected'; ?>>HR Admin</option>
-                                                            <option value="2" <?php if ($row['role_name'] == 'Admin') echo 'selected'; ?>>Admin</option>
-                                                            <option value="3" <?php if ($row['role_name'] == 'Employee') echo 'selected'; ?>>Employee</option>
+                                                            <option value="2" <?php if ($row['role_name'] == 'HR Admin') echo 'selected'; ?>>HR Admin</option>
+                                                            <option value="3" <?php if ($row['role_name'] == 'Admin') echo 'selected'; ?>>Admin</option>
+                                                            <option value="4" <?php if ($row['role_name'] == 'Employee') echo 'selected'; ?>>Employee</option>
                                                         </select>
                                                     </div>
                                                     <div class="flex-end">

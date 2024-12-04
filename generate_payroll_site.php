@@ -139,14 +139,15 @@ include './layout/header.php';
 
             <div class="row mt-4">
                 <div class="col-12 table-responsive">
-                    <table class="table table-bordered">
+                    <table class="table table-bordered custom-border">
                         <thead>
-                            <tr>
+                            <tr class="custom-border">
                                 <th colspan="2"></th>
                                 <th colspan=2 class="text-center">Rate</th>
                                 <th colspan=7 class="text-center">Payroll</th>
+                                <th colspan="2"></th>
                             </tr>
-                            <tr>
+                            <tr class="custom-border">
                                 <th>Emp #</th>
                                 <th>Name</th>
                                 <th>Basic Salary</th>

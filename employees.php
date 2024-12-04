@@ -165,7 +165,7 @@ include './layout/header.php';
                 </form>
                 <div class="d-flex">
 
-                    <?php if ($_SESSION['role_name'] == 'Super Admin'): ?>
+                    <?php if ($_SESSION['role_name'] == 'Super Admin' || $_SESSION['role_name'] == 'HR Admin'): ?>
                         <form action="">
                             <button type="submit" class="btn btn-success mb-2" id="add-employee-btn">Add Employee</button>
                         </form>
@@ -241,7 +241,7 @@ include './layout/header.php';
                                     // Edit Button Visibility Based on Role
                                     if ($_SESSION['role_name'] == 'Super Admin') {
                                         // Super Admin can see the Edit button for all employees
-                                        echo "<button type='button' class='btn btn-primary mb-2 edit-employee-btn' data-employee-id='{$employee_id}' 
+                                        echo " <button type='button' class='btn btn-primary mb-2 edit-employee-btn' data-employee-id='{$employee_id}' 
                                                 data-employee-number='{$employee_number}' 
                                                 data-lastname='{$lastname}' 
                                                 data-firstname='{$firstname}' 
@@ -302,7 +302,8 @@ include './layout/header.php';
                                         echo "";
                                     }
 
-                                    echo "      <button type='button' class='btn btn-secondary mb-2 leaves-btn' data-id='{$employee_number}'>Leaves</button>
+                                    echo " <button type='button' class='btn btn-secondary mb-2 leaves-btn' data-id='{$employee_number}' 
+                                        style='" . ($employee_status === 'Contractual' ? "display: none;" : "") . "'>Leaves</button>
                                             </td>
                                         </tr>";
 
@@ -708,15 +709,15 @@ include './layout/header.php';
                                         <?php if (isset($employeeData) && $employeeData['role_name'] == 'super admin') echo 'selected'; ?>>
                                         Super Admin
                                     </option>
-                                    <option value="4"
+                                    <option value="2"
                                         <?php if (isset($employeeData) && $employeeData['role_name'] == 'hr_admin') echo 'selected'; ?>>
                                         HR Admin
                                     </option>
-                                    <option value="2"
+                                    <option value="3"
                                         <?php if (isset($employeeData) && $employeeData['role_name'] == 'admin') echo 'selected'; ?>>
                                         Admin
                                     </option>
-                                    <option value="3"
+                                    <option value="4"
                                         <?php if (isset($employeeData) && $employeeData['role_name'] == 'employee') echo 'selected'; ?>>
                                         Employee
                                     </option>
@@ -1014,15 +1015,15 @@ include './layout/header.php';
                                     <?php if (isset($employeeData) && $employeeData['role_name'] == 'super admin') echo 'selected'; ?>>
                                     Super Admin
                                 </option>
-                                <option value="4"
+                                <option value="2"
                                         <?php if (isset($employeeData) && $employeeData['role_name'] == 'hr_admin') echo 'selected'; ?>>
                                         HR Admin
                                     </option>
-                                <option value="2"
+                                <option value="3"
                                     <?php if (isset($employeeData) && $employeeData['role_name'] == 'admin') echo 'selected'; ?>>
                                     Admin
                                 </option>
-                                <option value="3"
+                                <option value="4"
                                     <?php if (isset($employeeData) && $employeeData['role_name'] == 'employee') echo 'selected'; ?>>
                                     Employee
                                 </option>

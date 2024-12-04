@@ -46,21 +46,30 @@ function getRoleBasedQuery($role_name)
 {
     if ($role_name === 'super admin') {
         return "
-            SELECT d.*, e.lastname, e.firstname, p.project_name
+            SELECT d.*, e.lastname, e.firstname, e.role_id, p.project_name
             FROM dtr d
             JOIN employees e ON d.employee_id = e.employee_id
             LEFT JOIN projects p ON e.project_name = p.project_name
             WHERE 1=1";
-    } elseif ($role_name === 'admin' || $role_name === 'hr admin') {
+    } elseif ($role_name === 'hr admin') {
         return "
-            SELECT d.*, e.lastname, e.firstname, p.project_name
+            SELECT d.*, e.lastname, e.firstname, e.role_id, p.project_name
             FROM dtr d
             JOIN employees e ON d.employee_id = e.employee_id
             LEFT JOIN projects p ON e.project_name = p.project_name
-            WHERE p.project_name = ?";
+            WHERE e.role_id != (SELECT role_id FROM roles WHERE role_name = 'Super Admin')";
+    } elseif ($role_name === 'admin') {
+        return "
+            SELECT d.*, e.lastname, e.firstname, e.role_id, p.project_name
+            FROM dtr d
+            JOIN employees e ON d.employee_id = e.employee_id
+            LEFT JOIN projects p ON e.project_name = p.project_name
+            WHERE e.role_id NOT IN (
+                SELECT role_id FROM roles WHERE role_name IN ('Super Admin', 'HR Admin')
+            ) AND p.project_name = ?";
     } else {
         return "
-            SELECT d.*, e.lastname, e.firstname, p.project_name
+            SELECT d.*, e.lastname, e.firstname, e.role_id, p.project_name
             FROM dtr d
             JOIN employees e ON d.employee_id = e.employee_id
             LEFT JOIN projects p ON e.project_name = p.project_name
@@ -92,9 +101,9 @@ $stmt = $conn->prepare($query_today);
 $params = [];
 
 // Add role-based parameters
-if ($role_name === 'admin' || $role_name === 'hr admin') {
+if ($role_name === 'admin') {
     $params[] = $project_name;
-} elseif ($role_name !== 'super admin') {
+} elseif ($role_name !== 'super admin' && $role_name !== 'hr admin') {
     $params[] = $employee_id;
 }
 
@@ -143,11 +152,13 @@ $activePage = 'dtr';
             <h2>Generate Daily Time Record</h2>
             <form action="" method="GET">
                 <div class="form-group row">
+                <?php if ($role_name === 'super admin' || $role_name === 'hr admin' || $role_name === 'admin'): ?>
                     <div class="col-sm-2">
                         <input class="form-control" type="text" name="search_user" id="search_user" placeholder="Search User...">
                     </div>
+                    <?php endif; ?>
+                    <?php if ($role_name === 'super admin' || $role_name === 'hr admin'): ?>
                     <div class="col-sm-2">
-                        <?php if ($role_name === 'super admin' || $role_name === 'hr admin'): ?>
                             <select name="project_name" id="project_name" class="form-control">
                                 <option value="">Select Project</option>
                                 <?php
@@ -157,8 +168,8 @@ $activePage = 'dtr';
                                 }
                                 ?>
                             </select>
-                        <?php endif; ?>
                     </div>
+                    <?php endif; ?>
                     <div class="col-sm-1 d-flex">
                         <select name="month" id="month" class="form-control">
                             <option value="">Month</option>
@@ -186,9 +197,12 @@ $activePage = 'dtr';
                         &nbsp;
                         <input type="date" name="to_day" id="to_day" class="form-control" value="<?= htmlspecialchars($_GET['to_day'] ?? '') ?>" placeholder="To Day">
                     </div>
-                    <div class="col-sm-3 d-flex ">
+                    <div class="col-sm-3 d-flex">
                         <button type="submit" class="btn btn-primary">Filter</button>
+                        &nbsp;
+                        <?php if ($role_name === 'super admin' || $role_name === 'hr admin' || $role_name === 'admin'): ?>
                         <button type="button" class="btn btn-secondary" id="attendance-btn">Attendance</button>
+                        <?php endif; ?>
                     </div>
                 </div>
             </form>
