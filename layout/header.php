@@ -121,18 +121,54 @@ $can_manage_roles = $user['can_manage_roles'] ?? false;
                 </div>
             </li>
             <li class="pos-relative" id="notification-dropdown">
-    <div class="custom-dropdown-right" aria-labelledby="navbarDropdownMenuLink">
-    <?php if ($can_view_team_data): ?>
-        <?php
-        // Check if there are any notifications
-        if (empty($notifs)) {
-            echo '<div class="p-3 text-center" style="color: #888; font-style: italic;">';
-            echo 'No notifications available.';
-            echo '</div>';
-        } else {
-            // Loop through notifications if available
-            foreach ($notifs as $notif) {
-                $redirect = $notif['request_type'] == "leave_request" ? 'hr-leaves-page.php' : 'profile-change-requests.php?';
+            <div class="custom-dropdown-right" aria-labelledby="navbarDropdownMenuLink">
+    <?php
+    // Check if there are any notifications for everyone
+    if (empty($notifs)) {
+        echo '<div class="p-3 text-center" style="color: #888; font-style: italic;">';
+        echo 'No notifications available.';
+        echo '</div>';
+    } else {
+        // Loop through notifications if available
+        foreach ($notifs as $notif) {
+            if ($notif['request_type'] == "announcement") {
+                // Based on session role, set the redirect link
+                $redirect = '';
+                if ($_SESSION['role_name'] == 'Super Admin' || $_SESSION['role_name'] == 'HR Admin' || $_SESSION['role_name'] == 'Admin') {
+                    $redirect = 'index.php'; // Admin and HR roles redirect to index.php
+                } elseif ($_SESSION['role_name'] == 'Employee') {
+                    $redirect = 'employee_dashboard.php'; // Employee role redirects to employee_dashboard.php
+                }
+                echo '<div class="d-flex p-3 border-bottom dropdown-list">';
+                echo '<div class="pr-3" style="flex:0 0 91%;">';
+                echo '<p class="font-weight-bold p-0 m-0">' . $notif['message'] . '</p>';
+                echo '<p class="p-0 m-0">' . $notif['timestamp'] . '</p>';
+                echo '</div>';
+                echo '<div style="flex:0 0 30px;">';
+                echo '<a href="' . $redirect . '" class="mark-read" data-id="' . $notif['id'] . '" onclick="markAsRead(' . $notif['id'] . ')">';
+                echo '<img src="assets/images/arrow-right.svg" style="width:30px; cursor:pointer;" alt="">';
+                echo '</a>';
+                echo '</div>';
+                echo '</div>';
+            } elseif ($notif['request_type'] == "leave_request") {
+                // Hide leave_request for Employee role
+                if ($_SESSION['role_name'] != 'Employee') {
+                    $redirect = 'hr-leaves-page.php';
+                    echo '<div class="d-flex p-3 border-bottom dropdown-list">';
+                    echo '<div class="pr-3" style="flex:0 0 91%;">';
+                    echo '<p class="font-weight-bold p-0 m-0">' . $notif['message'] . '</p>';
+                    echo '<p class="p-0 m-0">' . $notif['timestamp'] . '</p>';
+                    echo '</div>';
+                    echo '<div style="flex:0 0 30px;">';
+                    echo '<a href="' . $redirect . '" class="mark-read" data-id="' . $notif['id'] . '">';
+                    echo '<img src="assets/images/arrow-right.svg" style="width:30px; cursor:pointer;" alt="">';
+                    echo '</a>';
+                    echo '</div>';
+                    echo '</div>';
+                }
+            } else {
+                // For other request types like profile-change
+                $redirect = 'profile-change-requests.php?';
                 echo '<div class="d-flex p-3 border-bottom dropdown-list">';
                 echo '<div class="pr-3" style="flex:0 0 91%;">';
                 echo '<p class="font-weight-bold p-0 m-0">' . $notif['message'] . '</p>';
@@ -146,9 +182,9 @@ $can_manage_roles = $user['can_manage_roles'] ?? false;
                 echo '</div>';
             }
         }
-        ?>
-        <?php endif; ?>
-    </div>
+    }
+    ?>
+</div>
 </li>
 
         </ul>
