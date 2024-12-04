@@ -10,6 +10,8 @@ if (!isset($_SESSION['role_name']) || !isset($_SESSION['employee_id'])) {
 $role_name = $_SESSION['role_name'];
 $employee_id = $_SESSION['employee_id'];
 
+$activePage = 'employee_dashboard';
+
 $name = '';
 $query = "SELECT lastname FROM employees WHERE employee_id = ?";
 if ($stmt = $conn->prepare($query)) {
@@ -46,9 +48,9 @@ include 'layout/header.php';
                             <div class="card custom-border">
                                 <div class="card-body">
                                     <div class="m-0">No announcement for today.</div>
-
+                                    
                                     <div class="d-flex justify-content-end">
-                                    <?php if ($role_name !== 'employee' || $role_name !== 'admin'): ?>
+                                    <?php if ($role_name === 'Super Admin' || $role_name === 'HR Admin'): ?>
                                     <button class="btn btn-primary announce-btn" id="announce-btn">Announcement</button>
                                     <?php endif; ?>
                                 </div>
