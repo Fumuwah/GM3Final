@@ -30,16 +30,17 @@ include 'layout/header.php';
 <div class="d-flex align-items-stretch">
     <?php include 'layout/sidebar.php'; ?>
     <div class="main" style="max-height: calc(100vh - 80px);overflow-y:scroll">
-    <div class="container-fluid">
-    <div class="d-flex justify-content-between align-items-center mb-2">
-        <h2>Hello <?php echo htmlspecialchars($name); ?>!</h2>
-        <div>
-            <button class="btn btn-success mr-2">Time-In</button>
-            <button class="btn btn-danger">Time-Out</button>
-        </div>
-    </div>
-</div>
-
+        <div class="container-fluid pl-5">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h2>Hello <?php echo htmlspecialchars($name); ?>!</h2>
+                    <div>
+                        <form method="POST" action="">
+                            <input type="hidden" name="employee_id" value="<?php echo $_SESSION['employee_id']; ?>">
+                            <button type="submit" name="action" value="time_in" class="btn btn-success mr-2">Time-In</button>
+                            <button type="submit" name="action" value="time_out" class="btn btn-danger">Time-Out</button>
+                        </form>
+                    </div>
+            </div>
             <div class="row">
                 <div class="col-12 col-lg-8 pt-3 pt-md-0">
                     <div class="row numbers-of">
@@ -78,6 +79,9 @@ include 'layout/header.php';
                                         $stmt->execute();
                                         $stmt->bind_result($date, $time_in, $time_out);
                                         while ($stmt->fetch()) {
+                                            $formatted_time_in = $time_in ? date("h:i A", strtotime($time_in)) : "-";
+                                            $formatted_time_out = $time_out ? date("h:i A", strtotime($time_out)) : "-";
+                                            
                                             $time_in_status = strtotime($time_in);
                                             if ($time_in_status < strtotime("07:00:00")) {
                                                 $status = "Early";
@@ -86,14 +90,15 @@ include 'layout/header.php';
                                             } else {
                                                 $status = "Late";
                                             }
-                                            
+                                        
                                             echo "<tr>
                                                     <td>{$date}</td>
-                                                    <td>{$time_in}</td>
-                                                    <td>{$time_out}</td>
+                                                    <td>{$formatted_time_in}</td>
+                                                    <td>{$formatted_time_out}</td>
                                                     <td>{$status}</td>
                                                 </tr>";
                                         }
+                                        
                                         $stmt->close();
                                         ?>
                                     </tbody>
@@ -118,9 +123,9 @@ include 'layout/header.php';
                                         <?php
                                          $query = "SELECT start_date, end_date, leave_type, reason 
                                          FROM leave_requests 
-                                         WHERE employee_id = ? 
+                                         WHERE employee_id = ? AND status = 'Approved' 
                                          ORDER BY start_date DESC 
-                                         LIMIT 3";
+                                         LIMIT 3";                               
                                          $stmt = $conn->prepare($query);
                                          $stmt->bind_param("i", $employee_id);
                                          $stmt->execute();
@@ -154,7 +159,7 @@ include 'layout/header.php';
                 <div class="col-12 col-lg-4 pt-3 pt-md-0">
                     <?php include 'database.php'; ?>
 
-                    <div class="card birthday-container mt-2">
+                    <div class="card birthday-container mt-2 custom-border">
                         <div class="card-header font-weight-bold">
                             Birthdays
                         </div>
@@ -209,6 +214,7 @@ include 'layout/header.php';
         </div>
     </div>
 </div>
+
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>

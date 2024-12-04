@@ -119,18 +119,23 @@ if (isset($_GET['token'])) {
             <?php echo $display; ?>
             <?php if (isset($resetRequest)): ?>
                 <form action="" method="POST" class="mt-4">
-                    <label for="new_password">New Password:</label>
-                    <input type="password" name="new_password" required>
-                    <img src="./assets/images/eye.png" style="position:absolute; width:21px; cursor:pointer; right:10px; top:9px;" id="eye">
-                    <button type="submit" name="reset_password" class="btn btn-primary">Reset Password</button>
+                    <div class="form-group">
+                        <label for="new_password">New Password:</label>
+                        <div class="position-relative">
+                            <input type="password" id="new_password" name="new_password" class="form-control mt-1" required>
+                            <img src="./assets/images/eye.png" style="position:absolute; width:21px; cursor:pointer; right:10px; top:9px;" id="eye">
+                        </div>
+                    </div>
+                    <button type="submit" name="reset_password" class="btn btn-primary mt-3 w-100">Reset Password</button>
                 </form>
             <?php endif; ?>
         </div>
     </div>
 
+
     <script>
         let eye = document.querySelector('#eye');
-        let password = document.querySelector('#password');
+        let password = document.querySelector('#new_password');
         let seePassword = false;
         eye.addEventListener('click', function() {
             seePassword = !seePassword;

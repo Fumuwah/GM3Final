@@ -195,7 +195,6 @@ session_start();
                         <input type="password" class="form-control" name="password" placeholder="Password" id="password">
                         <img src="./assets/images/eye.png" style="position:absolute; width:21px; cursor:pointer; right:10px; top:9px;" id="eye">
                     </div>
-
                 </div>
                 <div class="">
                     <p class="py-2 m-0">Have you <a href="forgot_password.php">forgot your password</a>?</p>

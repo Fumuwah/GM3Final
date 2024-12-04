@@ -29,8 +29,9 @@ try {
         throw new Exception("This leave request has already been approved.");
     }
 
+    // Fetch leave request details, including start_date and end_date
     $query = "
-        SELECT lr.employee_id, lr.leave_type, DATEDIFF(lr.end_date, lr.start_date) + 1 AS leave_days
+        SELECT lr.employee_id, lr.leave_type, lr.start_date, lr.end_date, DATEDIFF(lr.end_date, lr.start_date) + 1 AS leave_days
         FROM leave_requests lr
         WHERE lr.request_id = ?
     ";
@@ -46,6 +47,8 @@ try {
     $leave_request = $result->fetch_assoc();
     $employee_id = $leave_request['employee_id'];
     $leave_type = strtolower($leave_request['leave_type']);
+    $start_date = $leave_request['start_date'];
+    $end_date = $leave_request['end_date'];
     $leave_days = $leave_request['leave_days'];
 
     $leave_balance_query = "SELECT sick_leave, vacation_leave, leave_without_pay FROM leaves WHERE employee_id = ?";
@@ -97,24 +100,51 @@ try {
         throw new Exception("Error updating leave balances: " . $update_leave_stmt->error);
     }
 
-    $approve_query = "UPDATE leave_requests SET status = 'Approved' WHERE request_id = ?";
-    $approve_stmt = $conn->prepare($approve_query);
-    $approve_stmt->bind_param("i", $request_id);
+ // Approve the leave request
+ $approve_query = "UPDATE leave_requests SET status = 'Approved' WHERE request_id = ?";
+ $approve_stmt = $conn->prepare($approve_query);
+ $approve_stmt->bind_param("i", $request_id);
 
-    if (!$approve_stmt->execute()) {
-        throw new Exception("Error approving leave request: " . $approve_stmt->error);
-    }
+ if (!$approve_stmt->execute()) {
+     throw new Exception("Error approving leave request: " . $approve_stmt->error);
+ }
 
-    $conn->commit();
-    echo "Leave request approved and leave balance updated successfully.";
+ // Insert leave dates into DTR
+ $current_date = new DateTime($start_date); // Start from the exact start date
+ $end_date_obj = new DateTime($end_date);   // End on the exact end date
+ $time_in = "07:00:00";
+ $time_out = "16:00:00";
+ $total_hrs = 9; // Total hours from 7:00 AM to 4:00 PM
+
+ while ($current_date <= $end_date_obj) {
+     $formatted_date = $current_date->format('Y-m-d'); // Format as YYYY-MM-DD
+     $year = $current_date->format('Y');
+     $month = $current_date->format('m');
+     $day = $current_date->format('d');
+
+     $insert_dtr_query = "
+         INSERT INTO dtr (employee_id, date, year, month, day, time_in, time_out, total_hrs)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+     ";
+     $insert_dtr_stmt = $conn->prepare($insert_dtr_query);
+     $insert_dtr_stmt->bind_param("ississsi", $employee_id, $formatted_date, $year, $month, $day, $time_in, $time_out, $total_hrs);
+
+     if (!$insert_dtr_stmt->execute()) {
+         throw new Exception("Error inserting into DTR: " . $insert_dtr_stmt->error);
+     }
+
+     // Move to the next day
+     $current_date->modify('+1 day');
+ }
+
+ $conn->commit();
+ echo "Leave request approved, leave balance updated, and DTR updated successfully.";
 } catch (Exception $e) {
-    $conn->rollback();
-    echo "Error: " . $e->getMessage();
+ $conn->rollback();
+ echo "Error: " . $e->getMessage();
 }
 
 $stmt->close();
-$balance_stmt->close();
-$update_leave_stmt->close();
 $approve_stmt->close();
 $conn->close();
 

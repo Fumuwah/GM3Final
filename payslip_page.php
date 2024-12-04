@@ -47,6 +47,9 @@ if ($role_name === "Admin") {
     $conditions[] = "( pr.employee_id = :employee_id )";
     // $conditions[] = "(pr.employee_id = :employee_id)";
 }
+if ($role_name === "HR Admin") {
+    $conditions[] = "pr.employee_id = :employee_id";
+}
 
 // Add conditions for month, year, and days filters if set
 if (!empty($month_filter)) {
@@ -74,6 +77,9 @@ $stmt = $pdo->prepare($query);
 
 // Bind parameters for filtering
 if ($role_name === "Super Admin") {
+    $stmt->bindParam(':employee_id', $employee_id, PDO::PARAM_INT);
+}
+if ($role_name === "HR Admin") {
     $stmt->bindParam(':employee_id', $employee_id, PDO::PARAM_INT);
 }
 
@@ -116,6 +122,9 @@ $totalStmt = $pdo->prepare($totalQuery);
 
 // Bind parameters for total count
 if ($role_name === "Super Admin") {
+    $totalStmt->bindParam(':employee_id', $employee_id, PDO::PARAM_INT);
+}
+if ($role_name === "HR Admin") {
     $totalStmt->bindParam(':employee_id', $employee_id, PDO::PARAM_INT);
 }
 if ($role_name === "Employee") {
