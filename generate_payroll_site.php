@@ -342,13 +342,14 @@ include './layout/header.php';
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        
-        const editBtn = document.querySelectorAll('.edit-btn');
-        const editPayrollModal = document.querySelector('#edit-modal');
-        var closeModalForm = document.querySelectorAll('.closeW-modal');
 
-        editBtn.forEach((btn) => {
-            btn.addEventListener('click', function() {
+    const editBtn = document.querySelectorAll('.edit-btn');
+    const editPayrollModal = document.querySelector('#edit-modal');
+    var closeModalForm = document.querySelectorAll('.closeW-modal');
+
+    // Event listener for the edit button to show the modal
+    editBtn.forEach((btn) => {
+        btn.addEventListener('click', function() {
             const payrollId = this.getAttribute('data-id');
             const cashAdv = this.getAttribute('data-cash-adv');
             const allowance = this.getAttribute('data-allowance');
@@ -364,6 +365,7 @@ include './layout/header.php';
         });
     });
 
+    // Event listener for closing the modal
     closeModalForm.forEach((d) => {
         d.addEventListener('click', function(i) {
             var modalParent = d.closest('.modal');
@@ -374,8 +376,62 @@ include './layout/header.php';
         });
     });
 
-    });
+    // Handle payroll update on form submit
+    const updateForm = document.querySelector('#edit-payroll-form');
+    if (updateForm) {
+        updateForm.addEventListener('submit', function(event) {
+            event.preventDefault();
 
+            const payrollId = document.getElementById('payroll_id').value;
+            const cashAdv = parseFloat(document.getElementById('edit_cash_adv').value);
+            const allowance = parseFloat(document.getElementById('edit_allowance').value);
+            const otherDeduc = parseFloat(document.getElementById('edit_other_deduc').value);
+
+            // Gather current values from the modal form
+            const originalCashAdv = parseFloat(document.getElementById('edit_cash_adv').dataset.originalCashAdv);
+            const originalAllowance = parseFloat(document.getElementById('edit_allowance').dataset.originalAllowance);
+            const originalOtherDeduc = parseFloat(document.getElementById('edit_other_deduc').dataset.originalOtherDeduc);
+
+            // Check if there are changes
+            if (cashAdv !== originalCashAdv || allowance !== originalAllowance || otherDeduc !== originalOtherDeduc) {
+                // Calculate the new values for gross, total_deduc, and netpay
+                const gross = (allowance + (otherDeduc * 8)); // Example formula, adjust as needed
+                const totalDeduc = otherDeduc + cashAdv; // Example formula, adjust as needed
+                const netpay = gross - totalDeduc; // Calculate netpay
+
+                // Send data to the backend (edit_payroll.php)
+                fetch('edit_payroll.php', {
+                    method: 'POST',
+                    body: new URLSearchParams({
+                        payroll_id: payrollId,
+                        cash_adv: cashAdv,
+                        allowance: allowance,
+                        other_deduc: otherDeduc,
+                        gross: gross,
+                        total_deduc: totalDeduc,
+                        netpay: netpay
+                    }),
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert("Payroll updated successfully!");
+                        location.reload(); // Reload the page to reflect changes
+                    } else {
+                        alert("Failed to update payroll.");
+                    }
+                })
+                .catch(error => console.error('Error updating payroll:', error));
+            } else {
+                alert("No changes detected.");
+            }
+        });
+    }
+
+    });
 
 </script>
 
