@@ -29,20 +29,26 @@ $role_name = strtolower($user['role_name'] ?? '');
 $project_name = $user['project_name'] ?? '';
 
 // Construct the query to fetch unread notifications
-$notification_query = "SELECT * FROM notification WHERE is_read = 0";
+$notification_query = "
+    SELECT n.*, e.project_name
+    FROM notification n
+    JOIN employees e ON n.employee_id = e.employee_id
+    LEFT JOIN projects p ON e.project_name = p.project_name
+    WHERE n.is_read = 0
+";
 
 // Add conditions based on the user's role
 if ($role_name == 'super admin') {
-    $notification_query .= " AND message != 'Your leave request has been approved.'"; // Exclude approved leave requests for Super Admin
+    $notification_query .= " AND n.message != 'Your leave request has been approved.'"; // Exclude approved leave requests for Super Admin
 } elseif ($role_name == 'hr admin') {
-    $notification_query .= " AND (message != 'Your leave request has been approved.' OR employee_id = $employee_id)"; // HR Admin sees their own approved requests
+    $notification_query .= " AND (n.message != 'Your leave request has been approved.' OR n.employee_id = $employee_id)"; // HR Admin sees their own approved requests
 } elseif ($role_name == 'admin') {
-    $notification_query .= " AND (employee_id = $employee_id OR project_name = '$project_name')"; // Admin sees approved leave requests of employees under the same project
+    $notification_query .= " AND (n.employee_id = $employee_id OR e.project_name = '$project_name')"; // Admin sees approved leave requests of employees under the same project
 } elseif ($role_name == 'employee') {
-    $notification_query .= " AND employee_id = $employee_id"; // Employee sees their own leave requests
+    $notification_query .= " AND n.employee_id = $employee_id"; // Employee sees their own leave requests
 }
 
-$notification_query .= " ORDER BY timestamp DESC";
+$notification_query .= " ORDER BY n.timestamp DESC";
 
 $notification_prep = mysqli_prepare($conn, $notification_query);
 mysqli_stmt_execute($notification_prep);
@@ -52,17 +58,20 @@ $notifs = mysqli_fetch_all($resultnotification, MYSQLI_ASSOC);
 // Count unread notifications based on the same conditions
 $unread_query = "
     SELECT COUNT(*) AS unread_count 
-    FROM notification 
-    WHERE is_read = 0";
+    FROM notification n
+    JOIN employees e ON n.employee_id = e.employee_id
+    LEFT JOIN projects p ON e.project_name = p.project_name
+    WHERE n.is_read = 0
+";
 
 if ($role_name == 'super admin') {
-    $unread_query .= " AND message != 'Your leave request has been approved.'"; // Exclude approved leave requests for Super Admin
+    $unread_query .= " AND n.message != 'Your leave request has been approved.'"; // Exclude approved leave requests for Super Admin
 } elseif ($role_name == 'hr admin') {
-    $unread_query .= " AND (message != 'Your leave request has been approved.' OR employee_id = $employee_id)"; // HR Admin sees their own approved requests
+    $unread_query .= " AND (n.message != 'Your leave request has been approved.' OR n.employee_id = $employee_id)"; // HR Admin sees their own approved requests
 } elseif ($role_name == 'admin') {
-    $unread_query .= " AND (employee_id = $employee_id OR project_name = '$project_name')"; // Admin sees approved leave requests of employees under the same project
+    $unread_query .= " AND (n.employee_id = $employee_id OR e.project_name = '$project_name')"; // Admin sees approved leave requests of employees under the same project
 } elseif ($role_name == 'employee') {
-    $unread_query .= " AND employee_id = $employee_id"; // Employee sees their own leave requests
+    $unread_query .= " AND n.employee_id = $employee_id"; // Employee sees their own leave requests
 }
 
 $result_unread = mysqli_query($conn, $unread_query);
@@ -78,6 +87,7 @@ $can_view_team_data = $user['can_view_team_data'] ?? false;
 $can_edit_data = $user['can_edit_data'] ?? false;
 $can_manage_roles = $user['can_manage_roles'] ?? false;
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -329,17 +339,19 @@ $can_manage_roles = $user['can_manage_roles'] ?? false;
     </script>
 
     <?php
-    // Handle the request to mark notification as read
-    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'])) {
-        $notif_id = $_POST['id'];
+    // Check if the request to mark a notification as read is made
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $data = json_decode(file_get_contents('php://input'), true);
+        if (isset($data['id'])) {
+            $notificationId = $data['id'];
 
-        // Update notification status
-        $update_query = "UPDATE notification SET is_read = 1 WHERE id = ?";
-        $update_stmt = mysqli_prepare($conn, $update_query);
-        mysqli_stmt_bind_param($update_stmt, 'i', $notif_id);
-        $result = mysqli_stmt_execute($update_stmt);
-
-        echo json_encode(['success' => $result]);
+            // Update the notification's is_read status to true
+            $update_query = "UPDATE notification SET is_read = 1 WHERE id = ?";
+            $stmt = $conn->prepare($update_query);
+            $stmt->bind_param("i", $notificationId);
+            $stmt->execute();
+            echo json_encode(['success' => true, 'message' => 'Notification marked as read.']);
+        }
         exit;
     }
     ?>
