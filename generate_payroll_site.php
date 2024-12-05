@@ -40,13 +40,29 @@ $totalRecords = $totalRow['total'] != null ? $totalRow['total'] : 0;
 $total_pages = ceil($totalRecords / $recordsPerPage);
 
 $query = "
-    SELECT e.employee_id AS employee_id, employee_number, e.firstname, e.middlename, e.lastname, 
-           pr.monthly, pr.allowance, pr.total_hrs, pr.other_ot, pr.other_deduc, pr.payroll_id,
-           pr.gross, pr.cash_adv, pr.total_deduc, pr.netpay, e.daily_salary, e.basic_salary
-    FROM payroll pr
-    LEFT JOIN employees e ON e.employee_id = pr.employee_id
+    SELECT 
+        e.employee_id AS employee_id, 
+        e.employee_number, 
+        e.firstname, 
+        e.middlename, 
+        e.lastname, 
+        pr.monthly, 
+        pr.allowance, 
+        pr.total_hrs, 
+        pr.other_ot, 
+        pr.other_deduc, 
+        pr.payroll_id,
+        pr.gross, 
+        pr.cash_adv, 
+        pr.total_deduc, 
+        pr.netpay, 
+        e.daily_salary, 
+        e.basic_salary
+    FROM employees e
+    JOIN payroll pr ON e.employee_id = pr.employee_id
     WHERE (e.firstname LIKE :search OR e.lastname LIKE :search OR e.employee_number LIKE :search)
 ";
+
 
 $params = [':search' => '%' . $search . '%'];
 
@@ -219,34 +235,58 @@ include './layout/header.php';
             <div class="modal-header">
                 <h5 class="modal-title" id="payrollModalLabel">Generate Payroll</h5>
             </div>
-            <div class="modal-body">
-                <form id="payrollForm" method="POST" autocomplete="off">
-                    <div class="col-4">Payroll Period:</div>
-                    <div class="form-group div form-row align-items-center">
-                        <div class="col-6">
-                            <input type="date" class="form-control" placeholder="From" name="fromDay" id="fromDay" required>
+                <div class="modal-body">
+                    <form id="payrollForm" method="POST" autocomplete="off">
+                        <div class="col-4">Payroll Period:</div>
+                        <div class="form-group div form-row align-items-center">
+                            <div class="col-6">
+                                <input type="date" class="form-control" placeholder="From" name="fromDay" id="fromDay" required>
+                            </div>
+                            <div class="col-6">
+                                <input type="date" class="form-control" placeholder="To" name="toDay" id="toDay" required>
+                            </div>
                         </div>
-                        <div class="col-6">
-                            <input type="date" class="form-control" placeholder="To" name="toDay" id="toDay" required>
+                        <div class="col-15">
+                            <label for="employee_status">Employee Status:</label>
+                            <select name="employee_status" id="employee_status" class="form-control" required>
+                                <option value="">Select Employee Status</option>
+                                <option value="Regular">Regular</option>
+                                <option value="Contractual">Contractual</option>
+                            </select>
                         </div>
-                    </div>
-                    <div class="col-15">
-                        <label for="employee_status">Employee Status:</label>
-                        <select name="employee_status" id="employee_status" class="form-control" required>
-                            <option value="">Select Employee Status</option>
-                            <option value="Regular">Regular</option>
-                            <option value="Contractual">Contractual</option>
-                        </select>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary close-modal">Close</button>
-                        <button type="button" class="btn btn-primary" id="generatePayrollBtn">Submit</button>
-                    </div>
-                </form>
+                        <div class="col-15 mt-3">
+                            <label for="role_name">Role:</label>
+                            <select name="role_name" id="role_name" class="form-control" required>
+                                <option value="">Select Role</option>
+                                <option value="1">Super Admin</option>
+                                <option value="2">HR Admin</option>
+                                <option value="3">Admin</option>
+                                <option value="4">Employee</option>
+                            </select>
+                        </div>
+
+                        <div class="col-15 mt-3">
+                            <label for="project_name">Project:</label>
+                            <select name="project_name" id="project_name" class="form-control">
+                                <option value="">Select Project</option>
+                                <?php foreach ($projects as $project): ?>
+                                    <option value="<?php echo htmlspecialchars($project['project_name']); ?>">
+                                        <?php echo htmlspecialchars($project['project_name']); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary close-modal">Close</button>
+                            <button type="button" class="btn btn-primary" id="generatePayrollBtn">Submit</button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
-</div>
+
 
 <div class="modal fade" id="edit-modal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
@@ -310,24 +350,69 @@ include './layout/header.php';
         });
     });
 
+    // Event listener for when the role is selected
+    document.getElementById('role_name').addEventListener('change', function() {
+        const roleId = this.value;
+        const projectField = document.getElementById('project_name');
+
+        // Check if the selected role requires the project field
+        if (roleId === '4') {  // '4' is Employee role
+            projectField.setAttribute('required', true);  // Make project required
+        } else {
+            projectField.removeAttribute('required');  // Make project not required for other roles
+        }
+    });
+
     document.getElementById('generatePayrollBtn').addEventListener('click', function () {
-    const fromDay = document.getElementById('fromDay').value;
-    const toDay = document.getElementById('toDay').value;
-    const employeeStatus = document.getElementById('employee_status').value;
+        const fromDay = document.getElementById('fromDay').value;
+        const toDay = document.getElementById('toDay').value;
+        const employeeStatus = document.getElementById('employee_status').value;
+        const roleId = document.getElementById('role_name').value; // This is role_id in your form
+        const projectName = document.getElementById('project_name').value; // Get project_name value
 
-    if (!fromDay || !toDay || !employeeStatus) {
-        alert("Please fill out all fields.");
-        return;
-    }
+        // Validate the fields
+        if (!fromDay || !toDay || !employeeStatus || !roleId || (roleId === '4' && !projectName)) {
+            alert("Please fill out all required fields.");
+            return;
+        }
 
-    fetch('generate_payroll.php', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ fromDay, toDay, employeeStatus }),
-    })
-});
+        // Map role_id to role_name (you can modify this to fit your role names and ids)
+        const roleMap = {
+            '1': 'Super Admin',
+            '2': 'HR Admin',
+            '3': 'Admin',
+            '4': 'Employee',
+            // Add more role mappings if needed
+        };
+
+        const roleName = roleMap[roleId];
+
+        if (!roleName) {
+            alert("Invalid role selected.");
+            return;
+        }
+
+        fetch('generate_payroll.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ fromDay, toDay, employeeStatus, roleName, projectName }), // Include project_name
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert("Payroll generated successfully!");
+                window.location.reload();
+            } else {
+                alert(data.message || "Failed to generate payroll. Please try again.");
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert("An error occurred.");
+        });
+    });
 
     document.querySelectorAll('.close-modal').forEach(btn => {
         btn.addEventListener('click', () => {

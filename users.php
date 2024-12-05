@@ -81,7 +81,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['employee_id'])) {
         $current_role_id = $row['role_id'];
 
         // Role transition rules
-        $admin_roles = [4, 2]; // HR Admin (4) and Admin (2)
+        $admin_roles = [2, 3]; // HR Admin (4) and Admin (2)
 
         // Prevent downgrading HR Admin or Admin to non-admin roles
         if (in_array($current_role_id, $admin_roles) && !in_array($new_role_id, $admin_roles)) {

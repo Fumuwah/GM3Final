@@ -1,6 +1,5 @@
 <?php
 session_start();
-
 include 'database.php';
 
 if (!isset($_SESSION['role_name']) || !isset($_SESSION['employee_id'])) {
@@ -15,10 +14,11 @@ if (!isset($_GET['request_id'])) {
 }
 
 $request_id = $_GET['request_id'];
+$approver_id = $_SESSION['employee_id']; // Get the approver's ID from session
 $conn->begin_transaction();
 
 try {
-    $check_query = "SELECT status FROM leave_requests WHERE request_id = ?";
+    $check_query = "SELECT status, employee_id FROM leave_requests WHERE request_id = ?";
     $check_stmt = $conn->prepare($check_query);
     $check_stmt->bind_param("i", $request_id);
     $check_stmt->execute();
@@ -100,52 +100,74 @@ try {
         throw new Exception("Error updating leave balances: " . $update_leave_stmt->error);
     }
 
- // Approve the leave request
- $approve_query = "UPDATE leave_requests SET status = 'Approved' WHERE request_id = ?";
- $approve_stmt = $conn->prepare($approve_query);
- $approve_stmt->bind_param("i", $request_id);
+    // Approve the leave request
+    $approve_query = "UPDATE leave_requests SET status = 'Approved' WHERE request_id = ?";
+    $approve_stmt = $conn->prepare($approve_query);
+    $approve_stmt->bind_param("i", $request_id);
 
- if (!$approve_stmt->execute()) {
-     throw new Exception("Error approving leave request: " . $approve_stmt->error);
- }
+    if (!$approve_stmt->execute()) {
+        throw new Exception("Error approving leave request: " . $approve_stmt->error);
+    }
 
- // Insert leave dates into DTR
- $current_date = new DateTime($start_date); // Start from the exact start date
- $end_date_obj = new DateTime($end_date);   // End on the exact end date
- $time_in = "07:00:00";
- $time_out = "16:00:00";
- $total_hrs = 9; // Total hours from 7:00 AM to 4:00 PM
+    // Insert notification for the employee who requested the leave
+    $notification_message_requester = "Your leave request has been approved.";
+    $notification_query_requester = "INSERT INTO notification (employee_id, message, request_type, is_read, timestamp) VALUES (?, ?, 'leave_request', 0, NOW())";
+    $notification_stmt_requester = $conn->prepare($notification_query_requester);
+    $notification_stmt_requester->bind_param("is", $employee_id, $notification_message_requester);
 
- while ($current_date <= $end_date_obj) {
-     $formatted_date = $current_date->format('Y-m-d'); // Format as YYYY-MM-DD
-     $year = $current_date->format('Y');
-     $month = $current_date->format('m');
-     $day = $current_date->format('d');
+    if (!$notification_stmt_requester->execute()) {
+        throw new Exception("Error inserting notification for requester: " . $notification_stmt_requester->error);
+    }
 
-     $insert_dtr_query = "
-         INSERT INTO dtr (employee_id, date, year, month, day, time_in, time_out, total_hrs)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-     ";
-     $insert_dtr_stmt = $conn->prepare($insert_dtr_query);
-     $insert_dtr_stmt->bind_param("ississsi", $employee_id, $formatted_date, $year, $month, $day, $time_in, $time_out, $total_hrs);
+    // Insert notification for the employee who approved the leave
+    $notification_message_approver = "You have approved a leave request.";
+    $notification_query_approver = "INSERT INTO notification (employee_id, message, request_type, is_read, timestamp) VALUES (?, ?, 'leave_request', 0, NOW())";
+    $notification_stmt_approver = $conn->prepare($notification_query_approver);
+    $notification_stmt_approver->bind_param("is", $approver_id, $notification_message_approver);
 
-     if (!$insert_dtr_stmt->execute()) {
-         throw new Exception("Error inserting into DTR: " . $insert_dtr_stmt->error);
-     }
+    if (!$notification_stmt_approver->execute()) {
+        throw new Exception("Error inserting notification for approver: " . $notification_stmt_approver->error);
+    }
 
-     // Move to the next day
-     $current_date->modify('+1 day');
- }
+    // Insert leave dates into DTR
+    $current_date = new DateTime($start_date); // Start from the exact start date
+    $end_date_obj = new DateTime($end_date);   // End on the exact end date
+    $time_in = "07:00:00";
+    $time_out = "16:00:00";
+    $total_hrs = 9; // Total hours from 7:00 AM to 4:00 PM
 
- $conn->commit();
- echo "Leave request approved, leave balance updated, and DTR updated successfully.";
+    while ($current_date <= $end_date_obj) {
+        $formatted_date = $current_date->format('Y-m-d'); // Format as YYYY-MM-DD
+        $year = $current_date->format('Y');
+        $month = $current_date->format('m');
+        $day = $current_date->format('d');
+
+        $insert_dtr_query = "
+            INSERT INTO dtr (employee_id, date, year, month, day, time_in, time_out, total_hrs)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        ";
+        $insert_dtr_stmt = $conn->prepare($insert_dtr_query);
+        $insert_dtr_stmt->bind_param("ississsi", $employee_id, $formatted_date, $year, $month, $day, $time_in, $time_out, $total_hrs);
+
+        if (!$insert_dtr_stmt->execute()) {
+            throw new Exception("Error inserting into DTR: " . $insert_dtr_stmt->error);
+        }
+
+        // Move to the next day
+        $current_date->modify('+1 day');
+    }
+
+    $conn->commit();
+    echo "Leave request approved, leave balance updated, and DTR updated successfully.";
 } catch (Exception $e) {
- $conn->rollback();
- echo "Error: " . $e->getMessage();
+    $conn->rollback();
+    echo "Error: " . $e->getMessage();
 }
 
 $stmt->close();
 $approve_stmt->close();
+$notification_stmt_requester->close();
+$notification_stmt_approver->close();
 $conn->close();
 
 header("Location: hr-leaves-page.php");

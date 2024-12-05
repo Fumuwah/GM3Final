@@ -1,14 +1,32 @@
 <?php
 session_start();
 include('database.php');
+include('handleAttendance.php');
 
 if (!isset($_SESSION['role_name']) || !isset($_SESSION['employee_id'])) {
     header("Location: login.php");
     exit();
 }
 
+date_default_timezone_set('Asia/Manila');
+
 $role_name = $_SESSION['role_name'];
 $employee_id = $_SESSION['employee_id'];
+
+$employee_id = $_SESSION['employee_id'];
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $employee_id = $_SESSION['employee_id']; // Get employee_id from form data or session
+    $action = $_POST['action']; // 'time_in' or 'time_out'
+
+    $message = handleAttendance($employee_id, $action, $conn);
+    echo "<script>alert('$message');</script>";
+
+    // Redirect to prevent form re-submission on page reload
+    header("Location: " . $_SERVER['PHP_SELF']);
+    exit(); // Make sure to call exit after redirect
+}
+
+
 
 $activePage = 'employee_dashboard';
 
@@ -48,8 +66,25 @@ include 'layout/header.php';
                             <h3>Announcement</h3>
                             <div class="card custom-border">
                                 <div class="card-body">
-                                    <div class="m-0">No announcement for today.</div>
-                                    
+                                <?php
+                                    $announcements_query = "SELECT a.message, a.created_at, e.firstname, e.lastname 
+                                                            FROM announcements a 
+                                                            JOIN employees e ON a.created_by = e.employee_id 
+                                                            ORDER BY a.created_at DESC LIMIT 1";
+
+                                    $result = $conn->query($announcements_query);
+
+                                    if ($result->num_rows > 0) {
+                                        while ($row = $result->fetch_assoc()) {
+                                            echo "<div class='announcement-item'>";
+                                            echo "<p><strong>" . htmlspecialchars($row['message']) . "</strong></p>";
+                                            echo "<p><small>Posted by: " . htmlspecialchars($row['firstname']) . " " . htmlspecialchars($row['lastname']) . " on " . htmlspecialchars($row['created_at']) . "</small></p>";
+                                            echo "</div>";
+                                        }
+                                    } else {
+                                        echo "<div class='m-0'>No announcements for today.</div>";
+                                    }
+                                    ?>
                                     <div class="d-flex justify-content-end">
                                     <?php if ($role_name === 'Super Admin' || $role_name === 'HR Admin'): ?>
                                     <button class="btn btn-primary announce-btn" id="announce-btn">Announcement</button>

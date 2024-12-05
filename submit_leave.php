@@ -34,11 +34,17 @@ try {
         $user = mysqli_fetch_array($userqueryresult, MYSQLI_ASSOC);
 
 
-        $notification = $conn->prepare("INSERT INTO notification (message, request_type) VALUES (?, ?)");
+        $notification = $conn->prepare("INSERT INTO notification (employee_id, message, request_type) VALUES (?, ?, ?)");
         $message = $user['firstname'] . ' ' . $user['lastname'] . " Request Leave Approval";
         $notif_type = "leave_request";
-        $notification->bind_param('ss', $message, $notif_type);
-        $notification->execute();
+
+        // Bind the employee_id (integer), message (string), and notification type (string)
+        $notification->bind_param('iss', $employee_id, $message, $notif_type);
+
+        // Execute the query
+        if (!$notification->execute()) {
+            throw new Exception("Error inserting notification: " . $notification->error);
+        }
 
         echo json_encode(['status' => 'success']);
     } else {

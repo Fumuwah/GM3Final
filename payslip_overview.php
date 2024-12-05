@@ -11,7 +11,7 @@ if (!isset($_SESSION['role_name']) || !isset($_SESSION['employee_id'])) {
 $payslipID = $_GET['pid'];
 $query = "SELECT pr.payroll_id, e.firstname, e.middlename, e.lastname, 
         pr.payroll_period, e.project_name, e.employee_number,  ps.position_name, 
-        pr.totalHrs, pr.allowance, pr.gross,
+        pr.totalHrs, pr.allowance, pr.gross, pr.cash_adv,
         e.withhold_tax, e.sss_con, e.philhealth_con, e.pag_ibig_con, pr.other_deduc,
         pr.total_deduc, pr.netpay, pr.netpay
         FROM payroll pr 
@@ -207,7 +207,10 @@ include './layout/header.php';
                 </div>
                 <div class="d-flex gap-5">
                     <p class="p-10 bg-gray" style="flex: 1 1 20%;">Others</p>
-                    <p class="p-10 bg-gray" style="flex: 1 1 80%;"><?php echo $payslip['other_deduc'] ?></p>
+                    <p class="p-10 bg-gray" style="flex: 1 1 80%;"><?php 
+                        $total_other_deduc = $payslip['other_deduc'] + $payslip['cash_adv'];
+                        echo $total_other_deduc;
+                    ?></p>
                 </div>
                 <div class="d-flex gap-5">
                     <p class="p-10 bg-blue text-white" style="flex: 1 1 20%;"><strong>Total Deduction</strong></p>

@@ -1243,24 +1243,37 @@ include './layout/header.php';
         });
     });
     document.addEventListener('DOMContentLoaded', function () {
-    const employeeStatusSelect = document.getElementById('edit_employee_status_select');
+    const employeeStatus = document.getElementById('edit_employee_status_select');
+    const basicSalary = document.getElementById('edit_basic_salary');
     const deductionsSection = document.getElementById('deductions-section');
 
-    function toggleDeductions() {
-        if (employeeStatusSelect.value === 'Contractual') {
-            deductionsSection.style.display = 'none';
+        // Function to toggle visibility for Basic Salary and Deductions sections
+        function toggleVisibility() {
+        if (employeeStatus && employeeStatus.value === "Contractual") {
+            // Hide Basic Salary field
+            basicSalary.parentElement.style.display = "none";
+            basicSalary.value = ""; // Clear the value if hidden
+
+            // Hide Deductions section
+            deductionsSection.style.display = "none";
         } else {
-            deductionsSection.style.display = 'block';
+            // Show Basic Salary field
+            basicSalary.parentElement.style.display = "";
+
+            // Show Deductions section
+            deductionsSection.style.display = "block";
         }
     }
 
-    // Event listener for modal shown
-    $('#edit-modal').on('show.bs.modal', function () {
-        toggleDeductions(); // Check the status when the modal is opened
-    });
+    // Add event listeners
+    if (employeeStatus) {
+        employeeStatus.addEventListener("change", toggleVisibility);
+    } else {
+        console.error("Employee status field not found in the DOM.");
+    }
 
     // Listen for changes in the employee_status field
-    employeeStatusSelect.addEventListener('change', toggleDeductions);
+    toggleVisibility();
 });
 
 </script>
@@ -1328,7 +1341,7 @@ document.addEventListener("DOMContentLoaded", function () {
 </script>
 
 
-<?php if ($_SESSION['role_name'] == "Super Admin") { ?>
+<?php if ($_SESSION['role_name'] == "Super Admin" || $_SESSION['role_name'] == 'HR Admin') { ?>
 
     <script>
         var addEmployeeModal = document.querySelector('#add-employee-modal');

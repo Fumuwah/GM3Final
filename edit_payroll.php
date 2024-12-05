@@ -8,7 +8,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $allowance = $_POST['allowance'];
     $otherDeduc = $_POST['other_deduc'];
 
-    // Step 1: Get the current values from the payroll table, and also join with employees table to get daily_salary
+    // Step 1: Get the current values from the payroll table, and also join with employees table to get daily_salary and deductions
     $selectQuery = "
         SELECT 
             payroll.cash_adv, 
@@ -18,7 +18,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             payroll.gross, 
             payroll.total_deduc, 
             payroll.netpay, 
-            employees.daily_salary
+            employees.daily_salary,
+            employees.withhold_tax,
+            employees.sss_con,
+            employees.philhealth_con,
+            employees.pag_ibig_con
         FROM payroll 
         JOIN employees ON payroll.employee_id = employees.employee_id 
         WHERE payroll.payroll_id = :payroll_id
@@ -31,7 +35,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Step 2: Calculate the new values for gross, total_deduc, and netpay
     $gross = $currentValues['total_hrs'] * ($currentValues['daily_salary'] / 8) + $allowance;
-    $totalDeduc = $otherDeduc + $cashAdv;
+
+    // Calculate the total deductions
+    $totalDeduc = $otherDeduc + $cashAdv + 
+                  $currentValues['withhold_tax'] + 
+                  $currentValues['sss_con'] + 
+                  $currentValues['philhealth_con'] + 
+                  $currentValues['pag_ibig_con'];
+
     $netpay = $gross - $totalDeduc;
 
     // Debug: Log the calculated values

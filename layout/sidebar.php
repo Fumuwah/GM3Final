@@ -107,7 +107,7 @@ $activePage = $activePage ?? '';
                 </a>
             </li>
         <?php endif; ?>
-        <?php if ($can_edit_data || $role_name === 'super admin'): ?>
+        <?php if ($role_name === 'hr admin' || $role_name === 'super admin' || $role_name === 'admin'): ?>
             <li class="sidebar-item" style="">
                 <a class="sidebar-link has-dropdown collapsed" id="collapse2" data-bs-toggle="collapse" href="#" style="<?= ($activePage === 'payroll') || ($activePage === 'generate_payroll_site') ? 'background-color:rgba(0, 123, 255, 0.5);border-left: 3px solid #3b7ddd;' : ''; ?>">
                     <span>Payroll</span>

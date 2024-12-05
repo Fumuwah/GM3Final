@@ -15,6 +15,7 @@ function handleAttendance($employee_id, $action, $conn) {
     $result = $stmt->get_result();
     $attendance = $result->fetch_assoc();
 
+    // Handle the time-in and time-out actions
     if ($action === 'time_in') {
         if ($attendance) {
             if ($attendance['time_in']) {

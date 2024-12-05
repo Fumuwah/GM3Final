@@ -227,7 +227,6 @@ $activePage = 'dtr';
                             <?php
                             $session_role_name = $_SESSION['role_name'];
 
-                            
                             if (mysqli_num_rows($result_today) > 0) {
                                 $i = 1;
                                 while ($row = mysqli_fetch_assoc($result_today)) {
@@ -244,20 +243,17 @@ $activePage = 'dtr';
                                     } else {
                                         $today_hrs = 0;
                                     }
-                                    $overtime_threshold = 8;
 
-                                    if (!empty($row['time_in']) && !empty($row['time_out'])) {
-                                        $time_in = new DateTime($row['time_in']);
-                                        $time_out = new DateTime($row['time_out']);
-                                        $interval = $time_in->diff($time_out);
-                                        $today_hrs = $interval->h + ($interval->i / 60 - 1);
-
-                                        $today_ot = ($today_hrs > $overtime_threshold) ? $today_hrs - $overtime_threshold : 0;
-                                    } else {
-                                        $today_hrs = 0;
-                                        $today_ot = 0;
+                                    // Subtract 1 hour for lunch break if total hours exceed 8
+                                    if ($today_hrs > 8) {
+                                        $today_hrs -= 1; // Subtract 1 hour for lunch break
                                     }
 
+                                    // Calculate overtime (OT) if total hours exceed 8
+                                    $overtime_threshold = 8;
+                                    $today_ot = ($today_hrs > $overtime_threshold) ? $today_hrs - $overtime_threshold : 0;
+
+                                    // Update the DTR table with total_hrs and other_ot
                                     $update_sql = "UPDATE dtr 
                                                 SET total_hrs = ?, other_ot = ? 
                                                 WHERE employee_id = ? AND date = ?";
@@ -268,6 +264,7 @@ $activePage = 'dtr';
                                         die("Error updating total_hrs and other_ot: " . $update_stmt->error);
                                     }
 
+                                    // Retrieve other OT for this employee and date
                                     $sql = "SELECT time_in, time_out, other_ot FROM dtr 
                                                         WHERE employee_id = ? AND date < ?";
                                     $stmt = $conn->prepare($sql);
@@ -303,6 +300,7 @@ $activePage = 'dtr';
                     </table>
                 </div>
             </div>
+
 
             <div class="d-flex justify-content-end">
                 <nav aria-label="Page navigation example">

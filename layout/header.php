@@ -1,43 +1,75 @@
 <?php
 require './database.php';
 
-// Fetch notifications for the dropdown
-$notification_query = "SELECT * FROM notification WHERE is_read = 0 ORDER BY timestamp DESC";
-$notification_prep = mysqli_prepare($conn, $notification_query);
-mysqli_stmt_execute($notification_prep);
-$resultnotification = mysqli_stmt_get_result($notification_prep);
-$notifs = mysqli_fetch_all($resultnotification, MYSQLI_ASSOC);
-
-// Count unread notifications
-$unread_query = "SELECT COUNT(*) AS unread_count FROM notification WHERE is_read = 0";
-$result_unread = mysqli_query($conn, $unread_query);
-
-if ($result_unread) {
-    $unread_count = mysqli_fetch_assoc($result_unread)['unread_count'];
-} else {
-    $unread_count = 0;
-}
-
 $employee_id = $_SESSION['employee_id'] ?? null;
 
 if (!$employee_id) {
     die('User is not logged in.');
 }
 
+// Fetch role and permissions data for the logged-in user
 $query = "SELECT r.role_name, 
                 p.can_view_own_data, p.can_view_team_data, 
-                p.can_edit_data, p.can_manage_roles 
+                p.can_edit_data, p.can_manage_roles,
+                pt.project_name
         FROM employees e 
         JOIN roles r ON e.role_id = r.role_id 
         LEFT JOIN permissions p ON r.role_id = p.permission_id 
+        LEFT JOIN projects pt ON e.project_name = pt.project_name
         WHERE e.employee_id = ?";
-
 $stmt = $pdo->prepare($query);
 $stmt->execute([$employee_id]);
 $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$user) {
     die('User data not found.');
+}
+
+$role_name = strtolower($user['role_name'] ?? '');
+$project_name = $user['project_name'] ?? '';
+
+// Construct the query to fetch unread notifications
+$notification_query = "SELECT * FROM notification WHERE is_read = 0";
+
+// Add conditions based on the user's role
+if ($role_name == 'super admin') {
+    $notification_query .= " AND message != 'Your leave request has been approved.'"; // Exclude approved leave requests for Super Admin
+} elseif ($role_name == 'hr admin') {
+    $notification_query .= " AND (message != 'Your leave request has been approved.' OR employee_id = $employee_id)"; // HR Admin sees their own approved requests
+} elseif ($role_name == 'admin') {
+    $notification_query .= " AND (employee_id = $employee_id OR project_name = '$project_name')"; // Admin sees approved leave requests of employees under the same project
+} elseif ($role_name == 'employee') {
+    $notification_query .= " AND employee_id = $employee_id"; // Employee sees their own leave requests
+}
+
+$notification_query .= " ORDER BY timestamp DESC";
+
+$notification_prep = mysqli_prepare($conn, $notification_query);
+mysqli_stmt_execute($notification_prep);
+$resultnotification = mysqli_stmt_get_result($notification_prep);
+$notifs = mysqli_fetch_all($resultnotification, MYSQLI_ASSOC);
+
+// Count unread notifications based on the same conditions
+$unread_query = "
+    SELECT COUNT(*) AS unread_count 
+    FROM notification 
+    WHERE is_read = 0";
+
+if ($role_name == 'super admin') {
+    $unread_query .= " AND message != 'Your leave request has been approved.'"; // Exclude approved leave requests for Super Admin
+} elseif ($role_name == 'hr admin') {
+    $unread_query .= " AND (message != 'Your leave request has been approved.' OR employee_id = $employee_id)"; // HR Admin sees their own approved requests
+} elseif ($role_name == 'admin') {
+    $unread_query .= " AND (employee_id = $employee_id OR project_name = '$project_name')"; // Admin sees approved leave requests of employees under the same project
+} elseif ($role_name == 'employee') {
+    $unread_query .= " AND employee_id = $employee_id"; // Employee sees their own leave requests
+}
+
+$result_unread = mysqli_query($conn, $unread_query);
+if ($result_unread) {
+    $unread_count = mysqli_fetch_assoc($result_unread)['unread_count'];
+} else {
+    $unread_count = 0;
 }
 
 $role_name = strtolower($user['role_name'] ?? '');
@@ -122,69 +154,133 @@ $can_manage_roles = $user['can_manage_roles'] ?? false;
             </li>
             <li class="pos-relative" id="notification-dropdown">
             <div class="custom-dropdown-right" aria-labelledby="navbarDropdownMenuLink">
-    <?php
-    // Check if there are any notifications for everyone
-    if (empty($notifs)) {
-        echo '<div class="p-3 text-center" style="color: #888; font-style: italic;">';
-        echo 'No notifications available.';
-        echo '</div>';
-    } else {
-        // Loop through notifications if available
-        foreach ($notifs as $notif) {
-            if ($notif['request_type'] == "announcement") {
-                // Based on session role, set the redirect link
-                $redirect = '';
-                if ($_SESSION['role_name'] == 'Super Admin' || $_SESSION['role_name'] == 'HR Admin' || $_SESSION['role_name'] == 'Admin') {
-                    $redirect = 'index.php'; // Admin and HR roles redirect to index.php
-                } elseif ($_SESSION['role_name'] == 'Employee') {
-                    $redirect = 'employee_dashboard.php'; // Employee role redirects to employee_dashboard.php
+                <?php
+                // Check if there are any notifications for everyone
+                if (empty($notifs)) {
+                    echo '<div class="p-3 text-center" style="color: #888; font-style: italic;">';
+                    echo 'No notifications available.';
+                    echo '</div>';
+                } else {
+                    // Loop through notifications if available
+                    foreach ($notifs as $notif) {
+                        // Announcement notification (visible for Super Admin, HR Admin, Admin, and Employee)
+
+                        if ($notif['request_type'] == "announcement") {
+                            // Set the redirect based on role
+                            $redirect = '';
+                            if ($_SESSION['role_name'] == 'Super Admin' || $_SESSION['role_name'] == 'HR Admin' || $_SESSION['role_name'] == 'Admin') {
+                                $redirect = 'index.php'; // Admin and HR roles redirect to index.php
+                            } elseif ($_SESSION['role_name'] == 'Employee') {
+                                $redirect = 'employee_dashboard.php'; // Employee role redirects to employee_dashboard.php
+                            }
+                            echo '<div class="d-flex p-3 border-bottom dropdown-list">';
+                            echo '<div class="pr-3" style="flex:0 0 91%;">';
+                            echo '<p class="font-weight-bold p-0 m-0">' . $notif['message'] . '</p>';
+                            echo '<p class="p-0 m-0">' . $notif['timestamp'] . '</p>';
+                            echo '</div>';
+                            echo '<div style="flex:0 0 30px;">';
+                            echo '<a href="' . $redirect . '" class="mark-read" data-id="' . $notif['id'] . '" onclick="markAsRead(' . $notif['id'] . ')">';
+                            echo '<img src="assets/images/arrow-right.svg" style="width:30px; cursor:pointer;" alt="">';
+                            echo '</a>';
+                            echo '</div>';
+                            echo '</div>';
+                        } 
+                        // Leave request notifications
+                        elseif ($notif['request_type'] == "leave_request") {
+                            // Hierarchy of visibility based on role
+                            if ($_SESSION['role_name'] == 'Super Admin') {
+                                if ($_SESSION['role_name'] == 'Super Admin' && $notif['message'] == 'Your leave request has been approved.') {
+                                    continue; // Skip this notification for Super Admin
+                                }
+                                // Super Admin sees all leave requests
+                                $redirect = 'hr-leaves-page.php';
+                                echo '<div class="d-flex p-3 border-bottom dropdown-list">';
+                                echo '<div class="pr-3" style="flex:0 0 91%;">';
+                                echo '<p class="font-weight-bold p-0 m-0">' . $notif['message'] . '</p>';
+                                echo '<p class="p-0 m-0">' . $notif['timestamp'] . '</p>';
+                                echo '</div>';
+                                echo '<div style="flex:0 0 30px;">';
+                                echo '<a href="' . $redirect . '" class="mark-read" data-id="' . $notif['id'] . '">';
+                                echo '<img src="assets/images/arrow-right.svg" style="width:30px; cursor:pointer;" alt="">';
+                                echo '</a>';
+                                echo '</div>';
+                                echo '</div>';
+                            } elseif ($_SESSION['role_name'] == 'HR Admin') {
+                                // HR Admin sees leave requests from Admin and Employee
+                                if ($_SESSION['role_name'] == 'HR Admin' && $notif['message'] == 'Your leave request has been approved.' && $notif['employee_id'] != $employee_id) {
+                                    continue;
+                                }
+                                $redirect = 'hr-leaves-page.php';
+                                echo '<div class="d-flex p-3 border-bottom dropdown-list">';
+                                echo '<div class="pr-3" style="flex:0 0 91%;">';
+                                echo '<p class="font-weight-bold p-0 m-0">' . $notif['message'] . '</p>';
+                                echo '<p class="p-0 m-0">' . $notif['timestamp'] . '</p>';
+                                echo '</div>';
+                                echo '<div style="flex:0 0 30px;">';
+                                echo '<a href="' . $redirect . '" class="mark-read" data-id="' . $notif['id'] . '">';
+                                echo '<img src="assets/images/arrow-right.svg" style="width:30px; cursor:pointer;" alt="">';
+                                echo '</a>';
+                                echo '</div>';
+                                echo '</div>';
+                            } elseif ($_SESSION['role_name'] == 'Admin') {
+                                // Admin only sees leave requests from Employee
+                                if ($_SESSION['role_name'] == 'Admin' && $notif['message'] == 'Your leave request has been approved.' && ($notif['employee_id'] != $employee_id || $notif['project_name'] != $_SESSION['project_name'])) {
+                                    continue;
+                                }
+                                if ($notif['employee_id'] == $employee_id) {
+                                    $redirect = 'hr-leaves-page.php';
+                                    echo '<div class="d-flex p-3 border-bottom dropdown-list">';
+                                    echo '<div class="pr-3" style="flex:0 0 91%;">';
+                                    echo '<p class="font-weight-bold p-0 m-0">' . $notif['message'] . '</p>';
+                                    echo '<p class="p-0 m-0">' . $notif['timestamp'] . '</p>';
+                                    echo '</div>';
+                                    echo '<div style="flex:0 0 30px;">';
+                                    echo '<a href="' . $redirect . '" class="mark-read" data-id="' . $notif['id'] . '">';
+                                    echo '<img src="assets/images/arrow-right.svg" style="width:30px; cursor:pointer;" alt="">';
+                                    echo '</a>';
+                                    echo '</div>';
+                                    echo '</div>';
+                                }
+                            } elseif ($_SESSION['role_name'] == 'Employee') {
+                                // Employee only sees their own leave requests
+                                if ($_SESSION['role_name'] == 'Employee' && $notif['employee_id'] != $employee_id) {
+                                    continue;
+                                }
+                                if ($notif['employee_id'] == $employee_id) {
+                                    $redirect = 'employee_dashboard.php';
+                                    echo '<div class="d-flex p-3 border-bottom dropdown-list">';
+                                    echo '<div class="pr-3" style="flex:0 0 91%;">';
+                                    echo '<p class="font-weight-bold p-0 m-0">' . $notif['message'] . '</p>';
+                                    echo '<p class="p-0 m-0">' . $notif['timestamp'] . '</p>';
+                                    echo '</div>';
+                                    echo '<div style="flex:0 0 30px;">';
+                                    echo '<a href="' . $redirect . '" class="mark-read" data-id="' . $notif['id'] . '">';
+                                    echo '<img src="assets/images/arrow-right.svg" style="width:30px; cursor:pointer;" alt="">';
+                                    echo '</a>';
+                                    echo '</div>';
+                                    echo '</div>';
+                                }
+                            }
+                        } 
+                        // For other types of notifications (e.g., profile change, etc.)
+                        else {
+                            $redirect = 'profile-change-requests.php?';
+                            echo '<div class="d-flex p-3 border-bottom dropdown-list">';
+                            echo '<div class="pr-3" style="flex:0 0 91%;">';
+                            echo '<p class="font-weight-bold p-0 m-0">' . $notif['message'] . '</p>';
+                            echo '<p class="p-0 m-0">' . $notif['timestamp'] . '</p>';
+                            echo '</div>';
+                            echo '<div style="flex:0 0 30px;">';
+                            echo '<a href="' . $redirect . '" class="mark-read" data-id="' . $notif['id'] . '">';
+                            echo '<img src="assets/images/arrow-right.svg" style="width:30px; cursor:pointer;" alt="">';
+                            echo '</a>';
+                            echo '</div>';
+                            echo '</div>';
+                        }
+                    }
                 }
-                echo '<div class="d-flex p-3 border-bottom dropdown-list">';
-                echo '<div class="pr-3" style="flex:0 0 91%;">';
-                echo '<p class="font-weight-bold p-0 m-0">' . $notif['message'] . '</p>';
-                echo '<p class="p-0 m-0">' . $notif['timestamp'] . '</p>';
-                echo '</div>';
-                echo '<div style="flex:0 0 30px;">';
-                echo '<a href="' . $redirect . '" class="mark-read" data-id="' . $notif['id'] . '" onclick="markAsRead(' . $notif['id'] . ')">';
-                echo '<img src="assets/images/arrow-right.svg" style="width:30px; cursor:pointer;" alt="">';
-                echo '</a>';
-                echo '</div>';
-                echo '</div>';
-            } elseif ($notif['request_type'] == "leave_request") {
-                // Hide leave_request for Employee role
-                if ($_SESSION['role_name'] != 'Employee') {
-                    $redirect = 'hr-leaves-page.php';
-                    echo '<div class="d-flex p-3 border-bottom dropdown-list">';
-                    echo '<div class="pr-3" style="flex:0 0 91%;">';
-                    echo '<p class="font-weight-bold p-0 m-0">' . $notif['message'] . '</p>';
-                    echo '<p class="p-0 m-0">' . $notif['timestamp'] . '</p>';
-                    echo '</div>';
-                    echo '<div style="flex:0 0 30px;">';
-                    echo '<a href="' . $redirect . '" class="mark-read" data-id="' . $notif['id'] . '">';
-                    echo '<img src="assets/images/arrow-right.svg" style="width:30px; cursor:pointer;" alt="">';
-                    echo '</a>';
-                    echo '</div>';
-                    echo '</div>';
-                }
-            } else {
-                // For other request types like profile-change
-                $redirect = 'profile-change-requests.php?';
-                echo '<div class="d-flex p-3 border-bottom dropdown-list">';
-                echo '<div class="pr-3" style="flex:0 0 91%;">';
-                echo '<p class="font-weight-bold p-0 m-0">' . $notif['message'] . '</p>';
-                echo '<p class="p-0 m-0">' . $notif['timestamp'] . '</p>';
-                echo '</div>';
-                echo '<div style="flex:0 0 30px;">';
-                echo '<a href="' . $redirect . '" class="mark-read" data-id="' . $notif['id'] . '">';
-                echo '<img src="assets/images/arrow-right.svg" style="width:30px; cursor:pointer;" alt="">';
-                echo '</a>';
-                echo '</div>';
-                echo '</div>';
-            }
-        }
-    }
-    ?>
-</div>
+                ?>
+            </div>
 </li>
 
         </ul>
@@ -233,19 +329,17 @@ $can_manage_roles = $user['can_manage_roles'] ?? false;
     </script>
 
     <?php
-    // Check if the request to mark a notification as read is made
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        $data = json_decode(file_get_contents('php://input'), true);
-        if (isset($data['id'])) {
-            $notificationId = $data['id'];
+    // Handle the request to mark notification as read
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'])) {
+        $notif_id = $_POST['id'];
 
-            // Update the notification's is_read status to true
-            $update_query = "UPDATE notification SET is_read = 1 WHERE id = ?";
-            $stmt = $conn->prepare($update_query);
-            $stmt->bind_param("i", $notificationId);
-            $stmt->execute();
-            echo json_encode(['success' => true, 'message' => 'Notification marked as read.']);
-        }
+        // Update notification status
+        $update_query = "UPDATE notification SET is_read = 1 WHERE id = ?";
+        $update_stmt = mysqli_prepare($conn, $update_query);
+        mysqli_stmt_bind_param($update_stmt, 'i', $notif_id);
+        $result = mysqli_stmt_execute($update_stmt);
+
+        echo json_encode(['success' => $result]);
         exit;
     }
     ?>

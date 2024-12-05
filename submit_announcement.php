@@ -31,15 +31,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $user = $user_result->fetch_assoc();
                     $fullname = $user['firstname'] . ' ' . $user['lastname'];
 
-                    // Insert the notification
-                    $notification_query = "INSERT INTO notification (message, request_type) VALUES (?, ?)";
+                    $notification_query = "INSERT INTO notification (employee_id, message, request_type) VALUES (?, ?, ?)";
                     $notif_stmt = $conn->prepare($notification_query);
+
+                    // Define the notification message and type
                     $notif_message = $fullname . " posted a new announcement.";
                     $notif_type = "announcement";
-                    $notif_stmt->bind_param("ss", $notif_message, $notif_type);
-                    
+
+                    // Bind parameters and execute the query
+                    $notif_stmt->bind_param("iss", $created_by, $notif_message, $notif_type);
+
                     if (!$notif_stmt->execute()) {
-                        throw new Exception("Failed to insert notification: " . $notif_stmt->error);
+                        throw new Exception("Error inserting notification: " . $notif_stmt->error);
                     }
                 } else {
                     throw new Exception("User not found for employee ID: " . $created_by);

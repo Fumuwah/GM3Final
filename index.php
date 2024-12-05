@@ -15,13 +15,20 @@ $activePage = "dashboard";
 
 $role = $_SESSION['role_name'];
 $employee_id = $_SESSION['employee_id'];
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $employee_id = $_SESSION['employee_id']; // Get employee_id from form data or session
     $action = $_POST['action']; // 'time_in' or 'time_out'
 
     $message = handleAttendance($employee_id, $action, $conn);
     echo "<script>alert('$message');</script>";
+
+    // Redirect to prevent form re-submission on page reload
+    header("Location: " . $_SERVER['PHP_SELF']);
+    exit(); // Make sure to call exit after redirect
 }
+
+
 $name = '';
 $query = "SELECT lastname FROM employees WHERE employee_id = ?";
 if ($stmt = $conn->prepare($query)) {
